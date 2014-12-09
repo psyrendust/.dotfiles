@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+#
+# Define environment variables for login, non-login, interactive and
+# non-interactive shells.
+#
+# Authors:
+#   Larry Gordon
+#
+# Execution Order
+#   https://github.com/psyrendust/alf/templates/home
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Do some platform checks so we don't have to keep doing it later
+# ------------------------------------------------------------------------------
+export ZSH_UNAME=`uname`
+
+if [[ $ZSH_UNAME == *Darwin* ]]; then
+  # We are using OS X
+  export PLATFORM_IS_MAC=1
+
+elif [[ $ZSH_UNAME == *CYGWIN* ]]; then
+  # We are using Cygwin in Windows
+  export PLATFORM_IS_CYGWIN=1
+
+elif [[ $ZSH_UNAME == *Linux* ]]; then
+  # We are using Linux
+  export PLATFORM_IS_LINUX=1
+fi
+# Add support for all systems
+export PLATFORM_IS_ALL=1
