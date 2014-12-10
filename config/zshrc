@@ -76,6 +76,7 @@ plugins=(
 plugins+=(
   aliases
   git
+  git-flow-completion
   sublime
 )
 
