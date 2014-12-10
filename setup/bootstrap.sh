@@ -10,5 +10,5 @@ if [ ! -n "$ZSH_CUSTOM" ]; then
 fi
 
 for script in $ZSH_CUSTOM/{homebrew,ohmyzsh,config}/install.sh; do
-  echo "-- $script"
+  "$script" 2>&1
 done
