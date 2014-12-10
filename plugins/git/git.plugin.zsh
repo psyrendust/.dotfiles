@@ -96,6 +96,9 @@ compdef _git ggpullu=git-pull-rebase-upstream
 alias ggpushu='git push upstream $(current_branch)'
 compdef _git ggpushu=git-push-upstream
 
+alias ggpusha='git push --all origin && git push --tags'
+compdef _git ggpusha=git-push-all-origin-tags
+
 alias gcleanindex='_git-clean-index'
 compdef _git gcleanindex=git-rm-cached-r
 
