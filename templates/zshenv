@@ -13,11 +13,25 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
+
+# ------------------------------------------------------------------------------
+# Setup options
+# ------------------------------------------------------------------------------
+setopt EXTENDED_GLOB
+
+
+# ------------------------------------------------------------------------------
+# Setup paths
+# ------------------------------------------------------------------------------
+export ZSH_CUSTOM="/Users/larrygordon/.dotfiles"
+export PATH="$ZSH_CUSTOM/bin:$ZSH_CUSTOM/plugins/pretty-print/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+export MANPATH="/usr/local/man:$MANPATH"
+
+
 # ------------------------------------------------------------------------------
 # Do some platform checks so we don't have to keep doing it later
 # ------------------------------------------------------------------------------
 export ZSH_UNAME=`uname`
-
 if [[ $ZSH_UNAME == *Darwin* ]]; then
   # We are using OS X
   export PLATFORM_IS_MAC=1
