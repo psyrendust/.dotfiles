@@ -53,10 +53,22 @@
 
 sbl() {
   if  [[ -n $PLATFORM_IS_MAC ]]; then
-    subl $@
+    if [[ "$1" = "" ]]; then
+      subl .
+    else
+      subl $@
+    fi
   elif  [[ -n $PLATFORM_IS_CYGWIN ]]; then
-    cygstart /usr/local/bin/subl $(cygpath -w $@)
+    if [[ "$1" = "" ]]; then
+      cygstart /usr/local/bin/subl $(cygpath -w .)
+    else
+      cygstart /usr/local/bin/subl $(cygpath -w $@)
+    fi
   elif [[ -n $PLATFORM_IS_LINUX ]]; then
-    nohup /usr/local/bin/subl $@ > /dev/null &
+    if [[ "$1" = "" ]]; then
+        nohup /usr/local/bin/subl . > /dev/null &
+    else
+      nohup /usr/local/bin/subl $@ > /dev/null &
+    fi
   fi
 }

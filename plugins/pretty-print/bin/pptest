@@ -1,0 +1,58 @@
+#!/usr/bin/env zsh
+#
+# Test the output of all colors pretty print colors.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   $ pptest
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+if [[ $ZSH_CUSTOM == "" ]]; then
+  ZSH_CUSTOM="$HOME/.dotfiles"
+fi
+
+pp_special=(
+  "pperror"
+  "ppfail"
+  "ppinfo"
+  "ppwarn"
+  "ppok"
+)
+pp_exclude=(
+  "ppprint"
+  "pptest"
+  "ppverbose"
+)
+
+pppurple " " "    Pretty Print Colors"
+pppurple "------------------------------------"
+# Output all non-special and non-excluded executables
+for ppfile in $ZSH_CUSTOM/plugins/pretty-print/bin/*; do
+  if [[ -n $( echo $pp_special | grep ${ppfile:t} ) ]] || [[ -n $( echo $pp_exclude | grep ${ppfile:t} ) ]]; then
+    continue
+  fi
+  eval "${ppfile:t} \"${ppfile:t} - testing pretty print\" | awk '{ printf \"%20s %s %s %s %s\\n\", \$1, \$2, \$3, \$4, \$5}'"
+done
+
+pppurple " " " " "   Pretty Print Status"
+pppurple "---------------------------------------"
+# Output all special executables
+for ppfile in ${pp_special[@]}; do
+  eval "${ppfile:t} \"${ppfile:t} - testing pretty print\""
+done
+# pppurple " " " " "   Pretty Print Status Based Aliases"
+# pppurple "------------------------------------"
+# ppsuccess  "ppsuccess  - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
+# ppinfo     "ppinfo     - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
+# ppwarning  "ppwarning  - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
+# ppdanger   "ppdanger   - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
+# ppemphasis "ppemphasis - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
+# pppurple " " " " "        Pretty Print Inline Printing"
+# pppurple "------------------------------------"
+# for ppfile in $ZSH_CUSTOM/plugins/pretty-print/bin/*; do
+#   eval "$ppfile -i \"$ppfile \""
+# done
