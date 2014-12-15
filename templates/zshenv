@@ -19,13 +19,55 @@
 # ------------------------------------------------------------------------------
 setopt EXTENDED_GLOB
 
+# Add brew-cask default options
+# OPTION              LOCATION                      DESCRIPTION
+# --appdir            /Applications                 Changes the path where the symlinks to the installed applications will be generated.
+# --binarydir         /usr/local/bin                Changes the path for binary symlinks.
+# --caskroom          /opt/homebrew-cask/Caskroom   Determines where the actual applications will be located.
+# --fontdir           ~/Library/Fonts               Changes the path for Fonts symlinks.
+# --input_methoddir   ~/Library/Input\ Methods      Changes the path for Input Methods symlinks.
+# --prefpanedir       ~/Library/PreferencePanes     Changes the path for PreferencePane symlinks.
+# --qlplugindir       ~/Library/QuickLook           Changes the path for Quicklook Plugin symlinks.
+# --screen_saverdir   ~/Library/Screen\ Savers      Changes the path for Screen Saver symlinks.
+# --widgetdir         ~/Library/Widgets             Changes the path for Dashboard Widget symlinks.
+export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --caskroom=/usr/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers --widgetdir=~/Library/Widgets"
+
 
 # ------------------------------------------------------------------------------
 # Setup paths
 # ------------------------------------------------------------------------------
+typeset -a __path_pre __path_post __manpath_pre __manpath_post
+
 export ZSH_CUSTOM="/Users/larrygordon/.dotfiles"
-export PATH="$ZSH_CUSTOM/bin:$ZSH_CUSTOM/plugins/pretty-print/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-export MANPATH="/usr/local/man:$MANPATH"
+
+# shortcut for: $(/usr/local/bin/brew --prefix coreutils)
+__brew_coreutils="/usr/local/opt/coreutils"
+
+# Custom path locations for my plugins
+__path_pre+=("$ZSH_CUSTOM/bin")
+__path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
+
+# Add homebrew Core Utilities
+__path_pre+=("$__brew_coreutils/libexec/gnubin")
+
+# Add manpath
+__manpath_pre+=("/usr/local/share/man")
+
+# Add homebrew Core Utilities man
+__manpath_pre+=("$__brew_coreutils/libexec/gnuman")
+
+
+# ------------------------------------------------------------------------------
+# Apply PATHS
+# ------------------------------------------------------------------------------
+export MANPATH="$([[ ${#__manpath_pre} > 0 ]] && printf "%s:" "${__manpath_pre[@]}")$MANPATH$([[ ${#__manpath_post} > 0 ]] && printf ":%s" "${__manpath_post[@]}")"
+export PATH="$([[ ${#__path_pre} > 0 ]] && printf "%s:" "${__path_pre[@]}")$PATH$([[ ${#__path_post} > 0 ]] && printf ":%s" "${__path_post[@]}")"
+
+unset __path_pre
+unset __path_post
+unset __manpath_pre
+unset __manpath_post
+unset __brew_coreutils
 
 
 # ------------------------------------------------------------------------------
