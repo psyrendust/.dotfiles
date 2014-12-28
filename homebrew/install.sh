@@ -25,6 +25,9 @@ brew doctor
 ppinfo ' - Install homebrew packages'
 brew install coreutils git git-flow node bash zsh fasd
 
+ppinfo ' - Install imagemagick homebrew package'
+brew install imagemagick --with-libtiff
+
 ppinfo ' - Uninstall unused and old versions of packages'
 brew cleanup
 
