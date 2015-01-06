@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Grab the current version of node in use (via Node): [node-0.10.33]
+CURRENT_NODE=""
+if which node &> /dev/null; then
+  CURRENT_NODE="$(node --version)"
+  CURRENT_NODE="node-${CURRENT_NODE:1}"
+fi
+echo $CURRENT_NODE

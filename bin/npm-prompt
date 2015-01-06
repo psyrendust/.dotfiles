@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Grab the current version of npm in use (via NPM): [npm-2.1.11]
+CURRENT_NPM=""
+if which npm &> /dev/null; then
+  CURRENT_NPM="npm-$(npm --version)"
+fi
+echo $CURRENT_NPM

@@ -54,9 +54,10 @@ function __prompt-scm-char {
   echo $SCM_CHAR
 }
 function __PROMPT_LINE_1 {
-  local CURRENT_USER="%{$fg[magenta]%}%m%{$reset_color%}"   # Grab the current machine name
-  local IN="%{$fg[white]%}in%{$reset_color%}"               # Just some text
-  local CURRENT_PATH="%{$fg[green]%}%~"                     # Grab the current file path
+  local CURRENT_USER="%{$fg[magenta]%}%n%{$reset_color%}"    # Grab the current username
+  local CURRENT_MACHINE="%{$fg[magenta]%}%m%{$reset_color%}" # Grab the current machine name
+  local IN="%{$fg[white]%}in%{$reset_color%}"                # Just some text
+  local CURRENT_PATH="%{$fg[green]%}%~"                      # Grab the current file path
   echo "$(__prompt-ruby-version) $CURRENT_USER $IN $CURRENT_PATH"
 }
 
