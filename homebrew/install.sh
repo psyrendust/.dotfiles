@@ -31,8 +31,8 @@ packages=(
   zsh
 )
 
-ppinfo ' - Install homebrew packages'
-brew install
+ppinfo ' - Install homebrew packages' ${packages[@]}
+brew install ${packages[@]}
 
 ppinfo ' - Install imagemagick homebrew package'
 brew install imagemagick --with-libtiff
