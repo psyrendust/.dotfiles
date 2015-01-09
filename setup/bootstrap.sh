@@ -13,6 +13,6 @@ export PATH="$ZSH_CUSTOM/plugins/pretty-print/bin:$PATH"
 
 ppinfo 'installing dependencies'
 
-for script in $ZSH_CUSTOM/{homebrew,ohmyzsh,ruby,templates}/install.sh; do
+for script in $ZSH_CUSTOM/{homebrew,ohmyzsh,rvm,templates,nvm}/install.sh; do
   "$script" 2>&1
 done
