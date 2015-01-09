@@ -38,14 +38,16 @@ export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --c
 # ------------------------------------------------------------------------------
 typeset -a __path_pre __path_post __manpath_pre __manpath_post
 
-export ZSH_CUSTOM="/Users/larrygordon/.dotfiles"
+export ZSH_CUSTOM="$HOME/.dotfiles"
 
 # shortcut for: $(/usr/local/bin/brew --prefix coreutils)
 __brew_coreutils="/usr/local/opt/coreutils"
 
 # Custom path locations for my plugins
-__path_pre+=("$ZSH_CUSTOM/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
+__path_pre+=("$ZSH_CUSTOM/plugins/sublime/bin")
+__path_pre+=("$ZSH_CUSTOM/bin")
+__path_pre+=("$HOME/.tmpbin")
 
 # Add homebrew Core Utilities
 __path_pre+=("$__brew_coreutils/libexec/gnubin")
@@ -88,3 +90,9 @@ elif [[ $ZSH_UNAME == *Linux* ]]; then
 fi
 # Add support for all systems
 export PLATFORM_IS_ALL=1
+
+
+# ------------------------------------------------------------------------------
+# Ensure that a non-login, non-interactive shell has a defined environment.
+# ------------------------------------------------------------------------------
+[[ -s "$HOME/.profile" ]] && source "$HOME/.profile"
