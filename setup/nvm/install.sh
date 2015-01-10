@@ -4,9 +4,16 @@
 #
 # This installs some of the common dependencies needed (or at least desired)
 # using NodeJS.
+#
+# Authors:
+#   Larry Gordon
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
 
-ppinfo 'Install nvm'
-ppinfo ' - Check for nvm'
+ppinfo "Install nvm"
+ppinfo " - Check for nvm"
 if test ! $(which nvm)
 then
   ppinfo " - Installing nvm"
@@ -16,13 +23,13 @@ fi
 export NVM_DIR="$HOME/.nvm"
 [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh" # This loads nvm"
 
-ppinfo ' - Install latest stable NodeJS'
+ppinfo " - Install latest stable NodeJS"
 nvm install stable
 
-ppinfo ' - Set the latest stable NodeJS to default'
+ppinfo " - Set the latest stable NodeJS to default"
 nvm alias default stable
 
-ppinfo ' - Set npm loglevel to http'
+ppinfo " - Set npm loglevel to http"
 npm config set loglevel http
 
 packages=(
@@ -49,5 +56,5 @@ for package in ${packages[@]}; do
 done
 unset package{,s}
 
-ppok ' - nvm install complete'
+ppok " - nvm install complete"
 exit 0

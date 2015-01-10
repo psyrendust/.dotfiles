@@ -14,8 +14,8 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-rm=`which grm`
-p=`pwd`
+rm=$(which grm)
+p=$(pwd)
 protected_paths=(
   "$HOME"
   "/Applications"

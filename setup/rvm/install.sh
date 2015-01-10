@@ -4,9 +4,16 @@
 #
 # This installs some of the common dependencies needed (or at least desired)
 # using Ruby.
+#
+# Authors:
+#   Larry Gordon
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
 
-ppinfo 'Install rvm'
-ppinfo ' - Check for rvm'
+ppinfo "Install rvm"
+ppinfo " - Check for rvm"
 if test ! $(which rvm)
 then
   ppinfo " - Installing RVM"
@@ -15,5 +22,5 @@ fi
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
-ppok ' - Ruby install complete'
+ppok " - Ruby install complete"
 exit 0
