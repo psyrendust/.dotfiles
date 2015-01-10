@@ -22,6 +22,9 @@ nvm install stable
 ppinfo ' - Set the latest stable NodeJS to default'
 nvm alias default stable
 
+ppinfo ' - Set npm loglevel to http'
+npm config set loglevel http
+
 packages=(
   npm
   eslint
