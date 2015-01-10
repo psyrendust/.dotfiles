@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#
+# Safer rm
+#
+# Author:
+#   Larry Gordon
+#
+# Protects against:
+#   $ rm -rf ~
+#   $ rm -rf .
+#   $ rm -rf /
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+rm=`which grm`
+p=`pwd`
+protected_paths=(
+  "$HOME"
+  "/Applications"
+  "/Library"
+  "/Network"
+  "/System"
+  "/User Information"
+  "/Users"
+  "/Volumes"
+  "/bin"
+  "/cores"
+  "/dev"
+  "/etc"
+  "/home"
+  "/net"
+  "/private"
+  "/root"
+  "/sbin"
+  "/tmp"
+  "/usr"
+  "/var"
+)
+# echo "rm location: $rm"
+# echo "CurrentPath: $p"
+# echo "Array: ${protected_paths[@]:0}"
+# echo "1: $1"
+# echo "2: $2"
+# echo "3: $3"
+
+# This is case a)
+# if the person issues "rm -r *", the script will check if the current directory
+# is / or /var or /usr or /oracle (or any additional directories that I may add
+# from time to time),  it will not echo out a message, you are about to execute
+# a dangerous delete from `pwd` & then come back to command prompt
+args=($@)
+# echo "before: ${args[@]}"
+if [ "$1" == "-r" ] || [ "$1" == "-rf" ]; then
+  # echo "found flag"
+  args=(${args[@]:1})
+  # echo "after: ${args[@]}"
+  for arg in "${args[@]}"; do
+    for i in $(seq 0 ${#protected_paths[@]}); do
+      # echo "Elem: ${protected_paths[$i]}"
+      if [ "${protected_paths[$i]}" == "$p" ] || [ "${protected_paths[$i]}" == "$arg" ]; then
+        pperror "Cannot remove protected directory: \"${protected_paths[$i]}\""
+        exit  # Just do nothing
+      fi
+    done
+  done
+fi
+
+grm $@

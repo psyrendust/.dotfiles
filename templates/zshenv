@@ -44,6 +44,7 @@ export ZSH_CUSTOM="$HOME/.dotfiles"
 __brew_coreutils="/usr/local/opt/coreutils"
 
 # Custom path locations for my plugins
+__path_pre+=("$ZSH_CUSTOM/plugins/safe-rm/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/sublime/bin")
 __path_pre+=("$ZSH_CUSTOM/bin")
