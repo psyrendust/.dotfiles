@@ -8,42 +8,11 @@
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
-
-alias gffstart='git flow feature start'
-compdef _git gffstart=git-flow-feature-start
-
-alias gfffinish='git flow feature finish'
-compdef _git gfffinish=git-flow-feature-finish
-
-alias gfrstart='git flow release start'
-compdef _git gfrstart=git-flow-release-start
-
-alias gfrfinish='git flow release finish'
-compdef _git flowrf=git-flow-release-finish
-
-alias gfhstart='git flow hotfix start'
-compdef _git gfhstart=git-flow-hotfix-start
-
-alias gfhfinish='git flow hotfix finish'
-compdef _git gfhfinish=git-flow-hotfix-finish
-
-alias gs='git status'
-compdef _git gs=git-status
-
-alias gass='git update-index --assume-unchanged'
-compdef _git gass=git-update-index
-
 alias gaa='git add -A'
 compdef _git gaa=git-add
 
-alias gun='git reset && git checkout . && git clean -fdx'
-compdef _git gun=git-reset
-
-alias gtag='git tag'
-compdef _git gtag=git-tag
-
-alias gtaga='git tag -a'
-compdef _git gtaga=git-tag
+alias gass='git update-index --assume-unchanged'
+compdef _git gass=git-update-index
 
 alias gbdel='_git-branch-delete'
 compdef _git gbdel=git-branch-D
@@ -51,41 +20,47 @@ compdef _git gbdel=git-branch-D
 alias gbfromhere='_git-branch-from-here'
 compdef _git gbromhere=git-checkout-b
 
+alias gcd='_git-clone-cd'
+compdef _git gcd=git-clone
+
+alias gcleanindex='_git-clean-index'
+compdef _git gcleanindex=git-rm-cached-r
+
 alias gcob='_git-checkout-branch'
 compdef _git gcob=git-checkout-b
 
 alias gcobu='_git-checkout-branch upstream'
 compdef _git gcob=git-checkout-b
 
-alias gm='git merge'
-compdef _git gm=git-merge
+alias gcundo='git reset --soft HEAD~1'
+compdef _git gcundo=git-reset-soft-head
 
-alias gmfrom='_git-merge-from'
-compdef _git gmfrom=git-merge
+alias gfffinish='git flow feature finish'
+compdef _git gfffinish=git-flow-feature-finish
 
-alias gmfromorigin='_git-merge-from-origin'
-compdef _git gmfromorigin=git-merge-origin
+alias gffstart='git flow feature start'
+compdef _git gffstart=git-flow-feature-start
 
-alias gmfromupstream='_git-merge-from-upstream'
-compdef _git gmfromupstream=git-merge-upstream
+alias gfhfinish='git flow hotfix finish'
+compdef _git gfhfinish=git-flow-hotfix-finish
 
-alias gmfromroot='_git-merge-from-root'
-compdef _git gmfromroot=git-merge-root
-
-alias gmclean='_git-merge-clean'
-compdef _git gmclean=git-rm
-
-alias gsdel='_git-stash-delete'
-compdef _git gsdel=git-stash
+alias gfhstart='git flow hotfix start'
+compdef _git gfhstart=git-flow-hotfix-start
 
 alias gfo='git fetch origin'
 compdef _git gfo=git-fetch-origin
 
-alias gfu='git fetch upstream'
-compdef _git gfu=git-fetch-upstream
-
 alias gfr='git fetch root'
 compdef _git gfr=git-fetch-root
+
+alias gfrfinish='git flow release finish'
+compdef _git flowrf=git-flow-release-finish
+
+alias gfrstart='git flow release start'
+compdef _git gfrstart=git-flow-release-start
+
+alias gfu='git fetch upstream'
+compdef _git gfu=git-fetch-upstream
 
 alias ggpull='git pull --rebase origin $(current_branch)'
 compdef _git ggpull=git-pull-rebase-origin
@@ -93,14 +68,11 @@ compdef _git ggpull=git-pull-rebase-origin
 alias ggpullu='git pull --rebase upstream $(current_branch)'
 compdef _git ggpullu=git-pull-rebase-upstream
 
-alias ggpushu='git push upstream $(current_branch)'
-compdef _git ggpushu=git-push-upstream
-
 alias ggpusha='git push --all origin && git push --tags'
 compdef _git ggpusha=git-push-all-origin-tags
 
-alias gcleanindex='_git-clean-index'
-compdef _git gcleanindex=git-rm-cached-r
+alias ggpushu='git push upstream $(current_branch)'
+compdef _git ggpushu=git-push-upstream
 
 alias gl='_git-log-pretty-grep'
 compdef _git glg=git-log-pretty
@@ -111,8 +83,39 @@ compdef _git glg=git-log-pretty
 alias gls='_git-log-pretty-grep-begin-sublime'
 compdef _git glg=git-log-pretty
 
-alias gcundo='git reset --soft HEAD~1'
-compdef _git gcundo=git-reset-soft-head
+alias gm='git merge'
+compdef _git gm=git-merge
+
+alias gmclean='_git-merge-clean'
+compdef _git gmclean=git-rm
+
+alias gmfrom='_git-merge-from'
+compdef _git gmfrom=git-merge
+
+alias gmfromorigin='_git-merge-from-origin'
+compdef _git gmfromorigin=git-merge-origin
+
+alias gmfromroot='_git-merge-from-root'
+compdef _git gmfromroot=git-merge-root
+
+alias gmfromupstream='_git-merge-from-upstream'
+compdef _git gmfromupstream=git-merge-upstream
+
+alias gs='git status'
+compdef _git gs=git-status
+
+alias gsdel='_git-stash-delete'
+compdef _git gsdel=git-stash
+
+alias gtag='git tag'
+compdef _git gtag=git-tag
+
+alias gtaga='git tag -a'
+compdef _git gtaga=git-tag
+
+alias gun='git reset && git checkout . && git clean -fdx'
+compdef _git gun=git-reset
+
 
 # alias gfupdate='git-flow-update'
 
@@ -147,6 +150,18 @@ function _git-checkout-branch() {
   else
     git checkout -b $2 $1/$2
   fi
+}
+
+# git clone and cd into directory
+function _git-clone-cd() {
+  if [[ "$#" -ne 2 ]]; then
+    repourl="$1"
+    repodir="${$(echo ${repourl##*/})%.git}"
+  else
+    repourl="$1"
+    repodir="$2"
+  fi
+  git clone ${repourl} ${repodir} && cd ${repodir}
 }
 
 # update target branch and merge it into current branch
