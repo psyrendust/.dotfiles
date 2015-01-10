@@ -8,116 +8,116 @@
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
-alias gaa="git add -A"
+alias gaa='git add -A'
 compdef _git gaa=git-add
 
-alias gass="git update-index --assume-unchanged"
+alias gass='git update-index --assume-unchanged'
 compdef _git gass=git-update-index
 
-alias gbdel="_git-branch-delete"
+alias gbdel='_git-branch-delete'
 compdef _git gbdel=git-branch-D
 
-alias gbfromhere="_git-branch-from-here"
+alias gbfromhere='_git-branch-from-here'
 compdef _git gbromhere=git-checkout-b
 
-alias gcd="_git-clone-cd"
+alias gcd='_git-clone-cd'
 compdef _git gcd=git-clone
 
-alias gcleanindex="_git-clean-index"
+alias gcleanindex='_git-clean-index'
 compdef _git gcleanindex=git-rm-cached-r
 
-alias gcob="_git-checkout-branch"
+alias gcob='_git-checkout-branch'
 compdef _git gcob=git-checkout-b
 
-alias gcobu="_git-checkout-branch upstream"
+alias gcobu='_git-checkout-branch upstream'
 compdef _git gcob=git-checkout-b
 
-alias gcundo="git reset --soft HEAD~1"
+alias gcundo='git reset --soft HEAD~1'
 compdef _git gcundo=git-reset-soft-head
 
-alias gfffinish="git flow feature finish"
+alias gfffinish='git flow feature finish'
 compdef _git gfffinish=git-flow-feature-finish
 
-alias gffstart="git flow feature start"
+alias gffstart='git flow feature start'
 compdef _git gffstart=git-flow-feature-start
 
-alias gfhfinish="git flow hotfix finish"
+alias gfhfinish='git flow hotfix finish'
 compdef _git gfhfinish=git-flow-hotfix-finish
 
-alias gfhstart="git flow hotfix start"
+alias gfhstart='git flow hotfix start'
 compdef _git gfhstart=git-flow-hotfix-start
 
-alias gfo="git fetch origin"
+alias gfo='git fetch origin'
 compdef _git gfo=git-fetch-origin
 
-alias gfr="git fetch root"
+alias gfr='git fetch root'
 compdef _git gfr=git-fetch-root
 
-alias gfrfinish="git flow release finish"
+alias gfrfinish='git flow release finish'
 compdef _git flowrf=git-flow-release-finish
 
-alias gfrstart="git flow release start"
+alias gfrstart='git flow release start'
 compdef _git gfrstart=git-flow-release-start
 
-alias gfu="git fetch upstream"
+alias gfu='git fetch upstream'
 compdef _git gfu=git-fetch-upstream
 
-alias ggpull="git pull --rebase origin $(current_branch)"
+alias ggpull='git pull --rebase origin $(current_branch)'
 compdef _git ggpull=git-pull-rebase-origin
 
-alias ggpullu="git pull --rebase upstream $(current_branch)"
+alias ggpullu='git pull --rebase upstream $(current_branch)'
 compdef _git ggpullu=git-pull-rebase-upstream
 
-alias ggpusha="git push --all origin && git push --tags"
+alias ggpusha='git push --all origin && git push --tags'
 compdef _git ggpusha=git-push-all-origin-tags
 
-alias ggpushu="git push upstream $(current_branch)"
+alias ggpushu='git push upstream $(current_branch)'
 compdef _git ggpushu=git-push-upstream
 
-alias gl="_git-log-pretty-grep"
+alias gl='_git-log-pretty-grep'
 compdef _git glg=git-log-pretty
 
-alias glb="_git-log-pretty-grep-begin"
+alias glb='_git-log-pretty-grep-begin'
 compdef _git glg=git-log-pretty
 
-alias gls="_git-log-pretty-grep-begin-sublime"
+alias gls='_git-log-pretty-grep-begin-sublime'
 compdef _git glg=git-log-pretty
 
-alias gm="git merge"
+alias gm='git merge'
 compdef _git gm=git-merge
 
-alias gmclean="_git-merge-clean"
+alias gmclean='_git-merge-clean'
 compdef _git gmclean=git-rm
 
-alias gmfrom="_git-merge-from"
+alias gmfrom='_git-merge-from'
 compdef _git gmfrom=git-merge
 
-alias gmfromorigin="_git-merge-from-origin"
+alias gmfromorigin='_git-merge-from-origin'
 compdef _git gmfromorigin=git-merge-origin
 
-alias gmfromroot="_git-merge-from-root"
+alias gmfromroot='_git-merge-from-root'
 compdef _git gmfromroot=git-merge-root
 
-alias gmfromupstream="_git-merge-from-upstream"
+alias gmfromupstream='_git-merge-from-upstream'
 compdef _git gmfromupstream=git-merge-upstream
 
-alias gs="git status"
+alias gs='git status'
 compdef _git gs=git-status
 
-alias gsdel="_git-stash-delete"
+alias gsdel='_git-stash-delete'
 compdef _git gsdel=git-stash
 
-alias gtag="git tag"
+alias gtag='git tag'
 compdef _git gtag=git-tag
 
-alias gtaga="git tag -a"
+alias gtaga='git tag -a'
 compdef _git gtaga=git-tag
 
-alias gun="git reset && git checkout . && git clean -fdx"
+alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
 
-# alias gfupdate="git-flow-update"
+# alias gfupdate='git-flow-update'
 
 function _current_branch() {
   ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
