@@ -20,10 +20,3 @@ alias ssh-bouncy="ssh -i ~/.ssh/famous/website.encrypted.pem ec2-user@bouncy-leg
 alias server="http-server"
 alias npmlist="npm list --depth=0"
 alias rmrf="rm -rf"
-
-function dropshadow() {
-  # Turn off dropshadow
-  defaults write com.apple.screencapture disable-shadow -bool true && killall SystemUIServer
-  # Turn on dropshadow
-  # defaults write com.apple.screencapture disable-shadow -bool false && killall SystemUIServer
-}

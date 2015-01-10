@@ -1,0 +1,26 @@
+#!/usr/bin/env zsh
+#
+# Enable or disable dropshadows on screen captures.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # Disable the dropshadow
+#   $ dropshadow
+#
+#   # Enable the dropshadow
+#   $ dropshadow -o
+#   $ dropshadow --on
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+if [[ "$1" == "--on" ]] || [[ "$1" == "-o" ]]; then
+  # Turn on dropshadow
+  defaults write com.apple.screencapture disable-shadow -bool false && killall SystemUIServer && ppok "dropshadow enabled"
+else
+  # Turn off dropshadow
+  defaults write com.apple.screencapture disable-shadow -bool true && killall SystemUIServer && ppok "dropshadow off"
+fi
