@@ -14,18 +14,19 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-
-# Create a symlink in the background, because it can be slow on some machines
-{
+alias s="sbl"
+[[ -s "/usr/local/bin/subl" ]] || {
+  echo no
+  # Create a symlink in the background, because it can be slow on some machines
   # OS X paths
   if [[ -n $PLATFORM_IS_MAC ]]; then
     sublime_paths=(
-      "$HOME/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-      "$HOME/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl"
-      "$HOME/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl"
       "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
       "/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl"
       "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl"
+      "$HOME/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
+      "$HOME/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl"
+      "$HOME/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl"
     )
   elif [[ -n $PLATFORM_IS_LINUX ]]; then
     # Linux paths
@@ -50,25 +51,3 @@
     fi
   done
 } &!
-
-sbl() {
-  if  [[ -n $PLATFORM_IS_MAC ]]; then
-    if [[ "$1" = "" ]]; then
-      subl .
-    else
-      subl $@
-    fi
-  elif  [[ -n $PLATFORM_IS_CYGWIN ]]; then
-    if [[ "$1" = "" ]]; then
-      cygstart /usr/local/bin/subl $(cygpath -w .)
-    else
-      cygstart /usr/local/bin/subl $(cygpath -w $@)
-    fi
-  elif [[ -n $PLATFORM_IS_LINUX ]]; then
-    if [[ "$1" = "" ]]; then
-        nohup /usr/local/bin/subl . > /dev/null &
-    else
-      nohup /usr/local/bin/subl $@ > /dev/null &
-    fi
-  fi
-}

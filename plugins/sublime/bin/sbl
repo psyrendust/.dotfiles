@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+#
+# Open path or files in Sublime Text 3 or Sublime Text 2.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   $ sbl
+#   $ sbl .
+#   $ sbl filename.txt
+#   $ sbl file1.txt file2.txt
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+openinsublime() {
+  if  [[ -n $PLATFORM_IS_MAC ]]; then
+    if [[ "$1" = "" ]]; then
+      subl .
+    else
+      subl $@
+    fi
+  elif  [[ -n $PLATFORM_IS_CYGWIN ]]; then
+    if [[ "$1" = "" ]]; then
+      cygstart /usr/local/bin/subl $(cygpath -w .)
+    else
+      cygstart /usr/local/bin/subl $(cygpath -w $@)
+    fi
+  elif [[ -n $PLATFORM_IS_LINUX ]]; then
+    if [[ "$1" = "" ]]; then
+        nohup /usr/local/bin/subl . > /dev/null &
+    else
+      nohup /usr/local/bin/subl $@ > /dev/null &
+    fi
+  fi
+}
+openinsublime $@
