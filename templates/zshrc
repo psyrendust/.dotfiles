@@ -80,10 +80,11 @@ plugins+=(
   sublime
 )
 
-source $ZSH/oh-my-zsh.sh
 
+
+# ------------------------------------------------------------------------------
 # User configuration
-
+# ------------------------------------------------------------------------------
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
@@ -108,3 +109,14 @@ export ARCHFLAGS="-arch x86_64"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# ------------------------------------------------------------------------------
+# Load rvm
+# ------------------------------------------------------------------------------
+[[ -s "$HOME/.envrvm" ]] && source "$HOME/.envrvm" # Load rvm
+
+
+# ------------------------------------------------------------------------------
+# Startup Oh My Zsh
+# ------------------------------------------------------------------------------
+source $ZSH/oh-my-zsh.sh

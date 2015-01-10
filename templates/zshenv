@@ -91,9 +91,3 @@ elif [[ $ZSH_UNAME == *Linux* ]]; then
 fi
 # Add support for all systems
 export PLATFORM_IS_ALL=1
-
-
-# ------------------------------------------------------------------------------
-# Ensure that a non-login, non-interactive shell has a defined environment.
-# ------------------------------------------------------------------------------
-[[ -s "$HOME/.profile" ]] && source "$HOME/.profile"
