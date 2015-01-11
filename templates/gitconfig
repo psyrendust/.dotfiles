@@ -9,7 +9,7 @@
 
 [core]
   editor = subl -n -w
-	excludesfile = /Users/larrygordon/.gitignore_global
+  excludesfile = /Users/larrygordon/.gitignore_global
   filemode = false
   hidedotfiles = false
   trustctime = false
@@ -64,10 +64,10 @@
 # ------------------------------------------------------------------------------
 [difftool "sourcetree"]
   cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
-	path = 
+  path =
 [mergetool "sourcetree"]
   cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustExitCode = true
+  trustExitCode = true
 
 
 
@@ -75,7 +75,7 @@
 # User configuration stuff
 # ------------------------------------------------------------------------------
 [credential]
-	helper = osxkeychain
+  helper = osxkeychain
 [help]
   autocorrect = 1
 [user]
