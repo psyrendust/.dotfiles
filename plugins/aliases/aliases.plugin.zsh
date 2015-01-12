@@ -20,3 +20,8 @@ alias ssh-bouncy="ssh -i ~/.ssh/famous/website.encrypted.pem ec2-user@bouncy-leg
 alias server="http-server"
 alias npmlist="npm list --depth=0"
 alias rmrf="rm -rf"
+
+function mkcd() {
+  dir="$*"
+  mkdir -p "$dir" && cd "$dir"
+}
