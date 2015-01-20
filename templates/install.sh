@@ -14,11 +14,15 @@
 ppinfo "Install config files"
 
 setopt EXTENDED_GLOB
-local config_path=${HOME}/.dotfiles/templates
+local dotfiles_path=${HOME}/.dotfiles
+local templates_path=${dotfiles_path}/templates
 
-for file in ${config_path}/^(*.sh|*.md)(.N); do
+for file in ${templates_path}/^(*.sh|*.md)(.N); do
   ln -sf "$file" "${HOME}/.${file:t}"
 done
+
+# Symlink this projects EditorConfig file to the $HOME directory
+ln -sf {$dotfiles_path,$HOME}/.editorconfig
 
 ppok " - config install complete"
 exit 0
