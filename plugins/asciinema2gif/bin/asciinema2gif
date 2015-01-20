@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+#
+# Converts asciinema video to an animated gif.
+#
+# Author:
+#   Larry Gordon
+#
+# Dependencies:
+#   $ brew install imagemagick
+#   $ brew install gifsicle
+#
+# Usage:
+#   $ asciinema2gif https://asciinema.org/a/15562
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+set -e
+
+bindir="$(cd -P ${0:h} && pwd)"
+rundir="$(cd -P "${bindir:h}" && pwd)"
+currdir="$(pwd)"
+
+# Execute this in a subshell, changing to a temporary directory.
+(
+  tempdir="$(mktemp -d --tmpdir asciinema2gif.XXX)"
+  echo "Created temporary dir: $tempdir"
+  cd "$tempdir"
+
+  $bindir/phantomjs2 $rundir/render.js $1
+
+  echo '- Generating GIF ...'
+  convert -delay 5 -loop 0 frames/*.png gif:- | gifsicle --colors=256 --delay=6 --optimize=3 > "$currdir/asciicast.gif"
+
+  echo "- Created: $currdir/asciicast.gif"
+  rm -rf "$tempdir"
+)
