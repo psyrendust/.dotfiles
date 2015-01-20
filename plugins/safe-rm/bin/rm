@@ -59,7 +59,9 @@ if [ "$1" == "-r" ] || [ "$1" == "-rf" ]; then
   for arg in "${args[@]}"; do
     for i in $(seq 0 ${#protected_paths[@]}); do
       # echo "Elem: ${protected_paths[$i]}"
-      if [ "${protected_paths[$i]}" == "$p" ] || [ "${protected_paths[$i]}" == "$arg" ]; then
+      # echo "- p: $p"
+      # echo "- arg: $arg"
+      if [ "${protected_paths[$i]}" == "$arg" ]; then
         pperror "Cannot remove protected directory: \"${protected_paths[$i]}\""
         exit  # Just do nothing
       fi
