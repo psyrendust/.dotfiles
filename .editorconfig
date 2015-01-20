@@ -1,5 +1,6 @@
 # EditorConfig: http://editorconfig.org
 
+# top-most EditorConfig file
 root = true
 
 [*]
@@ -13,6 +14,6 @@ insert_final_newline = true
 [*.md]
 trim_trailing_whitespace = false
 
-[gitconfig]
+[git*,.git/config]
 indent_style = tab
 indent_size = 2
