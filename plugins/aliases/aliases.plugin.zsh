@@ -17,7 +17,8 @@ HELPDIR=/usr/local/share/zsh/help
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 alias ssh-bouncy="ssh -i ~/.ssh/famous/website.encrypted.pem ec2-user@bouncy-lego-42.phi42.net"
-alias server="http-server"
+alias server="live-server"
+alias simpleserver="python -m SimpleHTTPServer"
 alias npmlist="npm list --depth=0"
 alias rmrf="rm -rf"
 
