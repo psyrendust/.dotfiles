@@ -30,6 +30,7 @@ ppinfo " - Audits your installation for common issues"
 brew doctor
 
 packages=(
+  asciinema
   bash
   coreutils
   fasd
