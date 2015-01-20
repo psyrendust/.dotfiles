@@ -1,14 +1,14 @@
 {
-    "env": {
-        "browser": true,
-        "node": true
-    },
-    "globals": {
-        "DocumentFragment": true
-    },
-    "rules": {
-        "brace-style": [1, "1tbs"],
-        "no-unused-vars": [1, {"vars": "local", "args": "none"}],
-        "quotes": [2, "single"]
-    }
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "globals": {
+    "DocumentFragment": true
+  },
+  "rules": {
+    "brace-style": [1, "1tbs"],
+    "no-unused-vars": [1, {"vars": "local", "args": "none"}],
+    "quotes": [2, "single"]
+  }
 }

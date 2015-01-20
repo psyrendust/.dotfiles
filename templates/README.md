@@ -43,18 +43,18 @@ So typically (or sooner or later), what you will encounter are non-login shells.
 # General configuration ends
 
 if [[ -n $PS1 ]]; then
-    : # These are executed only for interactive shells
-    echo "interactive"
+  : # These are executed only for interactive shells
+  echo "interactive"
 else
-    : # Only for NON-interactive shells
+  : # Only for NON-interactive shells
 fi
 
 if shopt -q login_shell ; then
-    : # These are executed only when it is a login shell
-    echo "login"
+  : # These are executed only when it is a login shell
+  echo "login"
 else
-    : # Only when it is NOT a login shell
-    echo "nonlogin"
+  : # Only when it is NOT a login shell
+  echo "nonlogin"
 fi
 ```
 
