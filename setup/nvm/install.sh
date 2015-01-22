@@ -45,6 +45,7 @@ packages=(
   jscs
   jshint
   jspm
+  lorem-ipsum
   nodemon
   npm-check-updates
 )
