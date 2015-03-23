@@ -50,6 +50,7 @@ plugins=(
   apache2
   bower
   brew
+  colored-man
   colorize
   copydir
   copyfile
@@ -114,7 +115,6 @@ export ARCHFLAGS="-arch x86_64"
 # Load rvm
 # ------------------------------------------------------------------------------
 [[ -s "$HOME/.envrvm" ]] && source "$HOME/.envrvm" # Load rvm
-
 
 # ------------------------------------------------------------------------------
 # Startup Oh My Zsh

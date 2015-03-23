@@ -2,3 +2,8 @@
 # Load nvm
 # ------------------------------------------------------------------------------
 [[ -s "$HOME/.envnvm" ]] && source "$HOME/.envnvm" # Load nvm
+
+# ------------------------------------------------------------------------------
+# Load completions
+# ------------------------------------------------------------------------------
+[[ -s "/usr/local/etc/bash_completion.d/conductor-completion.sh" ]] && source "/usr/local/etc/bash_completion.d/conductor-completion.sh"

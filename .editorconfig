@@ -1,5 +1,5 @@
 # EditorConfig: http://editorconfig.org
-
+# Global EditorConfig
 # top-most EditorConfig file
 root = true
 
@@ -16,5 +16,13 @@ trim_trailing_whitespace = false
 indent_size = 4
 
 [git*,.git/config]
+indent_style = tab
+indent_size = 2
+
+[*.sublime*]
+indent_style = tab
+indent_size = 2
+
+[*.*rc]
 indent_style = tab
 indent_size = 2

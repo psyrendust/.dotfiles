@@ -45,3 +45,14 @@ function mkcd() {
   dir="$*"
   mkdir -p "$dir" && cd "$dir"
 }
+
+function lswhich() {
+  echo $1
+  ls -lAh $(which $1)
+}
+
+function ffdec() {
+  local ffdec_exec="/Applications/JPEXS-Flash-Decompiler/ffdec_4.1.1/ffdec.jar"
+  local java_exec="/usr/local/bin/java"
+  $java_exec -jar $ffdec_exec $@ &
+}

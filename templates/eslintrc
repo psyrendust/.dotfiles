@@ -1,14 +1,40 @@
 {
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "binaryLiterals": true,
+    "blockBindings": true,
+    "classes": true,
+    "defaultParams": true,
+    "destructuring": true,
+    "forOf": true,
+    "generators": true,
+    "modules": true,
+    "objectLiteralComputedProperties": true,
+    "objectLiteralDuplicateProperties": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "octalLiterals": true,
+    "regexUFlag": true,
+    "regexYFlag": true,
+    "superInFunctions": true,
+    "templateStrings": true,
+    "unicodeCodePointEscapes": true,
+    "globalReturn": true,
+    "jsx": false
+  },
   "env": {
     "browser": true,
+    "es6": true,
     "node": true
   },
   "globals": {
     "DocumentFragment": true
   },
   "rules": {
+    "strict": 0,
     "brace-style": [1, "1tbs"],
     "no-unused-vars": [1, {"vars": "local", "args": "none"}],
+    "no-extra-boolean-cast": 0,
     "quotes": [2, "single"]
   }
 }
