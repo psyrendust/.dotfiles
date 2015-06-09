@@ -68,7 +68,7 @@ compdef _git ggpull=git-pull-rebase-origin
 alias ggpullu='git pull --rebase upstream $(current_branch)'
 compdef _git ggpullu=git-pull-rebase-upstream
 
-alias ggpusha='git push --all origin && git push --tags'
+alias ggpusha='git push origin master && git push origin develop && git push --tags'
 compdef _git ggpusha=git-push-all-origin-tags
 
 alias ggpushu='git push upstream $(current_branch)'
