@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+#
+# Output system info for bug report submission.
+#
+# Uses OS X command system_profiler
+# http://www.macobserver.com/tmo/article/os-x-how-to-capture-an-amazing-amount-of-mac-info-from-the-command-line
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # Output to stdout
+#   $ systembuginfo
+#
+#   # Output to file
+#   $ systembuginfo > ~/systeminfo.txt
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+# List all datatypes
+# system_profiler -listDataTypes
+
+output="System Info"
+
+datatypes=(
+  SPSoftwareDataType
+  SPHardwareDataType
+)
+
+for datatype in ${datatypes[@]}; do
+  temp=$(eval "system_profiler $datatype -detailLevel mini")
+  output="${output}
+
+${temp}"
+done
+
+echo "${output}"
