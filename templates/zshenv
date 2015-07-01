@@ -29,8 +29,7 @@ setopt EXTENDED_GLOB
 # --prefpanedir       ~/Library/PreferencePanes     Changes the path for PreferencePane symlinks.
 # --qlplugindir       ~/Library/QuickLook           Changes the path for Quicklook Plugin symlinks.
 # --screen_saverdir   ~/Library/Screen\ Savers      Changes the path for Screen Saver symlinks.
-# --widgetdir         ~/Library/Widgets             Changes the path for Dashboard Widget symlinks.
-export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --caskroom=/usr/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers --widgetdir=~/Library/Widgets"
+export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --caskroom=/usr/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers"
 
 
 # ------------------------------------------------------------------------------
