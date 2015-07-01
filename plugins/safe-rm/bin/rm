@@ -45,19 +45,30 @@ protected_paths=(
 # echo "2: $2"
 # echo "3: $3"
 
+# Place all args into an array. Correct for anything that has a space in it.
+args=()
+for i in `seq 1 $#`; do
+    eval a=\$$i
+    args+=("$a")
+done
+
 # This is case a)
-# if the person issues "rm -r *", the script will check if the current directory
+# If the person issues "rm -r *", the script will check if the current directory
 # is / or /var or /usr or /oracle (or any additional directories that I may add
 # from time to time),  it will not echo out a message, you are about to execute
 # a dangerous delete from `pwd` & then come back to command prompt
-args=($@)
+
+flag="$1"
+
 # echo "before: ${args[@]}"
-if [ "$1" == "-r" ] || [ "$1" == "-rf" ]; then
+if [ "$flag" == "-r" ] || [ "$flag" == "-rf" ]; then
   # echo "found flag"
-  args=(${args[@]:1})
-  # echo "after: ${args[@]}"
-  for arg in "${args[@]}"; do
+  # echo ${#args}
+  for ((i = 1; i < ${#args[@]}; i++)); do
+    arg="${args[$i]}"
+    # echo "> [$arg]"
     for i in $(seq 0 ${#protected_paths[@]}); do
+      # echo "------------------------------------------------------------"
       # echo "Elem: ${protected_paths[$i]}"
       # echo "- p: $p"
       # echo "- arg: $arg"
@@ -67,6 +78,12 @@ if [ "$1" == "-r" ] || [ "$1" == "-rf" ]; then
       fi
     done
   done
+else
+  flag="";
 fi
 
-grm $@
+# End of the line. Go ahead and delete each path/file passed in as an argument
+for ((i = 1; i < ${#args[@]}; i++)); do
+  dir="$(echo ${args[$i]} | sed 's/ /\\ /g')"
+  eval "grm ${flag} ${dir}"
+done
