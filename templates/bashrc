@@ -1,2 +1,4 @@
-[[ -s "$HOME/.envrvm" ]] && source "$HOME/.envrvm" # Load rvm
-[[ -s "$HOME/.envnvm" ]] && source "$HOME/.envnvm" # Load nvm
+# rvm.sh -> to thwart rvm's install.sh
+[[ -s "$HOME/.init_rvm" ]] && source "$HOME/.init_rvm" # Load rvm
+# nvm.sh -> to thwart nvm's install.sh
+[[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm

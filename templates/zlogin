@@ -1,9 +1,10 @@
 # ------------------------------------------------------------------------------
 # Load nvm
+# nvm.sh -> to thwart nvm's install.sh
+# rvm.sh -> to thwart rvm's install.sh
 # ------------------------------------------------------------------------------
-[[ -s "$HOME/.envnvm" ]] && source "$HOME/.envnvm" # Load nvm
+[[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
 
 # ------------------------------------------------------------------------------
 # Load completions
 # ------------------------------------------------------------------------------
-[[ -s "/usr/local/etc/bash_completion.d/conductor-completion.sh" ]] && source "/usr/local/etc/bash_completion.d/conductor-completion.sh"

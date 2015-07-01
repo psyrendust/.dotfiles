@@ -55,6 +55,9 @@ __path_pre+=("$HOME/.tmpbin")
 # Add homebrew Core Utilities
 __path_pre+=("$__brew_coreutils/libexec/gnubin")
 
+# Add GOROOT
+__path_pre+=("/usr/local/opt/go/libexec/bin")
+
 # Add manpath
 __manpath_pre+=("/usr/local/share/man")
 
