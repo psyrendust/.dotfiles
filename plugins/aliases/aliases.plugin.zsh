@@ -19,8 +19,23 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 alias ssh-bouncy="ssh -i ~/.ssh/famous/website.encrypted.pem ec2-user@bouncy-lego-42.phi42.net"
 alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
-alias npmlist="npm list --depth=0"
 alias rmrf="rm -rf"
+
+function ffdec() {
+  local ffdec_exec="/Applications/JPEXS-Flash-Decompiler/ffdec_4.1.1/ffdec.jar"
+  local java_exec="/usr/local/bin/java"
+  $java_exec -jar $ffdec_exec $@ &
+}
+
+function lswhich() {
+  echo $1
+  ls -lAh $(which $1)
+}
+
+function mkcd() {
+  dir="$*"
+  mkdir -p "$dir" && cd "$dir"
+}
 
 function rem() {
   # words, sentences or paragraphs
@@ -39,20 +54,4 @@ function rem() {
   [[ $lowercase == "false" ]] && str="$(echo ${str:0:1} | tr '[a-z]' '[A-Z]')${str:1}"
   echo "$str" | pbcopy
   echo "$str"
-}
-
-function mkcd() {
-  dir="$*"
-  mkdir -p "$dir" && cd "$dir"
-}
-
-function lswhich() {
-  echo $1
-  ls -lAh $(which $1)
-}
-
-function ffdec() {
-  local ffdec_exec="/Applications/JPEXS-Flash-Decompiler/ffdec_4.1.1/ffdec.jar"
-  local java_exec="/usr/local/bin/java"
-  $java_exec -jar $ffdec_exec $@ &
 }

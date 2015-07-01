@@ -6,16 +6,16 @@
 #   Larry Gordon
 #
 # Usage:
-#   $ ppverbose "foo" "bar"
+#   $ ppverbosewarn "foo" "bar"
 #
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
 if [[ $# < 2 ]]; then
-  pplightblue "$1"
+  ppyellow "$1"
 else
-  pplightblue -i "$1: "
+  ppyellow -i "$1: "
   shift
-  ppblue "$@"
+  ppbrown "$@"
 fi

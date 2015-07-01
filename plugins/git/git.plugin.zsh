@@ -62,8 +62,8 @@ compdef _git gfrstart=git-flow-release-start
 alias gfu='git fetch upstream'
 compdef _git gfu=git-fetch-upstream
 
-alias ggpull='git pull --rebase origin $(current_branch)'
-compdef _git ggpull=git-pull-rebase-origin
+alias grbo='_git-rebase-origin'
+compdef _git grbo=git-rebase-origin
 
 alias ggpullu='git pull --rebase upstream $(current_branch)'
 compdef _git ggpullu=git-pull-rebase-upstream
@@ -164,6 +164,11 @@ function _git-clone-cd() {
   git clone ${repourl} ${repodir} && cd ${repodir}
 }
 
+function _git-rebase-origin() {
+  local branch_name=${1:-$(current_branch)}
+  git rebase origin/${branch_name}
+}
+
 # update target branch and merge it into current branch
 function _git-merge-from() {
   current_branch=$(current_branch)
@@ -171,7 +176,7 @@ function _git-merge-from() {
   echo "switching to branch $target_branch"
   gco -f $target_branch
   echo "updating branch $target_branch"
-  ggpull
+  ggpur
   echo "switching to branch $current_branch"
   gco -f $current_branch
   echo "stashing any changes"

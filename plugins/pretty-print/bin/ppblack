@@ -14,14 +14,11 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-__alf-pretty-print() {
-  while getopts ":i" opt; do
-    [[ $opt == "i" ]] && has_option=1
-  done
-  if [[ -n $has_option ]]; then
-    shift && printf '\033[0;30m%s\033[0m' "$@"
-  else
-    printf '\033[0;30m%s\033[0m\n' "$@"
-  fi
-}
-__alf-pretty-print $@
+while getopts ":i" opt; do
+  [[ $opt == "i" ]] && has_option=1
+done
+if [[ -n $has_option ]]; then
+  shift && printf '\033[0;30m%s\033[0m' "$@"
+else
+  printf '\033[0;30m%s\033[0m\n' "$@"
+fi

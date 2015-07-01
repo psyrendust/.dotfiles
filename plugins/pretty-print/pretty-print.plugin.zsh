@@ -65,5 +65,7 @@
 # Yellow        1;33
 
 # Add bin to PATH
-export PATH="$(cd -P "$(cd -P ${0:h} && pwd)/bin" && pwd):$PATH"
+rdlkf() { [ -L "$1" ] && (local lk="$(readlink "$1")"; local d="$(dirname "$1")"; cd "$d"; local l="$(rdlkf "$lk")"; ([[ "$l" = /* ]] && echo "$l" || echo "$d/$l")) || echo "$1"; }
+DIR="$(dirname "$(rdlkf "$0")")/bin"
+export PATH="$DIR:$PATH"
 
