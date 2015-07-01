@@ -32,10 +32,13 @@ brew doctor
 packages=(
   asciinema
   bash
+  caskroom/cask/brew-cask
   coreutils
   fasd
   git
   git-flow
+  go
+  nvm
   zsh
 )
 
