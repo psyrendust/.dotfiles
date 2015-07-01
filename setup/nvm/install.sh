@@ -34,6 +34,7 @@ npm config set loglevel http
 
 packages=(
   npm
+  david
   eslint
   express-generator
   famous-dist-generator
