@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+#
+# Kill CrashPlan app and menu bar app and unmount DroboPro1
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # crashplanstop
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+# Check if "CrashPlan.app" and "CrashPlan menu bar.app" are running and kill their process by PID.
+stopCrashPlanApps() {
+  results=( $(pgrep "CrashPlan menu bar") )
+  results+=( $(pgrep -fx "/Applications/CrashPlan.app/Contents/MacOS/CrashPlan") )
+  for result in ${results[@]}; do
+    kill -9 $result
+  done
+}
+
+# Unmount DroboPro1
+unmountDroboPro1() {
+  [[ -d "/Volumes/DroboPro1" ]]; && umount /Volumes/DroboPro1
+}
+
+# Execute all commands
+stopCrashPlanApps &
+unmountDroboPro1 &
+wait %1 %2 2> /dev/null

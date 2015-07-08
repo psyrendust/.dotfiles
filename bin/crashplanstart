@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+#
+# Mount network drive and start "CrashPlan.app" and "CrashPlan menu bar.app".
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # crashplanstart
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+# Mount DroboPro1
+mountDroboPro1() {
+  [[ -d "/Volumes/DroboPro1" ]] || mount_afp afp://Macmini._afpovertcp._tcp.local/DroboPro1 /Volumes/DroboPro1 2> /dev/null
+}
+
+# Check if "CrashPlan menu bar.app" is running, if not then launch it.
+openCrashPlanMenuBarApp() {
+  [[ -z $(pgrep "CrashPlan menu bar") ]] && open -a "/Applications/CrashPlan.app/Contents/Helpers/CrashPlan menu bar.app"
+}
+
+# Check if "CrashPlan.app" is running, if not then launch it.
+openCrashPlanApp() {
+  [[ -z $(pgrep -fx "/Applications/CrashPlan.app/Contents/MacOS/CrashPlan") ]] && open -a "/Applications/CrashPlan.app"
+}
+
+# Execute all commands
+mountDroboPro1 &
+openCrashPlanMenuBarApp &
+openCrashPlanApp &
+wait %1 %2 %3 2> /dev/null
