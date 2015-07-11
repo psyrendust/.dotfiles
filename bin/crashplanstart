@@ -14,21 +14,21 @@
 
 # Mount DroboPro1
 mountDroboPro1() {
-  [[ -d "/Volumes/DroboPro1" ]] || mount_afp afp://Macmini._afpovertcp._tcp.local/DroboPro1 /Volumes/DroboPro1 2> /dev/null
+  [[ -d "/Volumes/DroboPro1" ]] || mkdir -p /Volumes/DroboPro1 && mount_afp afp://Macmini._afpovertcp._tcp.local/DroboPro1 /Volumes/DroboPro1 &> /dev/null
 }
 
 # Check if "CrashPlan menu bar.app" is running, if not then launch it.
 openCrashPlanMenuBarApp() {
-  [[ -z $(pgrep "CrashPlan menu bar") ]] && open -a "/Applications/CrashPlan.app/Contents/Helpers/CrashPlan menu bar.app"
+  [[ -z $(pgrep "CrashPlan menu bar") ]] && open -a "/Applications/CrashPlan.app/Contents/Helpers/CrashPlan menu bar.app" &> /dev/null
 }
 
 # Check if "CrashPlan.app" is running, if not then launch it.
 openCrashPlanApp() {
-  [[ -z $(pgrep -fx "/Applications/CrashPlan.app/Contents/MacOS/CrashPlan") ]] && open -a "/Applications/CrashPlan.app"
+  [[ -z $(pgrep -fx "/Applications/CrashPlan.app/Contents/MacOS/CrashPlan") ]] && open -a "/Applications/CrashPlan.app" &> /dev/null
 }
 
 # Execute all commands
 mountDroboPro1 &
 openCrashPlanMenuBarApp &
 openCrashPlanApp &
-wait %1 %2 %3 2> /dev/null
+wait %1 %2 %3 &> /dev/null

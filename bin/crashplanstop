@@ -23,10 +23,10 @@ stopCrashPlanApps() {
 
 # Unmount DroboPro1
 unmountDroboPro1() {
-  [[ -d "/Volumes/DroboPro1" ]]; && umount /Volumes/DroboPro1
+  [[ -d "/Volumes/DroboPro1" ]] && diskutil unmount force /Volumes/DroboPro1 &> /dev/null
 }
 
 # Execute all commands
 stopCrashPlanApps &
 unmountDroboPro1 &
-wait %1 %2 2> /dev/null
+wait %1 %2 &> /dev/null
