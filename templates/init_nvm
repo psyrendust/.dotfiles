@@ -1,3 +1,15 @@
 export NVM_DIR="$HOME/.nvm"
 export PROFILE="$HOME/.profile"
-[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh" # This loads nvm"
+
+# Find the correct nvm init script
+if [[ -s "/usr/local/opt/nvm/nvm.sh" ]]; then
+  # Installed via homebrew
+  export NVM_INIT_SCRIPT_DIR="/usr/local/opt/nvm"
+
+elif [[ -s "$NVM_DIR/nvm.sh" ]]; then
+  # Installed via https://github.com/creationix/nvm
+  export NVM_INIT_SCRIPT_DIR="$NVM_DIR"
+fi
+
+# This loads nvm"
+[[ -s "$NVM_INIT_SCRIPT_DIR/nvm.sh" ]] && source "$NVM_INIT_SCRIPT_DIR/nvm.sh"
