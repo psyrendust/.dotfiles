@@ -65,5 +65,12 @@ then
   sudo echo "/usr/local/bin/zsh" >> /etc/shells && ppinfo " - Add zsh to /etc/shells"
 fi
 
+ppinfo "Setup nvm correctly"
+ppinfo "Add NVM's working directory to your \$HOME path (if it doesn't exist):"
+mkdir -p $HOME/.nvm
+
+ppinfo "Symlink nvm-exec to NVM's working directory"
+ln -sf "$(brew --prefix nvm)/nvm-exec" "$HOME/.nvm/nvm-exec"
+
 ppok " - Homebrew install complete"
 exit 0
