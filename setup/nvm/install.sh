@@ -13,8 +13,12 @@
 # ------------------------------------------------------------------------------
 
 ppinfo "Install nvm"
+
+export NVM_DIR=$HOME/.nvm
+[[ -s "$(brew --prefix nvm)/nvm.sh" ]] && source $(brew --prefix nvm)/nvm.sh
+
 ppinfo " - Check for nvm"
-if test ! $(which nvm)
+if test ! $(nvm --version)
 then
   ppinfo " - Installing nvm"
   curl https://raw.githubusercontent.com/creationix/nvm/v0.22.0/install.sh | bash
