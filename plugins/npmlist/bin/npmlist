@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-const exec = require('child_process').exec;
-const fs = require('fs');
-const path = require('path');
-const regNewline = /\n|\r/;
+var exec = require('child_process').exec;
+var fs = require('fs');
+var path = require('path');
+var regNewline = /\n|\r/;
 
-let cmd = ['npm list --depth=0'];
-let shouldProcess = false;
-let savePath = path.resolve(process.env.HOME);
-let filename = '.npmlist';
+var cmd = ['npm list --depth=0'];
+var shouldProcess = false;
+var savePath = path.resolve(process.env.HOME);
+var filename = '.npmlist';
 
 process.argv.slice(2).forEach(function (arg) {
   if (arg.indexOf('-') === 0) {
@@ -36,21 +36,21 @@ exec(cmd.join(' '), function (error, stdout) {
 });
 
 function processModules(data) {
-  let results = data.map(function (line) {
+  var results = data.map(function (line) {
     return line.replace(/^(\S{3}\s)(\S+?)(@\S+)/gim, '$2');
   }).filter(function (line, i) {
     return i !== 0 && line !== 'npm';
   });
 
-  let installCmd = ['\nnpm install -g ' + results.join(' ')];
-  let header = ['#!/usr/bin/env bash', '# ' + new Date(), '#'];
+  var installCmd = ['\nnpm install -g ' + results.join(' ')];
+  var header = ['#!/usr/bin/env bash', '# ' + new Date(), '#'];
   results = header.concat(
     data.map(function (line) {
       return '# ' + line;
     }), installCmd)
   .join('\n');
 
-  let file = path.join(savePath, filename);
+  var file = path.join(savePath, filename);
   fs.writeFile(file, results, 'utf8', function (err) {
     if (err) throw err;
     console.log('\nnpm global list saved to:', file);
