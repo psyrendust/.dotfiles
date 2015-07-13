@@ -14,17 +14,6 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="%{$fg[green]%}|"
 ZSH_THEME_GIT_PROMPT_DIRTY=" %{$fg[red]%}✗"
 ZSH_THEME_GIT_PROMPT_CLEAN=" %{$fg_bold[green]%}✓"
 
-function __prompt-ruby-version {
-  # Grab the current version of ruby in use (via RVM): [ruby-1.8.7]
-  if [ -e ~/.rvm/bin/rvm-prompt ]; then
-    local CURRENT_RUBY="%{$fg[yellow]%}|\$(~/.rvm/bin/rvm-prompt)|%{$reset_color%}"
-  else
-    if which rbenv &> /dev/null; then
-      local CURRENT_RUBY="%{$fg[yellow]%}|\$(rbenv version | sed -e 's/ (set.*$//')|%{$reset_color%}"
-    fi
-  fi
-  echo $CURRENT_RUBY
-}
 function __prompt-scm-char {
   # Setup some SCM characters
   local SCM=''
@@ -53,12 +42,21 @@ function __prompt-scm-char {
   fi
   echo $SCM_CHAR
 }
+
 function __PROMPT_LINE_1 {
-  local CURRENT_USER="%{$fg[magenta]%}%n%{$reset_color%}"    # Grab the current username
-  local CURRENT_MACHINE="%{$fg[magenta]%}%m%{$reset_color%}" # Grab the current machine name
-  local IN="%{$fg[white]%}in%{$reset_color%}"                # Just some text
-  local CURRENT_PATH="%{$fg[green]%}%~"                      # Grab the current file path
-  echo "$(__prompt-ruby-version) $CURRENT_USER $IN $CURRENT_PATH"
+  local CURRENT_USER="%{$fg[magenta]%}%n%{$reset_color%}"   # Grab the current username
+  local IN="%{$fg[white]%}in%{$reset_color%}"               # Just some text
+  local CURRENT_PATH="%{$fg[green]%}%~"                     # Grab the current file path
+  local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`      # Get the current IP for the SSH session
+  local CURRENT_LOCATION=""
+
+  # Am I root?
+  [ `whoami` = "root" ] && CURRENT_USER="%{$fg[red]%}%n%{$reset_color%}"
+
+  # Current location is remote
+  [ $SSH_IP ] && CURRENT_LOCATION="%{$fg[yellow]%}[ssh@$SSH_IP]%{$reset_color%} "
+
+  echo "$CURRENT_LOCATION$CURRENT_USER $IN $CURRENT_PATH"
 }
 
 function __PROMPT_LINE_2 {
