@@ -1,4 +1,6 @@
-# rvm.sh -> to thwart rvm's install.sh
+# export PATH="$PATH:$HOME/.rvm/bin" -> to thwart rvm's install.sh
+# $HOME/.rvm/scripts/rvm -> to thwart rvm's install.sh
 [[ -s "$HOME/.init_rvm" ]] && source "$HOME/.init_rvm" # Load rvm
 # nvm.sh -> to thwart nvm's install.sh
 [[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
+
