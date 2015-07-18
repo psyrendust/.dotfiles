@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+#
+# Fixes the user permissions for homebrew
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # fixbrewpermission <username>
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+ln -sf "$HOME/.dotfiles/bin/fixbrewpermission" "/usr/local/bin/fixbrewpermission"
+
+me=`whoami`
+
+sudo chown -R ${me}:wheel /usr/local
+sudo chown -R root:wheel /usr/local/ssl
+sudo chown -R ${me}:staff /usr/homebrew-cask
+sudo chown -R ${me}:wheel /Library/Caches/Homebrew
