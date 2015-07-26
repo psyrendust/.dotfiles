@@ -38,6 +38,7 @@ packages=(
   git
   git-flow
   go
+  mackup
   nvm
   zsh
 )
