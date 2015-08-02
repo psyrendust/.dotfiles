@@ -51,7 +51,6 @@ packages=(
   jspm
   lorem-ipsum
   nodemon
-  npm-check-updates
 )
 
 ppinfo "Install npm packages"
