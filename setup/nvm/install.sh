@@ -38,6 +38,7 @@ npm config set loglevel http
 
 packages=(
   npm
+  bower
   david
   eslint
   express-generator
@@ -51,6 +52,7 @@ packages=(
   jspm
   lorem-ipsum
   nodemon
+  yo
 )
 
 ppinfo "Install npm packages"
