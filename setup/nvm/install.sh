@@ -55,12 +55,22 @@ packages=(
   yo
 )
 
+postpackages=(
+)
+
 ppinfo "Install npm packages"
 for package in ${packages[@]}; do
   ppinfo " - Install $package"
   npm install -g $package && ppok " - Install $package"
 done
 unset package{,s}
+
+ppinfo "Post-install npm packages"
+for postpackage in ${postpackages[@]}; do
+  ppinfo " - Install $postpackage"
+  npm install -g $postpackage && ppok " - Install $postpackage"
+done
+unset postpackage{,s}
 
 ppok " - nvm install complete"
 exit 0
