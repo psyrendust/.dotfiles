@@ -41,7 +41,6 @@ packages=(
   david
   eslint
   express-generator
-  famous-dist-generator
   forever
   grunt-cli
   grunt-init
