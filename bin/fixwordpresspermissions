@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+#
+# Fix Wordpress file and folder permissions for a shared server installation.
+#
+# - All files should be 644.
+# - All folders should be 755.
+# - wp-config.php should be 600.
+#
+# Break down of permissions:
+# - Our user account may read and modify our files.
+# - WordPress (via our Web server and as the account owner) may read and modify our scripts.
+# - WordPress may create, modify or delete files or folders.
+# - Other people may not see our database credentials in `wp-config.php`.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # Fix permissions for the current folder
+#   $ fixwordpresspermissions .
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+find $1 -type f -exec chmod 644 {} +;
+find $1 -type d -exec chmod 755 {} +;
+find $1 -name "wp-config.php" -exec chmod 600 {} +;
