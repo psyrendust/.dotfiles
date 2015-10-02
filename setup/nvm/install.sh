@@ -38,6 +38,7 @@ npm config set loglevel http
 
 packages=(
   npm
+  babel
   bower
   david
   eslint
@@ -49,6 +50,7 @@ packages=(
   jscs
   jshint
   jspm
+  live-server
   lorem-ipsum
   nodemon
   yo
