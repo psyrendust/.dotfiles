@@ -14,8 +14,8 @@
 ppinfo "Install config files"
 
 setopt EXTENDED_GLOB
-local dotfiles_path=${HOME}/.dotfiles
-local templates_path=${dotfiles_path}/templates
+dotfiles_path=${HOME}/.dotfiles
+templates_path=${dotfiles_path}/templates
 
 for file in ${templates_path}/^(*.sh|*.md)(.N); do
   ln -sf "$file" "${HOME}/.${file:t}"
