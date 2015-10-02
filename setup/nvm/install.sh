@@ -41,7 +41,6 @@ packages=(
   bower
   david
   eslint
-  express-generator
   forever
   grunt-cli
   grunt-init
