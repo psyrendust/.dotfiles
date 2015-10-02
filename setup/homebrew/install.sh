@@ -40,6 +40,7 @@ packages=(
   go
   mackup
   nvm
+  tree
   zsh
 )
 
