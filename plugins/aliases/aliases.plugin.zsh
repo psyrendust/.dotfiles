@@ -37,6 +37,14 @@ function mkcd() {
   mkdir -p "$dir" && cd "$dir"
 }
 
+function pf() {
+  if [[ "$1" = "" ]]; then
+    open -a "Path Finder.app" .
+  else
+    open -a "Path Finder.app" $1
+  fi
+}
+
 function rem() {
   # words, sentences or paragraphs
   local units="words"
