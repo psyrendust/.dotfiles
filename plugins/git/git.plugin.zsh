@@ -113,6 +113,9 @@ compdef _git gtag=git-tag
 alias gtaga='git tag -a'
 compdef _git gtaga=git-tag
 
+alias gunadd='git reset HEAD'
+compdef _git gunadd=git-reset-head
+
 alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
