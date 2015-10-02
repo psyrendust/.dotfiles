@@ -20,7 +20,7 @@
     "templateStrings": true,
     "unicodeCodePointEscapes": true,
     "globalReturn": true,
-    "jsx": false
+    "jsx": true
   },
   "env": {
     "browser": true,
