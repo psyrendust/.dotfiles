@@ -37,22 +37,33 @@ ppinfo " - Set npm loglevel to http"
 npm config set loglevel http
 
 packages=(
-  npm
+  npm@2
   babel
+  babel-cli
+  babel-eslint
   bower
+  browserify
+  conventional-changelog
+  conventional-commits-detector
+  conventional-github-releaser
+  conventional-recommended-bump
   david
+  esdoc
   eslint
+  eslint-config-airbnb
   forever
   grunt-cli
   grunt-init
   gulp
-  http-server
   jscs
   jshint
+  json
   jspm
   live-server
   lorem-ipsum
   nodemon
+  trash
+  trash-cli
   yo
 )
 
