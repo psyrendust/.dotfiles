@@ -60,3 +60,5 @@
 [user]
 	name = Larry Gordon
 	email = lgordon@psyrendust.com
+[push]
+	default = current
