@@ -31,15 +31,28 @@ brew doctor
 
 packages=(
   asciinema
+  autoconf
+  automake
   bash
-  caskroom/cask/brew-cask
   coreutils
   fasd
+  ffmpeg
+  freetype
+  gdbm
   git
   git-flow
   go
+  imagemagick
+  libgpg-error
+  libksba
+  libvo-aacenc
+  libyaml
   mackup
   nvm
+  openssl
+  pcre
+  pkg-config
+  readline
   tree
   zsh
 )
