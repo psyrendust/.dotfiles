@@ -48,6 +48,7 @@ __path_pre+=("$ZSH_CUSTOM/plugins/asciinema2gif/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/sublime/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/npmlist/bin")
+__path_pre+=("$ZSH_CUSTOM/plugins/textcleaner/bin")
 __path_pre+=("$ZSH_CUSTOM/bin")
 __path_pre+=("$HOME/.tmpbin")
 
