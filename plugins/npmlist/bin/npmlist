@@ -4,6 +4,7 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
 var regNewline = /\n|\r/;
+var regLineReplace = /^(\S{3}\s)(\S+?)(@\S+)/gim;
 
 var cmd = ['npm list --depth=0'];
 var shouldProcess = false;
@@ -24,7 +25,7 @@ process.argv.slice(2).forEach(function (arg) {
 
 exec(cmd.join(' '), function (error, stdout) {
   if (error !== null) {
-    console.log('exec error: ' + error);
+    console.log(`exec error: ${error}`);
   }
   var results = stdout
     .split(regNewline)
@@ -37,22 +38,22 @@ exec(cmd.join(' '), function (error, stdout) {
 
 function processModules(data) {
   var results = data.map(function (line) {
-    return line.replace(/^(\S{3}\s)(\S+?)(@\S+)/gim, '$2');
+    return line.replace(regLineReplace, '$2');
   }).filter(function (line, i) {
     return i !== 0 && line !== 'npm';
   });
 
-  var installCmd = ['\nnpm install -g ' + results.join(' ')];
-  var header = ['#!/usr/bin/env bash', '# ' + new Date(), '#'];
+  var installCmd = [`\nnpm install -g ${results.join(' ')}\n`];
+  var header = ['#!/usr/bin/env bash', `# ${new Date()}`, '#'];
   results = header.concat(
     data.map(function (line) {
-      return '# ' + line;
+      return `# ${line}`;
     }), installCmd)
   .join('\n');
 
   var file = path.join(savePath, filename);
   fs.writeFile(file, results, 'utf8', function (err) {
     if (err) throw err;
-    console.log('\nnpm global list saved to:', file);
+    console.log(`\n${installCmd}\nnpm global list saved to: ${file}`);
   });
 }
