@@ -60,7 +60,6 @@ plugins=(
   fasd
   gem
   git
-  git
   git-flow-avh
   gitfast
   history
@@ -117,7 +116,6 @@ export ARCHFLAGS="-arch x86_64"
 # $HOME/.rvm/scripts/rvm -> to thwart rvm's install.sh
 # rvm.sh -> to thwart rvm's install.sh
 # ------------------------------------------------------------------------------
-[[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
 [[ -s "$HOME/.init_rvm" ]] && source "$HOME/.init_rvm" # Load rvm
 
 # ------------------------------------------------------------------------------
