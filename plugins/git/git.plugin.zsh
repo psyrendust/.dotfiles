@@ -179,7 +179,7 @@ compdef _git gaa=git-add
 alias gass='git update-index --assume-unchanged'
 compdef _git gass=git-update-index
 
-alias gbdel='_git-branch-delete'
+alias gbdel='git branch -D'
 compdef _git gbdel=git-branch
 
 alias gbfromhere='_git-branch-from-here'
