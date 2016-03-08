@@ -30,7 +30,8 @@ setopt EXTENDED_GLOB
 # --qlplugindir       ~/Library/QuickLook           Changes the path for Quicklook Plugin symlinks.
 # --screen_saverdir   ~/Library/Screen\ Savers      Changes the path for Screen Saver symlinks.
 export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --caskroom=/opt/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers"
-
+export GOPATH="$HOME/.go"
+export GOROOT="/usr/local/opt/go/libexec"
 
 # ------------------------------------------------------------------------------
 # Setup paths
@@ -55,8 +56,9 @@ __path_pre+=("$HOME/.tmpbin")
 # Add homebrew Core Utilities
 __path_pre+=("$__brew_coreutils/libexec/gnubin")
 
-# Add GOROOT
-__path_pre+=("/usr/local/opt/go/libexec/bin")
+# Add GOPATH and GOROOT
+__path_pre+=("$GOPATH/bin")
+__path_pre+=("$GOROOT/bin")
 
 # Add homebrews bin
 __path_pre+=("/usr/local/bin")
