@@ -80,6 +80,9 @@ then
   sudo echo "/usr/local/bin/zsh" >> /etc/shells && ppinfo " - Add zsh to /etc/shells"
 fi
 
+ppinfo "Setup GOPATH folder"
+mkdir -p $HOME/.go
+
 ppinfo "Setup nvm correctly"
 ppinfo "Add NVM's working directory to your \$HOME path (if it doesn't exist):"
 mkdir -p $HOME/.nvm
