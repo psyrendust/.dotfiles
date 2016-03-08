@@ -84,16 +84,14 @@ unset __brew_coreutils
 
 
 # ------------------------------------------------------------------------------
+# Load up necessary scripts
+# ------------------------------------------------------------------------------
 # Load any private github api tokens
-# ------------------------------------------------------------------------------
 [[ -s "$HOME/Dropbox/Larry/Apps/github/apiTokens.sh" ]] && source "$HOME/Dropbox/Larry/Apps/github/apiTokens.sh"
-
-
-# ------------------------------------------------------------------------------
 # Load up nvm
-# ------------------------------------------------------------------------------
 # nvm.sh -> to thwart nvm's install.sh
 [[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
+
 
 # ------------------------------------------------------------------------------
 # Do some platform checks so we don't have to keep doing it later
