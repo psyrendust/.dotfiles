@@ -1,0 +1,361 @@
+#!/usr/bin/env bash
+#
+# Github release script
+# Prerequisites:
+#   npm install -g chalk-cli trash conventional-recommended-bump conventional-changelog conventional-changelog-cli conventional-github-releaser conventional-commits-detector json
+#
+# Note:
+#   For conventional-github-releaser to work you'll need to setup a new GitHub
+#   app token, then add the `CONVENTIONAL_GITHUB_RELEASER_TOKEN` environment
+#   variable to your shell. You can find more details here:
+#   https://github.com/stevemao/conventional-github-releaser#setup-token-for-cli
+#
+# Usage:
+#   githubrelease -h
+#
+# defaults to conventional-recommended-bump
+# and optional argument preset `angular`/ `jquery` ...
+# defaults to conventional-commits-detector
+#-------------------------------------------------------------------------------
+# Does the following:
+#  1. pull from remote origin for master and develop branches
+#  2. rebase master onto develop
+#  3. rebase develop onto master
+#  4. updates changelog
+#  5. bumps version number
+#  6. commits changes
+#  7. creates a version tag
+#  8. pushes master and tag to remote
+#  9. rebase master onto develop
+# 10. pushes develop to remote
+# 11. creates a release on github
+#-------------------------------------------------------------------------------
+
+set -e
+
+version="0.1.0"
+# ------------------------------------------------------------------------------
+# Helper commands
+# ------------------------------------------------------------------------------
+# Universal logger for this script
+log() {
+  local output="$counter"
+  [[ $counter -lt 10 ]] && output="$counter "
+
+  chalk cyan "[step: $output] $1"
+
+  [[ "$1" != "startOnMaster" ]] && [[ "$1" != "startOnDevelop" ]] && increment
+}
+
+# Step counter
+increment() {
+  ((counter+=1))
+}
+
+# Get the current Git branch
+gitCurrBranch() {
+  ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
+  ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
+  echo "${ref#refs/heads/}"
+}
+
+# ------------------------------------------------------------------------------
+# Script commands
+# ------------------------------------------------------------------------------
+# Switch the current branch to <master>
+startOnMaster() {
+  log "startOnMaster"
+  if [ $(gitCurrBranch) != $master ]; then
+    git checkout $master
+  fi
+}
+
+# Switch the current branch to <develop>
+startOnDevelop() {
+  log "startOnDevelop"
+  if [ $(gitCurrBranch) != $develop ]; then
+    git checkout $develop
+  fi
+}
+
+# Pull latest changes from <master> and <develop> using rebase
+updateBranches() {
+  log "updateBranches"
+  git pull --rebase origin $master &&
+  git checkout $develop &&
+  git pull --rebase origin $develop
+}
+
+# Rebase the <develop> branch onto <master>
+rebaseDevelopOntoMaster() {
+  log "rebaseDevelopOntoMaster"
+  git rebase $develop
+}
+
+# Run npm tests
+runTests() {
+  log "runTests"
+  trash node_modules &>/dev/null
+  npm install
+  npm run test
+}
+
+# Make a backup of the package.json
+backupPackage() {
+  log "backupPackage"
+  cp package.json _package.json
+}
+
+# Use npm to bump the version of the package.json
+bumpPackage() {
+  log "bumpPackage"
+  npm --no-git-tag-version version ${bump} &>/dev/null
+}
+
+# Generate a changelog entry and save it to <changelog>
+updateChangelog() {
+  log "updateChangelog"
+  if [[ ! -f "./CHANGELOG.md" ]]; then
+    touch "./CHANGELOG.md"
+  fi &&
+  conventional-changelog -i CHANGELOG.md -s -p ${preset}
+}
+
+# Add the <changelog> to Git and commit it
+addChangelog() {
+  log "addChangelog"
+  local version=$(cat package.json | json version)
+  git add CHANGELOG.md
+  git commit -m"docs(CHANGELOG): $version"
+}
+
+# Reset the package.json to the backup made earlier
+resetPackage() {
+  log "resetPackage"
+  mv -f _package.json package.json
+}
+
+# Using npm, bump the package.json version, create new tag, and commit change
+# to Git
+npmBump() {
+  log "npmBump"
+  npm version ${bump} -m "chore(release): %s"
+}
+
+# Rebase the <master> branch onto <develop>
+rebaseMasterOntoDevelop() {
+  log "rebaseMasterOntoDevelop"
+  git rebase $master
+}
+
+# Push <master> and <develop> branches and all tags to remote origin
+pushAll() {
+  log "pushAll"
+  git push origin $master &&
+  git push origin $develop &&
+  git push --tags
+}
+
+
+conventionalGitHubReleaser() {
+  log "conventionalGitHubReleaser"
+  conventional-github-releaser -p ${preset}
+}
+
+# ------------------------------------------------------------------------------
+#
+# ------------------------------------------------------------------------------
+# Defaults
+defaultremote="origin"
+defaultmaster="master"
+defaultdevelop="develop"
+defaultchangelog="CHANGELOG.md"
+defaultstep=1
+
+usage() {
+  cat << EOF
+usage: $0 options
+
+Release a npm package to github.
+
+FLAG OPTIONS:
+   -h     Show this message.
+   -v     Display the version of this script.
+   -l     Generate a changelog entry and save it to <changelog>.
+   -p     Push <master>, <develop>, and tags to <remote>.
+   -u     Update <master> and <develop> branches from <remote> using rebase.
+
+ARGUMENT OPTIONS:
+   -c     Location of the <changelog>. Defaults to 'CHANGELOG.md'.
+   -m     The <master> branch. Defaults to 'master'.
+   -d     The <develop> branch. Defaults to 'develop'.
+   -r     The <remote> push and pull from. Defaults to 'origin'.
+   -P     The preset style used to generate the changelog. Examples include
+          ['angular' | 'jquery' ...]. Defaults to 'conventional-recommended-bump'.
+   -s     Allows you to start at a specific step. Useful for when the script
+          fails before completing all steps. See AVAILABLE STEPS below.
+   -b     The semver you would like to use for the release (default: patch).
+          Can be: [ major | minor | patch | v0.0.0 ]
+
+AVAILABLE STEPS:
+    1     Update <master> and <develop> branches from <remote> using rebase.
+    2     Push <master>, <develop>, and tags to <remote>.
+    3     Run 'npm test'
+    4     Rebase <develop> onto <master>.
+    5     Make a copy of 'package.json' to '_package.json'.
+    6     Temporarily bump the semver of 'package.json'.
+    7     Save a changelog entry to <changelog>.
+    8     Commit <changelog> update to Git.
+    9     Reset 'package.json' by moveing '_package.json' to 'package.json'.
+   10     Run 'npm version' command, which bumps 'package.json' and creates a tag.
+   11     Rebase <master> onto <develop>.
+   12     Push <master>, <develop>, and tags to <remote>.
+   13     Run 'conventional-github-releaser' to create a release in GitHub.
+
+COMMON USAGE:
+   1. Update all branches
+   2. Push changes from all branches
+   3. Cut a release
+
+   githubrelease -u
+   githubrelease -p
+   githubrelease -b patch
+EOF
+}
+# Argument variables
+arglog=
+argpull=
+argpush=
+argchangelog=
+argmaster=
+argdevelop=
+argremote=
+argpreset=
+argstep=
+argbump=
+
+# Variables to use in script
+changelog=
+master=
+develop=
+remote=
+preset=
+step=
+bump=
+
+# Grab command line arguments and flags
+while getopts "hvlupc:r:m:d:P:s:b:" OPTION
+do
+  case $OPTION in
+    h)
+      usage
+      exit 1
+      ;;
+    v)
+      echo "githubrelease v${version}"
+      exit 1
+      ;;
+    l)
+      arglog=1
+      ;;
+    u)
+      argpull=1
+      ;;
+    p)
+      argpush=1
+      ;;
+    c)
+      argchangelog=$OPTARG
+      ;;
+    r)
+      argremote=$OPTARG
+      ;;
+    m)
+      argmaster=$OPTARG
+      ;;
+    d)
+      argdevelop=$OPTARG
+      ;;
+    P)
+      argpreset=$OPTARG
+      ;;
+    s)
+      argstep=$OPTARG
+      ;;
+    b)
+      argbump=$OPTARG
+      ;;
+    ?)
+      usage
+      exit
+      ;;
+  esac
+done
+
+# Parse arguments and apply defaults if an argument was not passed
+[[ -n $argchangelog ]] && changelog=$argchangelog || changelog=$defaultchangelog
+[[ -n $argremote ]] && remote=$argremote || remote=$defaultremote
+[[ -n $argmaster ]] && master=$argmaster || master=$defaultmaster
+[[ -n $argdevelop ]] && develop=$argdevelop || develop=$defaultdevelop
+[[ -n $argpreset ]] && preset=$argpreset || preset=$(conventional-commits-detector)
+[[ -n $argstep ]] && step=$argstep || step=$defaultstep
+[[ -n $argbump ]] && bump=$argbump || bump=$(conventional-recommended-bump -p ${preset})
+
+echo "conventional-commits-detector: $(conventional-commits-detector)"
+
+# Output config setup
+chalk cyan "========== CONFIG =========="
+chalk white << EOF
+log       : $arglog
+pull      : $argpull
+push      : $argpush
+changelog : $changelog
+remote    : $remote
+master    : $master
+develop   : $develop
+bump      : $bump | $(conventional-recommended-bump -p $(conventional-commits-detector))
+preset    : $preset | $(conventional-commits-detector)
+counter   : $counter
+step      : $step
+EOF
+chalk cyan "============================"
+
+
+# githubrelease -l
+# githubrelease -l -b minor
+if [[ -n $arglog ]]; then
+  backupPackage
+  bumpPackage
+  updateChangelog
+  resetPackage
+  exit 1
+fi
+
+# githubrelease -u
+if [[ -n $argpull ]]; then
+  startOnMaster && updateBranches &&
+  exit 1
+fi
+
+# githubrelease -p
+if [[ -n $argpush ]]; then
+  pushAll &&
+  exit 1
+fi
+
+# Run the release script
+if [[ $step -le  1 ]]; then startOnMaster && updateBranches;           fi && # Step 1
+if [[ $step -le  2 ]]; then pushAll;                                   fi && # Step 2
+if [[ $step -le  3 ]]; then startOnDevelop && runTests;                fi && # Step 3
+if [[ $step -le  4 ]]; then startOnMaster && rebaseDevelopOntoMaster;  fi && # Step 4
+if [[ $step -ge  5 ]]; then startOnMaster;                             fi && # Step >= 5
+if [[ $step -le  5 ]]; then backupPackage;                             fi && # Step 5
+if [[ $step -le  6 ]]; then bumpPackage;                               fi && # Step 6
+if [[ $step -le  7 ]]; then updateChangelog;                           fi && # Step 7
+if [[ $step -le  8 ]]; then addChangelog;                              fi && # Step 8
+if [[ $step -le  9 ]]; then resetPackage;                              fi && # Step 9
+if [[ $step -le 10 ]]; then npmBump;                                   fi && # Step 10
+if [[ $step -le 11 ]]; then startOnDevelop && rebaseMasterOntoDevelop; fi && # Step 11
+if [[ $step -le 12 ]]; then pushAll;                                   fi && # Step 12
+if [[ $step -le 13 ]]; then conventionalGitHubReleaser;                fi && # Step 13
+chalk green "All done!" || chalk red "Epic fail!"
