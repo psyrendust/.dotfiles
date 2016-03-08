@@ -18,7 +18,7 @@ function _git-branch-from-here() {
   git checkout -b $1 $(current_branch)
 }
 
-function _git-branch-delete() {
+function _git-branch-delete-grep() {
   while getopts ":s" opt; do
     [[ $opt == "s" ]] && has_option=1
   done
@@ -180,6 +180,9 @@ alias gass='git update-index --assume-unchanged'
 compdef _git gass=git-update-index
 
 alias gbdel='git branch -D'
+compdef _git gbdel=git-branch
+
+alias gbdelgrep='_git-branch-delete-grep'
 compdef _git gbdel=git-branch
 
 alias gbfromhere='_git-branch-from-here'
