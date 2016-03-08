@@ -22,18 +22,28 @@
 # List all datatypes
 # system_profiler -listDataTypes
 
-output="System Info"
+title="System Info"
 
-datatypes=(
-  SPSoftwareDataType
-  SPHardwareDataType
-)
+read -r -d '' software << EOM
+$(eval "system_profiler SPSoftwareDataType -detailLevel mini")
+EOM
 
-for datatype in ${datatypes[@]}; do
-  temp=$(eval "system_profiler $datatype -detailLevel mini")
-  output="${output}
+read -r -d '' hardware << EOM
+$(eval "system_profiler SPHardwareDataType -detailLevel mini")
+EOM
 
-${temp}"
-done
+# Output some extra info
+read -r -d '' extra << EOM
+      Bash Version: `bash --version | grep "bash" | cut -f 4 -d " " | cut -d "-" -f 1  | cut -d "(" -f 1`
+      Zsh Version:  `zsh --version | grep "zsh" | cut -f 2 -d " "`
+      Git Version:  `git --version | grep "git" | cut -f 3 -d " "`
+      Node Version: `node --version | cut -d "v" -f 2`
+      NPM Version:  `npm --version`
+EOM
 
-echo "${output}"
+echo "$title"
+echo ""
+echo "$software"
+echo "      $extra"
+echo ""
+echo "$hardware"
