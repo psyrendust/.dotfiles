@@ -1,0 +1,22 @@
+{
+  "name": "dotfiles",
+  "version": "0.0.0",
+  "description": "My dotfiles",
+  "main": "setup/bootstrap.sh",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psyrendust/.dotfiles.git"
+  },
+  "keywords": [
+    "dotfiles"
+  ],
+  "author": "Larry Gordon <lgordon@psyrendust.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/psyrendust/.dotfiles/issues"
+  },
+  "homepage": "https://github.com/psyrendust/.dotfiles#readme"
+}
