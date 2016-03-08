@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+#
+# Backup logitech application support files.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # logitechbackup
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+destination="$HOME/Dropbox/Larry/_mackup/Library/Application Support/Logitech/Gaming"
+logitech_paths=(
+  "$HOME/Library/Application Support/Logitech/Gaming/profiles"
+  "$HOME/Library/Application Support/Logitech/Gaming/settings.json"
+)
+
+checkDestination() {
+  [[ -d "$destination" ]] || mkdir -p "$destination"
+}
+
+backup() {
+  for logitech_path in $logitech_paths; do
+    if [[ -a $logitech_path ]] && [[ -a "${destination}/${logitech_path##*/}" ]]; then
+      cp -R "$logitech_path" "${destination}/${logitech_path##*/}"
+      rm -rf "$logitech_path"
+      ln -s "${destination}/${logitech_path##*/}" "$logitech_path"
+    fi
+  done
+}
+
+# Execute all commands
+checkDestination &
+backup &
+wait %1 %2 &> /dev/null
