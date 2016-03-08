@@ -153,6 +153,24 @@ function _git-fetch-merge() {
   git branch -D $tmp_branch
 }
 
+# Generates git changelog grouped by day
+#
+# optional parameters
+# -a, --author       to filter by author
+# -s, --since        to select start date
+# -u, --until        to select end date
+function git-log-by-day () {
+  NEXT=$(date +%F)
+  echo "CHANGELOG"
+  echo ----------------------
+  git log --no-merges --format="%cd" --date=short | sort -u -r | while read DATE ; do
+      echo
+      echo [$DATE]
+      GIT_PAGER=cat git log --no-merges --format=" * %s" --since=$DATE --until=$NEXT
+      NEXT=$DATE
+  done
+}
+
 alias gfm="_git-fetch-merge"
 
 alias gaa='git add -A'
