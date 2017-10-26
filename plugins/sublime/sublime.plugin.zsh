@@ -32,9 +32,11 @@ alias s="sbl"
     # Linux paths
     sublime_path+=(
       "$HOME/bin/sublime_text"
+      "/opt/sublime_text_3/sublime_text"
       "/opt/sublime_text/sublime_text"
       "/usr/bin/sublime_text"
       "/usr/local/bin/sublime_text"
+      "/usr/bin/subl3"
       "/usr/bin/subl"
     )
   elif [[ -n $PLATFORM_IS_CYGWIN ]]; then

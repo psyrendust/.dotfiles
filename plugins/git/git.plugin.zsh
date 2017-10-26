@@ -15,7 +15,7 @@ function _current_branch() {
 }
 
 function _git-branch-from-here() {
-  git checkout -b $1 $(current_branch)
+  git checkout -b $@ $(current_branch)
 }
 
 function _git-branch-delete-grep() {
@@ -106,6 +106,78 @@ function _git-merge-clean() {
   find $(git rev-parse --show-toplevel) -type f -name \*.orig -exec rm -f {} \;
 }
 
+# github broke some workflow... this will make it less painful
+# function _git-patchit() {
+#   TOKEN="$CONVENTIONAL_GITHUB_RELEASER_TOKEN"
+#   FILE="$(echo "$1.patch" | sed s_pull/[0-9]*/commits_commit_)"
+#   echo "$FILE"
+
+#   curl --header 'Authorization: token $TOKEN' \
+#        --header 'Accept: application/vnd.github.v3.raw' \
+#        --remote-name \
+#        --progress-bar \
+#        --location-trusted "$FILE"
+#   #      --location $FILE | git am --whitespace=fix;
+# }
+# patchit = "!f() { curl -L $1.patch | git am --whitespace=fix; }; f"
+# patchit-please = "!f() { echo $1.patch | sed s_pull/[0-9]*/commits_commit_ | xargs curl -L | git am -3 --whitespace=fix; }; f"
+# patchit-please = "!f() { curl -L $1.patch | git am -3 --whitespace=fix; }; f"
+
+function patchit() {
+  local currBranch="$(current_branch)";
+  local destBranch="develop";
+  local tempBranch="staging";
+  local patchFile=".git/patches/$currBranch.patch";
+
+  mkdir -p ".git/patches"
+
+  # Make sure we are up to date
+  git checkout "$destBranch";
+  git pull --rebase origin $destBranch;
+
+  # Make a staging branch from develop
+  git checkout -b "$tempBranch" "$destBranch";
+
+  # Create the patch
+  git checkout "$currBranch";
+  git format-patch "$tempBranch" --stdout > "$patchFile";
+
+  # Switch to staging branch
+  git checkout "$tempBranch";
+
+  # Stat the patch
+  git apply --stat "$patchFile";
+
+  echo "Would you like to continue?"
+  select yn in "Yes" "No"; do
+      case $yn in
+          Yes ) break;;
+          No ) exit;;
+      esac
+  done
+
+  # Check the patch
+  git apply --check "$patchFile";
+
+  echo "Would you like to continue?"
+  select yn in "Yes" "No"; do
+      case $yn in
+          Yes ) break;;
+          No ) exit;;
+      esac
+  done
+
+  # Apply the patch
+  git am -3 --whitespace=fix --signoff < "$patchFile";
+}
+
+function patchmerge() {
+  git checkout develop # Switch to develop branch
+  git rebase staging # Rebase the changes from staging into develop
+  git branch -D staging # Delete the staging branch
+  rm .git/*.patch # Remove any .patch files
+}
+
 # create a stash and delete it
 function _git-stash-delete() {
   # Let's make sure there is something to stash
@@ -128,6 +200,11 @@ function _git-clean-index() {
   git reset HEAD --hard
   git add .
   cd "$current_location"
+}
+
+# Output multiline commit messages that contain subject/body/footer
+function _git-log-pretty-full() {
+  git log --format="%C(yellow)- %h%Creset %Cgreen%B%Creset"
 }
 
 function _git-log-pretty-grep() {
@@ -171,6 +248,15 @@ function git-log-by-day () {
   done
 }
 
+function gitfixtag() {
+  local tag="$1"
+  git checkout $tag
+  git tag -d $tag
+  git push origin :refs/tags/$tag
+  GIT_COMMITTER_DATE="$(git show --format=%aD | head -1)" git tag -a $tag -m "$tag"
+  git push --tags
+}
+
 alias gfm="_git-fetch-merge"
 
 alias gaa='git add -A'
@@ -200,8 +286,16 @@ compdef _git gcob=git-checkout
 alias gcobu='_git-checkout-branch upstream'
 compdef _git gcob=git-checkout
 
+alias gconflicts="grep -lr --exclude-dir="node_modules" '<<<<<<<' ."
+
 alias gcundo='git reset --soft HEAD~1'
 compdef _git gcundo=git-reset
+
+alias gcunstage='git reset HEAD~1'
+compdef _git gcunstage=git-reset
+
+alias gcreset='gcundo && gcunstage && grhh'
+compdef _git gcreset=git-reset
 
 alias gfffinish='git flow feature finish -r'
 compdef _git gfffinish=git-flow-feature-finish
@@ -254,6 +348,9 @@ compdef _git glg=git-log
 alias glb='_git-log-pretty-grep-begin'
 compdef _git glg=git-log
 
+alias glf='_git-log-pretty-full'
+compdef _git glg=git-log
+
 alias gls='_git-log-pretty-grep-begin-sublime'
 compdef _git glg=git-log
 
@@ -275,11 +372,32 @@ compdef _git gmfromroot=git-merge
 alias gmfromupstream='_git-merge-from-upstream'
 compdef _git gmfromupstream=git-merge
 
+# alias gpatchit='_git-patchit'
+# compdef _git gpatchit=git-am
+
+alias grours="git checkout --ours"
+compdef _git grours=git-checkout
+
+alias grup="git remote update -p"
+compdef _git grup=git-remote-update
+
+alias grtheirs="git checkout --theirs"
+compdef _git grtheirs=git-checkout
+
 alias gs='git status'
 compdef _git gs=git-status
 
 alias gsdel='_git-stash-delete'
 compdef _git gsdel=git-stash
+
+alias gsl='git stash list'
+compdef _git gsl=git-stash-list
+
+alias gsp='git stash pop'
+compdef _git gsp=git-stash-pop
+
+alias gst='git stash'
+compdef _git gst=git-stash
 
 alias gtag='git tag'
 compdef _git gtag=git-tag
@@ -293,5 +411,7 @@ compdef _git gunadd=git-reset
 alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
+alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
+alias gwip='git add -A; git commit -m "--wip--"'
 
 # alias gfupdate='git-flow-update'

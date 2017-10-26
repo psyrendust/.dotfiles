@@ -21,9 +21,6 @@ for file in ${templates_path}/^(*.sh|*.md)(.N); do
   ln -sf "$file" "${HOME}/.${file:t}"
 done
 
-# Symlink this projects EditorConfig file to the $HOME directory
-ln -sf {$dotfiles_path,$HOME}/.editorconfig
-
 # Symlink the templates/mackup folder to the $HOME directory
 if [[ -s $HOME/Dropbox/Larry/_mackup/.mackup.cfg ]]; then
   ln -sf $HOME/Dropbox/Larry/_mackup/.mackup.cfg $HOME/.mackup.cfg

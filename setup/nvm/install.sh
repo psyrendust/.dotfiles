@@ -21,7 +21,7 @@ ppinfo " - Check for nvm"
 if test ! $(nvm --version)
 then
   ppinfo " - Installing nvm"
-  curl https://raw.githubusercontent.com/creationix/nvm/v0.22.0/install.sh | bash
+  curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 fi
 
 export NVM_DIR="$HOME/.nvm"
@@ -33,8 +33,8 @@ nvm install stable
 ppinfo " - Set the latest stable NodeJS to default"
 nvm alias default stable
 
-ppinfo " - Set npm loglevel to http"
-npm config set loglevel http
+ppinfo " - Set npm progress to false"
+npm config set progress false
 
 packages=(
   npm@2

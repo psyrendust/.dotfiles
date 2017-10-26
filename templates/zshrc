@@ -50,11 +50,12 @@ plugins=(
   apache2
   bower
   brew
-  colored-man
+  colored-man-pages
   colorize
   copydir
   copyfile
   cp
+  docker
   encode64
   extract
   fasd
@@ -121,4 +122,5 @@ export ARCHFLAGS="-arch x86_64"
 # ------------------------------------------------------------------------------
 # Startup Oh My Zsh
 # ------------------------------------------------------------------------------
+source $ZSH_CUSTOM/themes/async.zsh
 source $ZSH/oh-my-zsh.sh

@@ -29,9 +29,11 @@ setopt EXTENDED_GLOB
 # --prefpanedir       ~/Library/PreferencePanes     Changes the path for PreferencePane symlinks.
 # --qlplugindir       ~/Library/QuickLook           Changes the path for Quicklook Plugin symlinks.
 # --screen_saverdir   ~/Library/Screen\ Savers      Changes the path for Screen Saver symlinks.
-export HOMEBREW_CASK_OPTS="--appdir=/Applications --binarydir=/usr/local/bin --caskroom=/opt/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers"
+export HOMEBREW_CASK_OPTS="--appdir=/Applications --caskroom=/opt/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers"
 export GOPATH="$HOME/.go"
 export GOROOT="/usr/local/opt/go/libexec"
+export JAVA_VERSION=1.7
+export JAVA_HOME="$(/usr/libexec/java_home)"
 
 # ------------------------------------------------------------------------------
 # Setup paths
@@ -41,7 +43,7 @@ typeset -a __path_pre __path_post __manpath_pre __manpath_post
 export ZSH_CUSTOM="$HOME/.dotfiles"
 
 # shortcut for: $(/usr/local/bin/brew --prefix coreutils)
-__brew_coreutils="/usr/local/opt/coreutils"
+# __brew_coreutils="/usr/local/opt/coreutils"
 
 # Custom path locations for my plugins
 __path_pre+=("$ZSH_CUSTOM/plugins/asciinema2gif/bin")
@@ -54,11 +56,19 @@ __path_pre+=("$ZSH_CUSTOM/bin")
 __path_pre+=("$HOME/.tmpbin")
 
 # Add homebrew Core Utilities
-__path_pre+=("$__brew_coreutils/libexec/gnubin")
+# __path_pre+=("$__brew_coreutils/libexec/gnubin")
 
 # Add GOPATH and GOROOT
 __path_pre+=("$GOPATH/bin")
 __path_pre+=("$GOROOT/bin")
+
+# Add path for NVIDIA Cuda
+if [[ -d "/usr/local/cuda" ]]; then
+  export CUDA_HOME=/usr/local/cuda
+  export DYLD_LIBRARY_PATH=/usr/local/cuda/lib:/usr/local/cuda/extras/CUPTI/lib
+  export LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
+  __path_pre+=("$DYLD_LIBRARY_PATH")
+fi
 
 # Add homebrews bin
 __path_pre+=("/usr/local/bin")
@@ -67,7 +77,7 @@ __path_pre+=("/usr/local/bin")
 __manpath_pre+=("/usr/local/share/man")
 
 # Add homebrew Core Utilities man
-__manpath_pre+=("$__brew_coreutils/libexec/gnuman")
+# __manpath_pre+=("$__brew_coreutils/libexec/gnuman")
 
 
 # ------------------------------------------------------------------------------
@@ -80,14 +90,52 @@ unset __path_pre
 unset __path_post
 unset __manpath_pre
 unset __manpath_post
-unset __brew_coreutils
+# unset __brew_coreutils
 
+# ------------------------------------------------------------------------------
+# Fix Yosemite Open File Limit Node.js Errors
+# http://blog.mact.me/2014/10/22/yosemite-upgrade-changes-open-file-limit
+# http://superuser.com/questions/827984/open-files-limit-does-not-work-as-before-in-osx-yosemite#answer-1171026
+# ------------------------------------------------------------------------------
+__limit_maxfiles_plist="/Library/LaunchDaemons/limit.maxfiles.plist"
+if [[ ! -s "${__limit_maxfiles_plist}" ]]; then
+  echo "Missing: ${__limit_maxfiles_plist}";
+  echo "Creating: ${__limit_maxfiles_plist}";
+  cat << EOM | sudo tee "${__limit_maxfiles_plist}"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>limit.maxfiles</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>launchctl</string>
+      <string>limit</string>
+      <string>maxfiles</string>
+      <string>64000</string>
+      <string>524288</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ServiceIPC</key>
+    <false/>
+  </dict>
+</plist>
+EOM
+  sudo chown root:wheel "${__limit_maxfiles_plist}"
+  sudo launchctl load -w "${__limit_maxfiles_plist}"
+  launchctl limit maxfiles
+fi
+unset __limit_maxfiles_plist
 
 # ------------------------------------------------------------------------------
 # Load up necessary scripts
 # ------------------------------------------------------------------------------
 # Load any private github api tokens
 [[ -s "$HOME/Dropbox/Larry/Apps/github/apiTokens.sh" ]] && source "$HOME/Dropbox/Larry/Apps/github/apiTokens.sh"
+# Load any private github api tokens
+[[ -s "$HOME/Dropbox/Larry/Apps/ChromeWebStore/key.sh" ]] && source "$HOME/Dropbox/Larry/Apps/ChromeWebStore/key.sh"
 # Load up nvm
 # nvm.sh -> to thwart nvm's install.sh
 [[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm

@@ -13,3 +13,25 @@ fi
 
 # This loads nvm"
 [[ -s "$NVM_INIT_SCRIPT_DIR/nvm.sh" ]] && source "$NVM_INIT_SCRIPT_DIR/nvm.sh"
+
+# This sets path to node
+node_path="$(which node)"
+
+# Autoload add-zsh-hook
+autoload -U add-zsh-hook
+
+# Call `nvm use` automatically in a directory with a .nvmrc file.
+# @see  https://github.com/creationix/nvm#zsh
+__loadnvmrc() {
+  if [[ -f .nvmrc && -r .nvmrc ]]; then
+    nvm use &> /dev/null
+  elif [[ $(nvm version) != $(nvm version default)  ]]; then
+    nvm use default &> /dev/null
+  fi
+  # This sets path to node
+  node_path="$(which node)"
+  ln -sf "$node_path" "/usr/local/bin/node"
+}
+
+# Add method to zsh hook for `chpwd` commands
+add-zsh-hook chpwd __loadnvmrc
