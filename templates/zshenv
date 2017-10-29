@@ -59,16 +59,8 @@ __path_pre+=("$HOME/.tmpbin")
 # __path_pre+=("$__brew_coreutils/libexec/gnubin")
 
 # Add GOPATH and GOROOT
-__path_pre+=("$GOPATH/bin")
-__path_pre+=("$GOROOT/bin")
-
-# Add path for NVIDIA Cuda
-if [[ -d "/usr/local/cuda" ]]; then
-  export CUDA_HOME=/usr/local/cuda
-  export DYLD_LIBRARY_PATH=/usr/local/cuda/lib:/usr/local/cuda/extras/CUPTI/lib
-  export LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-  __path_pre+=("$DYLD_LIBRARY_PATH")
-fi
+[[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
+[[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
 
 # Add homebrews bin
 __path_pre+=("/usr/local/bin")

@@ -73,11 +73,11 @@ function __PROMPT_LINE_1() {
 }
 
 function __PROMPT_LINE_2() {
-  local CURRENT_NODE_VERSION="%{$fg[magenta]%}node: $(node -v)%{$reset_color%}"
+  # local CURRENT_NODE_VERSION="%{$fg[magenta]%}node: $(node -v)%{$reset_color%}"
   local GIT_PROMPT_INFO="\$(git_prompt_info)"
 
-  local SCM_CHAR="%{$fg_bold[cyan]%}\$(__prompt-scm-char)%{$reset_color%}"
-  local PSYRENDUST_PROMPT="%{$fg[green]%}→%{$reset_color%}"
+  # local SCM_CHAR="%{$fg_bold[cyan]%}\$(__prompt-scm-char)%{$reset_color%}"
+  # local PSYRENDUST_PROMPT="%{$fg[green]%}→%{$reset_color%}"
 
   echo "$ZSH_THEME_NODE_DIVIDER_PREFIX\$(__prompt-nvm-get-version)$ZSH_THEME_NODE_DIVIDER_SUFFIX$GIT_PROMPT_INFO"
 }
@@ -89,7 +89,18 @@ function __PROMPT_LINE_3() {
   echo "$SCM_CHAR $PSYRENDUST_PROMPT "
 }
 
+function __PROMPT_LINE_4() {
+  local GIT_PROMPT_INFO="\$(git_prompt_info)"
+  local SCM_CHAR="%{$fg_bold[cyan]%}\$(__prompt-scm-char)%{$reset_color%}"
+  local PSYRENDUST_PROMPT="%{$fg[green]%}→%{$reset_color%}"
+
+  echo "$SCM_CHAR $GIT_PROMPT_INFO $PSYRENDUST_PROMPT "
+}
+
+# PROMPT="
+# $(__PROMPT_LINE_1)
+# $(__PROMPT_LINE_2)
+# $(__PROMPT_LINE_3)"
 PROMPT="
 $(__PROMPT_LINE_1)
-$(__PROMPT_LINE_2)
-$(__PROMPT_LINE_3)"
+$(__PROMPT_LINE_4)"
