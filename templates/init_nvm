@@ -14,24 +14,30 @@ fi
 # This loads nvm"
 [[ -s "$NVM_INIT_SCRIPT_DIR/nvm.sh" ]] && source "$NVM_INIT_SCRIPT_DIR/nvm.sh"
 
-# This sets path to node
-node_path="$(which node)"
-
 # Autoload add-zsh-hook
 autoload -U add-zsh-hook
 
 # Call `nvm use` automatically in a directory with a .nvmrc file.
 # @see  https://github.com/creationix/nvm#zsh
 __loadnvmrc() {
-  if [[ -f .nvmrc && -r .nvmrc ]]; then
-    nvm use &> /dev/null
-  elif [[ $(nvm version) != $(nvm version default)  ]]; then
-    nvm use default &> /dev/null
+  local node_version=$(nvm version)
+  local node_default=$(nvm version default)
+  local nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install &> /dev/null
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+      nvm use --delete-prefix $nvmrc_node_version &> /dev/null
+    fi
+  elif [ $node_version != $node_default ]; then
+    nvm use --delete-prefix $node_default &> /dev/null
   fi
-  # This sets path to node
-  node_path="$(which node)"
-  ln -sf "$node_path" "/usr/local/bin/node"
+
+  export node_path="$(nvm which $(nvm version))"
 }
 
 # Add method to zsh hook for `chpwd` commands
 add-zsh-hook chpwd __loadnvmrc
+__loadnvmrc

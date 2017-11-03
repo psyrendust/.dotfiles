@@ -1,3 +1,2 @@
-# progress=false
 cache-min=1000000
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}

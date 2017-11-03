@@ -13,6 +13,13 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
+# Check if command exists in $PATH
+# USAGE:
+#   __exists <command>
+__exists() {
+  command -v $1 > /dev/null 2>&1
+}
+
 
 # ------------------------------------------------------------------------------
 # Setup options
@@ -63,7 +70,7 @@ __path_pre+=("$HOME/.tmpbin")
 [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
 
 # Add homebrews bin
-__path_pre+=("/usr/local/bin")
+# __path_pre+=("/usr/local/bin")
 
 # Add manpath
 __manpath_pre+=("/usr/local/share/man")
@@ -131,7 +138,6 @@ unset __limit_maxfiles_plist
 # Load up nvm
 # nvm.sh -> to thwart nvm's install.sh
 [[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
-
 
 # ------------------------------------------------------------------------------
 # Do some platform checks so we don't have to keep doing it later
