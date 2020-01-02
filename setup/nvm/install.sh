@@ -12,6 +12,8 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
+set -eu
+
 ppinfo "Install nvm"
 
 export NVM_DIR=$HOME/.nvm
@@ -29,41 +31,32 @@ export NVM_DIR="$HOME/.nvm"
 
 ppinfo " - Install latest stable NodeJS"
 nvm install stable
-
-ppinfo " - Set the latest stable NodeJS to default"
 nvm alias default stable
-
-ppinfo " - Set npm progress to false"
-npm config set progress false
+nvm alias sublime $(node -v)
 
 packages=(
-  npm@2
   babel
   babel-cli
   babel-eslint
-  bower
-  browserify
-  conventional-changelog
-  conventional-commits-detector
-  conventional-github-releaser
-  conventional-recommended-bump
   david
-  esdoc
   eslint
   eslint-config-airbnb
-  forever
+  eslint-config-airbnb-base
+  eslint-plugin-import
+  eslint-plugin-jsx-a11y
+  eslint-plugin-react
+  githubrelease
+  grunt
   grunt-cli
-  grunt-init
   gulp
-  jscs
   jshint
   json
-  jspm
   live-server
   lorem-ipsum
   nodemon
-  trash
+  npm
   trash-cli
+  webpack
   yo
 )
 

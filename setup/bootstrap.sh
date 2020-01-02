@@ -16,6 +16,12 @@ if [ ! -n "$ZSH_CUSTOM" ]; then
   ZSH_CUSTOM=~/.dotfiles
 fi
 
+# Getting rid of 'last login' message from iTerm
+# https://ashokgelal.com/2017/01/04/til-iterm-hush-last-login/
+if [ ! -s "$HOME/.hushlogin" ]; then
+  touch "$HOME/.hushlogin"
+fi
+
 newpaths=(
   "/usr/local/bin"
   "/usr/local/opt/go/libexec/bin"
@@ -33,7 +39,7 @@ done
 
 ppinfo "Installing dependencies"
 
-for script in $ZSH_CUSTOM/setup/{homebrew,ohmyzsh,rvm,nvm,symlinks}/install.sh; do
+for script in $ZSH_CUSTOM/setup/{homebrew,homebrew-cask,nvm,symlinks}/install.sh; do
   "$script" 2>&1
 done
 

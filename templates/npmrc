@@ -1,2 +1,3 @@
 cache-min=1000000
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+@lyft:registry=https://npm-proxy.fury.io/drM6auMDVB6xY2SH5HWq/lyft/
+//registry.npmjs.org/:_authToken=f128a1bb-cbbe-43ea-92ab-fd0eb5a574c3

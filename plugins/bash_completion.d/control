@@ -1,0 +1,57 @@
+# __control_subcommand_list=(
+#   ancestors
+#   build
+#   clean
+#   deploy
+#   descendants
+#   discover
+#   ensure
+#   enter
+#   extract
+#   kill
+#   list
+#   manifest
+#   override
+#   provision
+#   pull
+#   push
+#   register
+#   release
+#   reset
+#   restart
+#   run
+#   snapshot
+#   start
+#   stats
+#   status
+#   stop
+#   test
+#   tethered
+#   update
+#   url
+#   version
+# )
+# _control() {
+#   local curr prev
+#   cur=${COMP_WORDS[COMP_CWORD]}
+#   prev=${COMP_WORDS[COMP_CWORD-1]}
+
+#   case ${COMP_CWORD} in
+#     1)
+#       COMPREPLY=($(compgen -W "${__control_subcommand_list}" -- ${cur}))
+#       ;;
+#     2)
+#       case ${prev} in
+#         enter)
+#           names="$(control status | awk '/^NAME/ {next}; {print $1}')"
+#           COMPREPLY=($(compgen -W "${names}" -- ${cur}))
+#           ;;
+#       esac
+#       ;;
+#     *)
+#       COMPREPLY=()
+#       ;;
+#   esac
+# }
+
+# complete -F _control control

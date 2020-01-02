@@ -19,21 +19,7 @@ ppinfo " - Audits your installation for common issues"
 brew cask doctor
 
 packages=(
-  animated-gif-quicklook
-  betterzipql
-  cert-quicklook
-  provisionql
-  qlcolorcode
-  qlimagesize
-  qlmarkdown
-  qlprettypatch
-  qlstephen
-  qlvideo
-  quicklook-csv
-  quicklook-json
-  quicknfo
-  suspicious-package
-  webpquicklook
+  ngrok
 )
 
 ppinfo "Install homebrew cask packages"
