@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#
+# co
+# Fuzzy git checkout
+#-------------------------------------------------------------------------------
+
+set -e
+
+BRANCH=$(git recent | fzf) &&
+git checkout ${BRANCH}

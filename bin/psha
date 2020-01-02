@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# psha
+# Fuzzy copy git sha
+#-------------------------------------------------------------------------------
+
+set -e
+
+HASH=$(sha)
+echo $HASH | pbcopy
+echo $HASH

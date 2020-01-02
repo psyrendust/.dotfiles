@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#
+# sha
+# Fuzzy get git sha
+#-------------------------------------------------------------------------------
+
+set -e
+
+HASH=$(git log --pretty=oneline --no-color | head -n 20 | fzf)
+echo ${HASH} | awk '{ print $1 }'

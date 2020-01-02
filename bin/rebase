@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# rebase
+# Fuzzy git rebase
+#-------------------------------------------------------------------------------
+
+set -e
+
+# HASH=`ghash` &&
+# git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
+git rebase -i $(ghash)^

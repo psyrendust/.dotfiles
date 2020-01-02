@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 
 # Add zsh help
-unalias run-help
+unalias run-help > /dev/null 2>&1
 autoload run-help
 HELPDIR=/usr/local/share/zsh/help
 
@@ -20,6 +20,11 @@ alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
 alias rmrf="rm -rf"
 alias changelogreset="conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+alias l='ls -CFH'
+alias la='l -A'
+alias li='l -l'
+alias ll='la -l'
+alias dotfiles='code ~/.dotfiles'
 
 # Removing ANSI color codes from text stream
 # https://superuser.com/a/561105
@@ -73,3 +78,20 @@ function rem() {
   echo "$str" | pbcopy
   echo "$str"
 }
+
+function rmlock() {
+  # Remove .git/index.lock
+  local lockfile="$(git rev-parse --show-toplevel)/.git/index.lock"
+  if [[ -f "$lockfile" ]]; then
+    rm "$lockfile"
+    echo "removed $lockfile"
+  fi
+}
+
+_pluginsAliases="$ZSH_CUSTOM/plugins/aliases"
+for plugin in $_pluginsAliases/*.zsh; do
+  if [ "$plugin" != "$_pluginsAliases/aliases.plugin.zsh" ]; then
+    source "$plugin" 2>&1
+  fi
+done
+unset _pluginsAliases

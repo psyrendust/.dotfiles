@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#
+# ghash
+# Fuzzy git rebase
+#-------------------------------------------------------------------------------
+
+set -e
+
+# For short sha
+# commits=$(git log --color=always --pretty=oneline --abbrev-commit --reverse) &&
+commits=$(git log --color=always --pretty=oneline --reverse) &&
+commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse) &&
+# echo -n $(echo "$commit" | sed "s/ .*//")
+echo ${commit} | awk '{ print $1 }'

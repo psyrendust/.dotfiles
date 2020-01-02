@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# gitcommiteditor
+# Open VS Code, wait for exit, then focus back on iterm
+#
+# Usage
+# 1. Add gitcommiteditor to your path
+# 2. Add the following to ~/.gitconfig
+# ```
+# [core]
+#   editor = gitcommiteditor
+# ```
+# 3. Run `git commit`
+#-------------------------------------------------------------------------------
+
+set -e
+
+code -w $@ &&
+osascript -e "tell application \"iTerm\" to activate"

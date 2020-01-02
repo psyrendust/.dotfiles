@@ -257,6 +257,9 @@ function gitfixtag() {
   git push --tags
 }
 
+alias gcp='git cherry-pick'
+compdef _git gcp=git-cherry-pick
+
 alias gfm="_git-fetch-merge"
 
 alias gaa='git add -A'
@@ -279,6 +282,9 @@ compdef _git gcd=git-clone
 
 alias gcleanindex='_git-clean-index'
 compdef _git gcleanindex=git-rm
+
+alias gco='git checkout'
+compdef _git gco=git-checkout
 
 alias gcob='_git-checkout-branch'
 compdef _git gcob=git-checkout
@@ -412,6 +418,7 @@ alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
-alias gwip='git add -A; git commit -m "--wip--"'
+# alias gwip='git add -A; git commit -m "--wip-- $(date "+%Y-%m-%d %H:%M:%S")"'
+alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'
 
 # alias gfupdate='git-flow-update'

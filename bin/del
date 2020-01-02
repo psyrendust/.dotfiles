@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#
+# del
+# Fuzzy git delete branch
+#-------------------------------------------------------------------------------
+
+set -e
+
+BRANCH=$(git recent | fzf) &&
+git branch -D ${BRANCH}
