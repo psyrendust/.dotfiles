@@ -1,3 +1,19 @@
+# [0.2.0](https://github.com/psyrendust/.dotfiles/compare/v0.1.0...v0.2.0) (2020-01-02)
+
+
+### Bug Fixes
+
+* **theme:** remove nvm check to fix recursive error ([ce8e4c4](https://github.com/psyrendust/.dotfiles/commit/ce8e4c4a0aa8ac7b9f5d5ccadea6f9a16b1de08b))
+
+
+### Features
+
+* **all:** too many updates ([e4fbf3a](https://github.com/psyrendust/.dotfiles/commit/e4fbf3afbd059f5571cf8fa009444904b09ec413))
+* **package:** add package-lock.json ([395a764](https://github.com/psyrendust/.dotfiles/commit/395a7641d5cdc370eb18cdced0411ee2c205e14b))
+* **theme:** add spaceship theme and setup file ([abed187](https://github.com/psyrendust/.dotfiles/commit/abed187f38cfd42aba3f8d01ec6c017c68f40985))
+
+
+
 <a name="0.1.0"></a>
 # 0.1.0 (2016-03-08)
 
