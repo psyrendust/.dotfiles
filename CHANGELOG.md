@@ -1,3 +1,13 @@
+# [0.3.0](https://github.com/psyrendust/.dotfiles/compare/v0.2.0...v0.3.0) (2020-01-02)
+
+
+### Features
+
+* **git:** update git tools ([134ea89](https://github.com/psyrendust/.dotfiles/commit/134ea8934718b379155c0c282574ff4a641dff3e))
+* **package:** manage releases with githubrelease ([5e1b933](https://github.com/psyrendust/.dotfiles/commit/5e1b93358c4bb05c113157d2ad0ae431fbcd25f1))
+
+
+
 # [0.2.0](https://github.com/psyrendust/.dotfiles/compare/v0.1.0...v0.2.0) (2020-01-02)
 
 
