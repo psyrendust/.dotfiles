@@ -257,6 +257,12 @@ function gitfixtag() {
   git push --tags
 }
 
+function _git-log-diff() {
+  local currBranch="$(current_branch)";
+  local targetBranch=${1:-develop};
+  git log --format="%C(auto) %h %s" --date=relative $targetBranch..$currBranch
+}
+
 alias gcp='git cherry-pick'
 compdef _git gcp=git-cherry-pick
 
@@ -359,6 +365,9 @@ compdef _git glf=git-log
 
 alias gls='_git-log-pretty-grep-begin-sublime'
 compdef _git gls=git-log
+
+alias gld='_git-log-diff'
+compdef _git gld=git-log
 
 alias gm='git merge'
 compdef _git gm=git-merge
