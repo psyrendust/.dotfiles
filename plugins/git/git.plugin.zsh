@@ -349,16 +349,16 @@ alias ggpushu='git push upstream $(current_branch)'
 compdef _git ggpushu=git-push
 
 alias gl='_git-log-pretty-grep'
-compdef _git glg=git-log
+compdef _git gl=git-log
 
 alias glb='_git-log-pretty-grep-begin'
-compdef _git glg=git-log
+compdef _git glb=git-log
 
 alias glf='_git-log-pretty-full'
-compdef _git glg=git-log
+compdef _git glf=git-log
 
 alias gls='_git-log-pretty-grep-begin-sublime'
-compdef _git glg=git-log
+compdef _git gls=git-log
 
 alias gm='git merge'
 compdef _git gm=git-merge
