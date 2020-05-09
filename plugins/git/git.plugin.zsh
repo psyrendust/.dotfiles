@@ -263,6 +263,12 @@ function _git-log-diff() {
   git log --format="%C(auto) %h %s" --date=relative $targetBranch..$currBranch
 }
 
+function _git-log-pr() {
+  local currBranch="$(current_branch)";
+  local targetBranch=${1:-develop};
+  git log --format="* %s" --no-color --date=relative $targetBranch..$currBranch | pbcopy
+}
+
 alias gcp='git cherry-pick'
 compdef _git gcp=git-cherry-pick
 
@@ -368,6 +374,9 @@ compdef _git gls=git-log
 
 alias gld='_git-log-diff'
 compdef _git gld=git-log
+
+alias glpr='_git-log-pr'
+compdef _git glpr=git-log
 
 alias gm='git merge'
 compdef _git gm=git-merge
