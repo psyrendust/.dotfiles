@@ -1,59 +1,154 @@
 #!/usr/bin/env node
 
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var fs = require('fs');
 var path = require('path');
-var regNewline = /\n|\r/;
 var regLineReplace = /^(\S{3}\s)(\S+?)(@\S+)/gim;
+var regNewline = /\n|\r/;
 
 var cmd = ['npm list --depth=0'];
-var shouldProcess = false;
-var savePath = path.resolve(process.env.HOME);
-var filename = '.npmlist';
+var file = path.join(path.resolve(process.env.HOME), '.npmlist');
+var isGlobal = false;
+var isHelp = false;
+var isInstall = false;
+var isRestore = false;
+var isSave = false;
 
+/**
+ * Process cli args
+ */
 process.argv.slice(2).forEach(function (arg) {
-  if (arg.indexOf('-') === 0) {
-    if (arg.indexOf('g') !== -1) {
-      cmd.push('-g');
-      filename += '-g';
-    }
-    if (arg.indexOf('s') !== -1) {
-      shouldProcess = true;
-    }
+  if (arg.indexOf('--install') === 0 || arg.indexOf('-i') === 0) {
+    isInstall = true;
+  } else if (arg.indexOf('--restore') === 0 || arg.indexOf('-r') === 0) {
+    isRestore = true;
+  } else if (arg.indexOf('--global') === 0 || arg.indexOf('-g') === 0) {
+    isGlobal = true;
+  } else if (arg.indexOf('--save') === 0 || arg.indexOf('-s') === 0) {
+    isSave = true;
+    isGlobal = true;
+  } else if (arg.indexOf('--help') === 0 || arg.indexOf('-h') === 0) {
+    isHelp = true;
   }
 });
 
-exec(cmd.join(' '), function (error, stdout) {
-  if (error !== null) {
-    console.log(`exec error: ${error}`);
-  }
-  var results = stdout
-    .split(regNewline)
-    .filter(function (line) {
-      return line.length;
-    });
-  console.log(results.join('\n'));
-  if (shouldProcess) processModules(results);
-});
+function showHelp() {
+  console.log(`
+List installed npm packages at depth 0.
 
-function processModules(data) {
-  var results = data.map(function (line) {
-    return line.replace(regLineReplace, '$2');
-  }).filter(function (line, i) {
-    return i !== 0 && line !== 'npm';
+Usage:
+  $ npmlist
+  $ npmlist -g
+  $ npmlist -s
+  $ npmlist -r
+  $ npmlist -i
+
+Options
+  --help, -h     Show this help message.
+  --global, -g   List packages in the global install prefix instead of in the current project.
+  --save, -s     Save the global package list $HOME/.npmlist.
+  --install, -i  Install the latest packages that were last saved to $HOME/.npmlist.
+  --restore, -r  Install the exact semvered packages that were last saved to $HOME/.npmlist.
+`);
+}
+
+function createOutput(data) {
+  var packages = data.filter(function (line, i) {
+    // Exclude npm from the list.
+    return i !== 0 && !line.includes(' npm@');
   });
 
-  var installCmd = [`\nnpm install -g ${results.join(' ')}\n`];
-  var header = ['#!/usr/bin/env bash', `# ${new Date()}`, '#'];
-  results = header.concat(
-    data.map(function (line) {
-      return `# ${line}`;
-    }), installCmd)
-  .join('\n');
+  var vars = `
+var install = [
+${packages.map(line => `  '${line.replace(regLineReplace, '$2')}'`).join(',\n')}
+];
+var installExact = [
+${packages.map(line => `  '${line.replace(regLineReplace, '$2$3')}'`).join(',\n')}
+];
+`;
 
-  var file = path.join(savePath, filename);
-  fs.writeFile(file, results, 'utf8', function (err) {
+  var output = data.map(function (line) {
+    return ` * ${line}`;
+  }).join('\n');
+
+  return `#!/usr/bin/env bash
+var spawn = require('child_process').spawn;
+
+/**
+ * ${new Date()}
+ *
+${output}
+ */
+
+var isExact = false;
+
+/**
+ * Process cli args
+ */
+process.argv.slice(2).forEach(function (arg) {
+  if (arg.indexOf('--exact') === 0 || arg.indexOf('-e') === 0) {
+    isExact = true;
+  }
+});
+
+var args = ['install', '-g'];
+${vars}
+
+if (isExact) {
+  console.log('install exact...');
+  args.push(...installExact);
+} else {
+  console.log('install latest...');
+  args.push(...install);
+}
+
+spawn('npm', args, { stdio: [0, 1, 2] });
+`;
+}
+
+function save(data) {
+  fs.writeFile(file, createOutput(data), 'utf8', function (err) {
     if (err) throw err;
-    console.log(`\n${installCmd}\nnpm global list saved to: ${file}`);
+    console.log(`
+Saved to: ${file}
+
+Run to install latest dependencies:
+  npmlist -i
+
+Run to install exact dependencies:
+  npmlist -r
+`);
+  });
+}
+
+
+if (isHelp) {
+  showHelp();
+} else if (isInstall || isRestore) {
+  if (!fs.existsSync(file)) {
+    throw new Error('File .npmlist does not exist')
+  }
+  var args = [file];
+  if (isRestore) {
+    args.push('-e');
+  }
+  spawn('node', args, { stdio: [0, 1, 2] });
+} else {
+  if (isGlobal) cmd.push('-g');
+  exec(cmd.join(' '), function (error, stdout) {
+    if (error !== null) {
+      throw new Error(error);
+    }
+    var results = stdout
+      .split(regNewline)
+      .filter(function (line) {
+        return line.length;
+      });
+    if (isSave) {
+      save(results);
+    } else {
+      console.log(results.join('\n'));
+    }
   });
 }
