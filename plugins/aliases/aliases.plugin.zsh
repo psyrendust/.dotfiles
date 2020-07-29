@@ -25,6 +25,8 @@ alias la='l -A'
 alias li='l -l'
 alias ll='la -l'
 alias dotfiles='code ~/.dotfiles'
+alias version="cat package.json | jq '.version'"
+alias scripts="cat package.json | jq '.scripts'"
 
 # Removing ANSI color codes from text stream
 # https://superuser.com/a/561105
