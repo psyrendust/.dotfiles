@@ -1,3 +1,15 @@
+# [0.4.0](https://github.com/psyrendust/.dotfiles/compare/v0.3.0...v0.4.0) (2020-07-29)
+
+
+### Features
+
+* add git log diff command ([aecfb94](https://github.com/psyrendust/.dotfiles/commit/aecfb940a4b6935b58a7d45055e06b2ac44e46d9))
+* add git log diff command for pull request message ([ab99aff](https://github.com/psyrendust/.dotfiles/commit/ab99aff176d30e3a8634dcb9e63a0cf0fb2aa0af))
+* add package.json `version` and `scripts` aliases ([4290fc2](https://github.com/psyrendust/.dotfiles/commit/4290fc279621fb96afa591bd6998a11dccacbaf5))
+* added updates to npmlist util ([0326d4c](https://github.com/psyrendust/.dotfiles/commit/0326d4c02f94ba99498b785b65a04e03834735c0))
+
+
+
 # [0.3.0](https://github.com/psyrendust/.dotfiles/compare/v0.2.0...v0.3.0) (2020-01-02)
 
 
