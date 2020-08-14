@@ -27,6 +27,7 @@ alias ll='la -l'
 alias dotfiles='code ~/.dotfiles'
 alias version="cat package.json | jq '.version'"
 alias scripts="cat package.json | jq '.scripts'"
+alias yif="yarn install --frozen-lockfile"
 
 # Removing ANSI color codes from text stream
 # https://superuser.com/a/561105
