@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/psyrendust/.dotfiles/compare/v0.4.0...v0.5.0) (2020-08-14)
+
+
+### Features
+
+* add yarn install alias ([dfca46b](https://github.com/psyrendust/.dotfiles/commit/dfca46bfaa3ff10dd6688ea66de840cfcd585e30))
+
+
+
 # [0.4.0](https://github.com/psyrendust/.dotfiles/compare/v0.3.0...v0.4.0) (2020-07-29)
 
 
