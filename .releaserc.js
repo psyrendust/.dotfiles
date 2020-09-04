@@ -26,7 +26,12 @@ module.exports = {
         prepareCmd: 'prettier ./CHANGELOG.md --write',
       },
     ],
-    '@semantic-release/npm',
+    [
+      '@semantic-release/npm',
+      {
+        npmPublish: false,
+      },
+    ],
     '@semantic-release/github',
     '@semantic-release/git',
   ],
