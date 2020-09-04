@@ -1,3 +1,11 @@
+## [0.6.0](https://github.com/psyrendust/.dotfiles/compare/v0.5.0...v0.6.0) (2020-09-04)
+
+### Features
+
+- add java switching aliases ([e51c2f1](https://github.com/psyrendust/.dotfiles/commit/e51c2f113e064c02c3d53eb2289ae6d8706342f7))
+- add prettier and semantic-release configs ([3d96594](https://github.com/psyrendust/.dotfiles/commit/3d9659416ded8b909dc700acdea3245df28656ca))
+- add prettier and semantic-release dependencies ([9a2a0dd](https://github.com/psyrendust/.dotfiles/commit/9a2a0ddb9758c653e923d3afa92bd65161075017))
+
 # [0.5.0](https://github.com/psyrendust/.dotfiles/compare/v0.4.0...v0.5.0) (2020-08-14)
 
 ### Features
