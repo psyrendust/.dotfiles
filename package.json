@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/psyrendust/.dotfiles#readme",
   "devDependencies": {
-    "githubrelease": "^1.0.3"
+    "dot-prop": ">=4.2.1",
+    "githubrelease": "^1.0.3",
+    "minimist": ">=1.2.3"
   }
 }
