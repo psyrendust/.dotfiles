@@ -14,7 +14,7 @@ unalias run-help > /dev/null 2>&1
 autoload run-help
 HELPDIR=/usr/local/share/zsh/help
 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+[[ -d $HOME/.rvm/bin ]] && export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
@@ -42,6 +42,20 @@ function ffdec() {
 function findinprojects() {
   local pattern="$1"
   grep -rnIw --exclude-dir=".git" --exclude-dir="node_modules" -e "$pattern" $@
+}
+
+# Install multiple versions of java sdk
+# brew tap homebrew/cask-versions
+# Install java 1.8
+# brew cask install adoptopenjdk8
+function java8() {
+  local JAVA_8_HOME=$(/usr/libexec/java_home -v1.8)
+  export JAVA_HOME=$JAVA_8_HOME
+}
+
+function java11() {
+  local JAVA_11_HOME=$(/usr/libexec/java_home -v11)
+  export JAVA_HOME=$JAVA_11_HOME
 }
 
 function landed() {
