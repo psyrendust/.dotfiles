@@ -19,7 +19,7 @@
   "scripts": {
     "fix": "yarn lint --write",
     "lint": "prettier '*.{json,md}' '*/**/*.{json,md}' 'package.json' --ignore-path .gitignore --check",
-    "release": "semantic-release",
+    "release": "semantic-release --no-ci",
     "release:debug": "ROARR_LOG=true DEBUG='semantic-release:github' yarn release --debug=true",
     "release:dryrun": "yarn release:debug --dry-run --no-ci",
     "test": "echo \"Warning: no test specified, so go write some!\""
