@@ -16,6 +16,7 @@ HELPDIR=/usr/local/share/zsh/help
 
 [[ -d $HOME/.rvm/bin ]] && export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
+alias antigenupdate="antigen reset; antigen update;"
 alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
 alias rmrf="rm -rf"
