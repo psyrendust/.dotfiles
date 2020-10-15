@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# docker-clearlogs
+# Fuzzy docker clear logs
+# https://stackoverflow.com/questions/42510002/how-to-clear-the-logs-properly-for-a-docker-container/#51866793
+#-------------------------------------------------------------------------------
+
+set -e
+
+
+# create menu of docker images
+image=$(docker image ls | fzf --tac +s +m -e --ansi) &&
+# get the string from the first column
+imagename=$(echo ${image} | awk '{ print $1 }')
+# get the log path for the image
+LOGPATH=$(docker inspect --format='{{.LogPath}}' $imagename)
+# truncate the log for the image
+docker run -it --rm --privileged --pid=host alpine:latest nsenter -t 1 -m -u -n -i -- truncate -s0 $LOGPATH
