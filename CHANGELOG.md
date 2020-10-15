@@ -1,3 +1,10 @@
+## [0.7.0](https://github.com/psyrendust/.dotfiles/compare/v0.6.0...v0.7.0) (2020-10-15)
+
+### Features
+
+- add antigenupdate alias ([1d738b5](https://github.com/psyrendust/.dotfiles/commit/1d738b56e25f40bb81d405c9e07b0cf7550c94b2))
+- add docker-clearlogs to bin ([ba3392b](https://github.com/psyrendust/.dotfiles/commit/ba3392b68cc64bdc05401aa79767f07eef295c35))
+
 ## [0.6.0](https://github.com/psyrendust/.dotfiles/compare/v0.5.0...v0.6.0) (2020-09-04)
 
 ### Features
