@@ -17,17 +17,19 @@ HELPDIR=/usr/local/share/zsh/help
 [[ -d $HOME/.rvm/bin ]] && export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 alias antigenupdate="antigen reset; antigen update;"
-alias server="live-server"
-alias simpleserver="python -m SimpleHTTPServer"
-alias rmrf="rm -rf"
+alias cat='bat --paging=never'
+alias catp='bat'
+alias ccat='/bin/cat'
 alias changelogreset="conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
 alias l='ls -CFH'
 alias la='l -A'
 alias li='l -l'
 alias ll='la -l'
-alias dotfiles='code ~/.dotfiles'
-alias version="cat package.json | jq '.version'"
+alias rmrf="rm -rf"
 alias scripts="cat package.json | jq '.scripts'"
+alias server="live-server"
+alias simpleserver="python -m SimpleHTTPServer"
+alias version="cat package.json | jq '.version'"
 alias yif="yarn install --frozen-lockfile"
 
 # Removing ANSI color codes from text stream
