@@ -16,6 +16,9 @@
   "license": "MIT",
   "author": "Larry Gordon <lgordon@psyrendust.com>",
   "private": true,
+  "workspaces": [
+    "plugins/*"
+  ],
   "main": "setup/bootstrap.sh",
   "scripts": {
     "fix": "yarn lint --write",
