@@ -15,5 +15,5 @@
 
 set -e
 
-code -w $@ &&
+/usr/local/bin/code -w $@ &&
 osascript -e "tell application \"iTerm\" to activate"
