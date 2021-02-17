@@ -66,20 +66,18 @@ You then need to have only file, and you can call this `~/.bashrc` and do `cd &&
 
 > Note that zsh seems to read `~/.profile` as well, if `~/.zshrc` is not present.
 
-|                 | Interactive login | Interactive non-login | Script |
-| --------------- | ----------------- | --------------------- | ------ |
-| `/etc/zshenv`   | A                 | A                     | A      |
-| `~/.zshenv`     | B                 | B                     | B      |
-| `/etc/zprofile` | C                 |                       |        |
-| `~/.zprofile`   | D                 |                       |        |
-| `/etc/zshrc`    | E                 | C                     |        |
-| `~/.zshrc`      | F                 | D                     |        |
-| `/etc/zlogin`   | G                 |                       |        |
-| `~/.zlogin`     | H                 |                       |        |
-|                 |                   |                       |        |
-|                 |                   |                       |        |
-| `~/.zlogout`    | I                 |                       |        |
-| `/etc/zlogout`  | J                 |                       |        |
+| File            | Interactive login  | Interactive non-login  | Script | Description                                                                    |
+| --------------- | :----------------: | :--------------------: | :----: | :----------------------------------------------------------------------------- |
+| `/etc/zshenv`   | A                  | A                      | A      | Define environment vars.                                                       |
+| `~/.zshenv`     | B                  | B                      | B      | Define environment vars. Keep it lightweight for speed.                        |
+| `/etc/zprofile` | C                  |                        |        | Executable commands that do not change the shell environment.                  |
+| `~/.zprofile`   | D                  |                        |        | Executable commands that do not change the shell environment.                  |
+| `/etc/zshrc`    | E                  | C                      |        | Define aliases, functions, shell options, and key bindings.                    |
+| `~/.zshrc`      | F                  | D                      |        | Define aliases, functions, shell options, and key bindings.                    |
+| `/etc/zlogin`   | G                  |                        |        | Executes file/folder creation, login message, and should not change the shell. |
+| `~/.zlogin`     | H                  |                        |        | Executes file/folder creation, login message, and should not change the shell. |
+| `~/.zlogout`    | I                  |                        |        | Executes logout message and should not change the shell.                       |
+| `/etc/zlogout`  | J                  |                        |        | Executes logout message and should not change the shell.                       |
 
 ### Moral:
 
