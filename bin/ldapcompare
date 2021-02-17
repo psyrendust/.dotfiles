@@ -1,0 +1,41 @@
+#!/usr/bin/env zsh
+#
+# LDAP Comparison
+#-------------------------------------------------------------------------------
+
+set -e
+
+[[ $# -gt 0 ]] || {
+  echo "Need at least 1 username"
+  return 1
+}
+
+[[ $# -eq 1 ]] && {
+  local user1="lgordon"
+  local user2="$1"
+}
+
+[[ $# -eq 2 ]] && {
+  local user1="$1"
+  local user2="$2"
+}
+
+local temp1="$TMPDIR$(mktemp -u code-temp-XXXXXX).txt";
+local temp2="$TMPDIR$(mktemp -u code-temp-XXXXXX).txt";
+echo "user1=[$user1]"
+echo "user2=[$user2]";
+echo "temp1=[$temp1]";
+echo "temp2=[$temp2]";
+ldapsearch -b cn=users,dc=ods,dc=twitter,dc=corp -h ldap.local.twitter.com -xLLL uid=$user1 | sort > "$temp1"
+ldapsearch -b cn=users,dc=ods,dc=twitter,dc=corp -h ldap.local.twitter.com -xLLL uid=$user2 | sort > "$temp2"
+vscode -wd "$temp1" "$temp2"
+
+# Cleanup
+[[ -f "$temp1" ]] && {
+  echo "removing temp1=[$temp1]"
+  rm "$temp1"
+}
+[[ -f "$temp2" ]] && {
+  echo "removing temp2=[$temp2]"
+  rm "$temp2"
+}
