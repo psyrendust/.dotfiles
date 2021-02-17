@@ -37,7 +37,8 @@
     "semantic-release": "^17.3.9"
   },
   "resolutions": {
-    "mem": "^8.0.0"
+    "mem": "^8.0.0",
+    "yargs-parser": "^20.2.5"
   },
   "engines": {
     "node": ">=12.18.2"
