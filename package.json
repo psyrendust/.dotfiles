@@ -10,10 +10,7 @@
   "bugs": {
     "url": "https://github.com/psyrendust/.dotfiles/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/psyrendust/.dotfiles.git"
-  },
+  "repository": "git@github.com:psyrendust/.dotfiles.git",
   "license": "MIT",
   "author": "Larry Gordon <lgordon@psyrendust.com>",
   "main": "setup/bootstrap.sh",
