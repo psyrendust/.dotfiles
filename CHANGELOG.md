@@ -1,3 +1,9 @@
+### [0.8.2](https://github.com/psyrendust/.dotfiles/compare/v0.8.1...v0.8.2) (2021-02-17)
+
+### Bug Fixes
+
+- **functions:** zdot update freezes during zplug update ([164be02](https://github.com/psyrendust/.dotfiles/commit/164be0250917d9a73270f9cb0fe7089f16850e8c))
+
 ### [0.8.1](https://github.com/psyrendust/.dotfiles/compare/v0.8.0...v0.8.1) (2021-02-17)
 
 ### Bug Fixes
