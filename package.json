@@ -39,6 +39,9 @@
     "prettier-plugin-packagejson": "^2.2.9",
     "semantic-release": "^17.3.9"
   },
+  "resolutions": {
+    "mem": "^8.0.0"
+  },
   "engines": {
     "node": ">=12.18.2"
   }
