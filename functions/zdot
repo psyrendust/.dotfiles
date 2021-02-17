@@ -1,0 +1,128 @@
+#!/usr/bin/env zsh
+#
+# Define zdot command
+#
+# Authors:
+#   Larry Gordon
+#
+# Usage: zdot
+# 
+# @see https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-simple-completion-functions-using-_describe
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
+# ------------------------------------------------------------------------------
+
+function zdot() {
+  [[ $# -gt 0 ]] || {
+    _zdot::help
+    return 1
+  }
+
+  local command="$1"
+  shift
+
+  # Subcommand functions start with _ so that they don't
+  # appear as completion entries when looking for `omz`
+  (( $+functions[_zdot::$command] )) || {
+    _zdot::help
+    return 1
+  }
+
+  _zdot::$command "$@"
+}
+
+function _zdot {
+  local -a cmds subcmds
+  cmds=(
+    'help:Usage information'
+    'alias:Get the value of an alias'
+    'check:Check install'
+    'clear:Clear the cache directory'
+    'edit:Open dotfiles vscode workspace'
+    'load:Source a file if it exists'
+    'update:Update dotfiles'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'command' cmds
+  fi
+
+  return 0
+}
+
+if (( ! $+functions[compinit] )); then
+  autoload -Uz compinit
+  compinit
+fi
+compdef _zdot zdot
+
+function _zdot::help {
+  cat <<EOF
+Usage: zdot <command> [options]
+
+Available commands:
+
+  help                Print this help message
+  alias  <alias>      Get the value of an alias
+  check               Check install
+  clear               Clear the cache directory
+  edit                Open dotfiles vscode workspace
+  load   <script>     Source a file if it exists
+  update              Update dotfiles
+
+EOF
+}
+
+#
+# Get the value of an alias.
+#
+# Arguments:
+#    1. alias - The alias to get its value from
+# STDOUT:
+#    The value of alias $1 (if it has one).
+# Return value:
+#    0 if the alias was found,
+#    1 if it does not exist
+#
+function _zdot::alias() {
+    (( $+aliases[$1] )) && echo $aliases[$1]
+}
+
+function _zdot::check() {
+  _zdot::run "$ZSH_CUSTOM_TEMPLATES/check-install.zsh"
+}
+
+function _zdot::clear() {
+  rm -rf "$ZSH_CUSTOM/cache"
+}
+
+function _zdot::edit() {
+  code "$ZSH_CUSTOM/dotfiles.code-workspace"
+}
+
+function _zdot::load() {
+  [[ -z "$1" ]] && {
+    cat <<EOF
+Source a file if it exists
+
+Usage: zdot load <script>
+
+EOF
+    return 1
+  }
+
+  [[ -f "$1" ]] && . "$1"
+}
+
+function _zdot::update() {
+  # zplug refresh
+  # 1. clean    -- Remove repositories which are no longer managed
+  # 2. clear    -- Remove the cache file
+  # 3. update   -- Update installed packages in parallel
+  # 4. load     -- Source installed plugins and add installed commands to $PATH
+  zplug clean &&
+  zplug clear &&
+  zplug update &&
+  zplug load --verbose
+}
