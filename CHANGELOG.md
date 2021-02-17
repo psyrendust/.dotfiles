@@ -1,3 +1,9 @@
+### [0.8.1](https://github.com/psyrendust/.dotfiles/compare/v0.8.0...v0.8.1) (2021-02-17)
+
+### Bug Fixes
+
+- **package:** use ssh repository url vs https ([cc2bf51](https://github.com/psyrendust/.dotfiles/commit/cc2bf51501e450ac90e8f0f6e23abe133038ccec))
+
 ## [0.8.0](https://github.com/psyrendust/.dotfiles/compare/v0.7.0...v0.8.0) (2021-02-17)
 
 ### Features
