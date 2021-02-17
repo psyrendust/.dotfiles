@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# Someones LDAP Access
+#-------------------------------------------------------------------------------
+
+set -e
+
+[[ $# -gt 0 ]] || {
+  echo "Need at least 1 username"
+  return 1
+}
+
+[[ $# -eq 2 ]] && {
+  echo "Only 1 username allowed"
+  return 1
+}
+
+[[ $# -eq 1 ]] && {
+  local user1="$1"
+}
+
+echo "user1=[$user1]"
+ldapsearch -b cn=users,dc=ods,dc=twitter,dc=corp -h ldap.local.twitter.com -xLLL uid=$user1 | sort
