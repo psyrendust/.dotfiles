@@ -1,3 +1,29 @@
+## [0.8.0](https://github.com/psyrendust/.dotfiles/compare/v0.7.0...v0.8.0) (2021-02-17)
+
+### Features
+
+- **bin:** add git-add-all ([72d5cba](https://github.com/psyrendust/.dotfiles/commit/72d5cba2a000401f38e27d5f18b8345012925b51))
+- **bin:** add gitbranches ([8f9bb58](https://github.com/psyrendust/.dotfiles/commit/8f9bb58f3d419afe1ea9edd82aecd4a6b39827fb))
+- **bin:** add ldapcompare ([5768fdc](https://github.com/psyrendust/.dotfiles/commit/5768fdc9634de375d56be1186671e8edded96034))
+- **bin:** add ldapme ([7026ce0](https://github.com/psyrendust/.dotfiles/commit/7026ce0ff200d64fe54b2817e554324cf944b686))
+- **bin:** add ldapyou ([a0cbf82](https://github.com/psyrendust/.dotfiles/commit/a0cbf82b4e0e8ef5323a776e93a2c5bc6b47f4a6))
+- **bin:** add realpath ([a87de6d](https://github.com/psyrendust/.dotfiles/commit/a87de6dfbeb4c25c04c7668a5f7c1d5631559fc2))
+- **bin:** switch bash shebang to zsh ([2a1fa1c](https://github.com/psyrendust/.dotfiles/commit/2a1fa1cfb55c9b9e5e601245fe8daecd7db46880))
+- **bin:** use reference to global vscode path in gitcommiteditor ([9e8203b](https://github.com/psyrendust/.dotfiles/commit/9e8203bb53e2923a0c6a79aef4499cd5d19fa570))
+- **functions:** add zdot cli ([70b8245](https://github.com/psyrendust/.dotfiles/commit/70b8245446bc89822fadea938841293627a9fa54))
+- **lib:** add noop zsh files from OMZ that we don't want to load ([32117f7](https://github.com/psyrendust/.dotfiles/commit/32117f7cb92251040ac9bfde8777c56ee04b6981))
+- **plugins:** add fzf plugin ([ade22d5](https://github.com/psyrendust/.dotfiles/commit/ade22d50c35f256f56d914074912dc2edf97a66c))
+- **plugins:** add vscode plugin ([6a5b862](https://github.com/psyrendust/.dotfiles/commit/6a5b8623f3fe42fb20cc2087d3afef35cae952d9))
+- **plugins:** alpha sort and update aliases plugin ([e168276](https://github.com/psyrendust/.dotfiles/commit/e16827630a13a6a339c0d33e0f7e3c7b069d10cf))
+- **plugins:** prune and update git plugin ([4c3e73c](https://github.com/psyrendust/.dotfiles/commit/4c3e73ce2d078a4cd3d03cbf8ba2d5d1775c0d29))
+- **plugins:** remove echo from sublime plugin ([c87444b](https://github.com/psyrendust/.dotfiles/commit/c87444bdb6c007562e379480255aee16deadb4f9))
+- **templates:** add check-install script ([e5cf972](https://github.com/psyrendust/.dotfiles/commit/e5cf97278814c0ee1cc38f7b6d23b5967722dece))
+- **templates:** add zprofile.zsh template ([50e8520](https://github.com/psyrendust/.dotfiles/commit/50e85204b5bb691ab7c87e0916fb1be57d57068b))
+- **templates:** add zsh extension and add path setup ([e95b5eb](https://github.com/psyrendust/.dotfiles/commit/e95b5ebe1949a0bfe9de17d314622d8f98baff86))
+- **templates:** add zsh extension and move scripts to zshrc ([98adfdf](https://github.com/psyrendust/.dotfiles/commit/98adfdf441049a1b6ee6bb9502205fab1eab2fb6))
+- **templates:** add zsh extension and normalize pattern ([5dea00c](https://github.com/psyrendust/.dotfiles/commit/5dea00c49f6deeb147eec11ea6b04a1475877259))
+- add vscode workspace file ([6ac0ab5](https://github.com/psyrendust/.dotfiles/commit/6ac0ab553c9ad7a1fbd4c368895974822edbc3b7))
+
 ## [0.7.0](https://github.com/psyrendust/.dotfiles/compare/v0.6.0...v0.7.0) (2020-10-15)
 
 ### Features
