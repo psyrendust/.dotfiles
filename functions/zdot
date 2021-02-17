@@ -6,7 +6,7 @@
 #   Larry Gordon
 #
 # Usage: zdot
-# 
+#
 # @see https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-simple-completion-functions-using-_describe
 #
 # License:
@@ -121,8 +121,15 @@ function _zdot::update() {
   # 2. clear    -- Remove the cache file
   # 3. update   -- Update installed packages in parallel
   # 4. load     -- Source installed plugins and add installed commands to $PATH
-  zplug clean &&
+  echo "[zplug] Remove repositories which are no longer managed" &&
+  zplug clean --force &&
+  sleep 2 &&
+  echo "[zplug] Remove the cache file" &&
   zplug clear &&
-  zplug update &&
+  sleep 2 &&
+  echo "[zplug] Update installed packages in parallel" &&
+  zplug update --force &&
+  sleep 2 &&
+  echo "[zplug] Source installed plugins and add installed commands to \$PATH" &&
   zplug load --verbose
 }
