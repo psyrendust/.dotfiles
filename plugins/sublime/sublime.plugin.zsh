@@ -16,7 +16,6 @@
 
 alias s="sbl"
 [[ -s "/usr/local/bin/subl" ]] || {
-  echo no
   # Create a symlink in the background, because it can be slow on some machines
   # OS X paths
   if [[ -n $PLATFORM_IS_MAC ]]; then
