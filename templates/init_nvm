@@ -1,5 +1,4 @@
 export NVM_DIR="$HOME/.nvm"
-export PROFILE="$HOME/.profile"
 
 # Find the correct nvm init script
 if [[ -s "/usr/local/opt/nvm/nvm.sh" ]]; then
@@ -12,7 +11,7 @@ elif [[ -s "$NVM_DIR/nvm.sh" ]]; then
 fi
 
 # This loads nvm"
-[[ -s "$NVM_INIT_SCRIPT_DIR/nvm.sh" ]] && source "$NVM_INIT_SCRIPT_DIR/nvm.sh"
+zdot load "$NVM_INIT_SCRIPT_DIR/nvm.sh"
 
 # Autoload add-zsh-hook
 autoload -U add-zsh-hook
