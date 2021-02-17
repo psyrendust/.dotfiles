@@ -274,7 +274,7 @@ compdef _git gcp=git-cherry-pick
 
 alias gfm="_git-fetch-merge"
 
-alias gaa='git add -A'
+alias gaa='git-add-all'
 compdef _git gaa=git-add
 
 alias gass='git update-index --assume-unchanged'
@@ -315,29 +315,14 @@ compdef _git gcunstage=git-reset
 alias gcreset='gcundo && gcunstage && grhh'
 compdef _git gcreset=git-reset
 
-alias gfffinish='git flow feature finish -r'
-compdef _git gfffinish=git-flow-feature-finish
-
-alias gffstart='git flow feature start'
-compdef _git gffstart=git-flow-feature-start
-
-alias gfhfinish='git flow hotfix finish -r'
-compdef _git gfhfinish=git-flow-hotfix-finish
-
-alias gfhstart='git flow hotfix start'
-compdef _git gfhstart=git-flow-hotfix-start
+alias gdt='git difftool'
+compdef _git gdt=git-difftool
 
 alias gfo='git fetch origin'
 compdef _git gfo=git-fetch
 
 alias gfr='git fetch root'
 compdef _git gfr=git-fetch
-
-alias gfrfinish='git flow release finish -r'
-compdef _git flowrf=git-flow-release-finish
-
-alias gfrstart='git flow release start'
-compdef _git gfrstart=git-flow-release-start
 
 alias gfu='git fetch upstream'
 compdef _git gfu=git-fetch
@@ -435,8 +420,8 @@ compdef _git gunadd=git-reset
 alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
-alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
-# alias gwip='git add -A; git commit -m "--wip-- $(date "+%Y-%m-%d %H:%M:%S")"'
-alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'
-
-# alias gfupdate='git-flow-update'
+# Modified version of OMZ gwip
+# - adds timestamp to commit message.
+# - Replaces `git add -a` with faster implementation
+#   that is optimized for large repos.
+alias gwip='git-add-all; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'
