@@ -1,0 +1,144 @@
+#!/usr/bin/env node
+/**
+ * Open vscode with arguments. If argument path is a directory, attempt to
+ * find *.code-workspace files and prompt user if they would like to open
+ * the workspace.
+ */
+
+const fs = require('fs');
+const minimist = require('minimist');
+const prompts = require('prompts');
+const { resolve } = require('path');
+const { spawn } = require('child_process');
+
+const cmds = ['/usr/local/bin/code'];
+const workspaceReg = /.*\.code-workspace/i;
+let isVerbose = false;
+
+/** Filter for workspace files */
+const findWorkspaceFiles = (filename) => workspaceReg.test(filename);
+
+/** Create prompt choices */
+const fileChoice = (file) => ({ title: file, value: file });
+const createChoices = (files) => ([
+  ...files.map(fileChoice),
+  { title: 'skip', value: 'skip' },
+]);
+
+/** Verbose logger */
+const logger = (...args) => isVerbose && console.log('[vscode]', ...args);
+
+/** Open vscode */
+const openVscode = () => {
+  spawn(cmds.join(' '), {
+    stdio: 'inherit',
+    shell: true,
+  });
+};
+
+/** Open vscode with all options passed to this cli. */
+const openDefault = () => {
+  cmds.push(...optsArray, ...paths);
+  if (passthrough.length) {
+    cmds.push('--', ...passthrough);
+  }
+  openVscode();
+};
+
+// Gather args
+const argv = minimist(process.argv.slice(2), { '--': true });
+const { _:paths, '--':passthrough, ...options } = argv;
+
+// Set verbose logging
+if (options.verbose) isVerbose = true;
+// Set a default path if nothing was passed
+if (paths.length === 0) paths.push('.');
+
+// Filter flag options
+const opts = new Map();
+for (let key in options) {
+  const isFlag = key.length === 1;
+  const value = options[key];
+  const isBool = typeof value === 'boolean';
+  opts.set(key, { isFlag, isBool, value });
+}
+
+logger('minimist:', argv);
+logger('process.stdin.isTTY:', process.stdin.isTTY);
+logger('paths:', paths);
+logger('passthrough:', passthrough);
+logger('options:', options);
+logger('opts:', opts);
+
+// Create options string from minimist args
+const optsArray = [];
+opts.forEach(({ isBool, isFlag, value }, key) => {
+  const prefix = isFlag ? '-' : '--';
+  optsArray.push(`${prefix}${key}`);
+  if (!isBool) optsArray.push(value);
+});
+logger('optsString:', optsArray.join(' '));
+
+async function run() {
+  // is TTY
+  logger('-- isTTY');
+
+  if (paths.length === 1) {
+    logger('-- single path passed');
+    const fileOrDirPath = resolve(paths[0]);
+    let stats;
+    try {
+      stats = fs.statSync(fileOrDirPath);
+      logger('-- stats', stats);
+      logger('-- isDir', stats.isDirectory());
+    } catch (e) {
+      logger('-- ENOENT: no such file or directory', fileOrDirPath);
+      stats = {
+        isDirectory: () => false,
+      };
+    }
+    const workspaceFiles = [];
+    if (stats.isDirectory()) {
+      logger('-- isDirectory: true');
+      const dirSync = fs.readdirSync(fileOrDirPath)
+      workspaceFiles.push(...dirSync.filter(findWorkspaceFiles));
+      logger('-- dir:', dirSync);
+      logger('-- files:', workspaceFiles);
+    }
+
+    const totalFound = workspaceFiles.length;
+    if (totalFound > 0) {
+      logger('-- workspace file[s], found:', totalFound);
+      let workspaceFile;
+      const onCancel = () => workspaceFile = 'skip';
+      const onSubmit = (prompt, answer) => workspaceFile = answer;
+      await prompts({
+        type: 'select',
+        name: 'file',
+        message: 'Choose a workspace file',
+        choices: createChoices(workspaceFiles),
+      }, { onCancel, onSubmit });
+
+      logger('-- workspaceFile chosen:', workspaceFile);
+      if (workspaceFile !== 'skip') {
+        cmds.push(workspaceFile);
+        openVscode();
+        return;
+      }
+    }
+  }
+
+  logger('-- open default');
+  openDefault();
+}
+
+if (process.stdin.isTTY) {
+  run();
+} else {
+  logger('-- using pipe');
+  cmds.push(...optsArray);
+  if (paths.some(a => a === '-')) {
+    cmds.push('-');
+  }
+  openVscode();
+}

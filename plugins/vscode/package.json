@@ -1,0 +1,12 @@
+{
+  "name": "vscode",
+  "version": "1.0.0",
+  "description": "Dotfiles vscode plugin",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "minimist": "^1.2.5",
+    "prompts": "^2.4.0"
+  }
+}
