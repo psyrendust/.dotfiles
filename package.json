@@ -1,6 +1,7 @@
 {
   "name": "dotfiles",
   "version": "0.7.0",
+  "private": true,
   "description": "My dotfiles",
   "keywords": [
     "dotfiles"
@@ -15,11 +16,10 @@
   },
   "license": "MIT",
   "author": "Larry Gordon <lgordon@psyrendust.com>",
-  "private": true,
+  "main": "setup/bootstrap.sh",
   "workspaces": [
     "plugins/*"
   ],
-  "main": "setup/bootstrap.sh",
   "scripts": {
     "fix": "yarn lint --write",
     "lint": "prettier '*.{json,md}' '*/**/*.{json,md}' 'package.json' --ignore-path .gitignore --check",
