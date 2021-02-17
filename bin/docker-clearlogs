@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 #
 # docker-clearlogs
 # Fuzzy docker clear logs
