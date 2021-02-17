@@ -67,6 +67,13 @@
   dependencies:
     "@octokit/types" "^5.0.0"
 
+"@octokit/auth-token@^2.4.4":
+  version "2.4.5"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/auth-token/-/auth-token-2.4.5.tgz#568ccfb8cb46f36441fac094ce34f7a875b197f3"
+  integrity sha1-VozPuMtG82RB+sCUzjT3qHWxl/M=
+  dependencies:
+    "@octokit/types" "^6.0.3"
+
 "@octokit/core@^2.4.3":
   version "2.5.4"
   resolved "https://registry.yarnpkg.com/@octokit/core/-/core-2.5.4.tgz#f7fbf8e4f86c5cc2497a8887ba2561ec8d358054"
@@ -78,6 +85,18 @@
     "@octokit/types" "^5.0.0"
     before-after-hook "^2.1.0"
     universal-user-agent "^5.0.0"
+
+"@octokit/core@^3.2.3":
+  version "3.2.5"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/core/-/core-3.2.5.tgz#57becbd5fd789b0592b915840855f3a5f233d554"
+  integrity sha1-V77L1f14mwWSuRWECFXzpfIz1VQ=
+  dependencies:
+    "@octokit/auth-token" "^2.4.4"
+    "@octokit/graphql" "^4.5.8"
+    "@octokit/request" "^5.4.12"
+    "@octokit/types" "^6.0.3"
+    before-after-hook "^2.1.0"
+    universal-user-agent "^6.0.0"
 
 "@octokit/endpoint@^6.0.1":
   version "6.0.5"
@@ -97,6 +116,20 @@
     "@octokit/types" "^5.0.0"
     universal-user-agent "^6.0.0"
 
+"@octokit/graphql@^4.5.8":
+  version "4.6.0"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/graphql/-/graphql-4.6.0.tgz#f9abca55f82183964a33439d5264674c701c3327"
+  integrity sha1-+avKVfghg5ZKM0OdUmRnTHAcMyc=
+  dependencies:
+    "@octokit/request" "^5.3.0"
+    "@octokit/types" "^6.0.3"
+    universal-user-agent "^6.0.0"
+
+"@octokit/openapi-types@^5.0.0":
+  version "5.0.0"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/openapi-types/-/openapi-types-5.0.0.tgz#420853cc6d97a12521fa1d105ecc277112b32935"
+  integrity sha1-QghTzG2XoSUh+h0QXswncRKzKTU=
+
 "@octokit/plugin-paginate-rest@^2.2.0":
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.3.2.tgz#746fca42bc1c79639625dbcafe983e3581bdbfc7"
@@ -104,10 +137,22 @@
   dependencies:
     "@octokit/types" "^5.3.0"
 
+"@octokit/plugin-paginate-rest@^2.6.2":
+  version "2.9.1"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.9.1.tgz#e9bb34a89b7ed5b801f1c976feeb9b0078ecd201"
+  integrity sha1-6bs0qJt+1bgB8cl2/uubAHjs0gE=
+  dependencies:
+    "@octokit/types" "^6.8.0"
+
 "@octokit/plugin-request-log@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-request-log/-/plugin-request-log-1.0.0.tgz#eef87a431300f6148c39a7f75f8cfeb218b2547e"
   integrity sha512-ywoxP68aOT3zHCLgWZgwUJatiENeHE7xJzYjfz8WI0goynp96wETBF+d95b8g/uL4QmS6owPVlaxiz3wyMAzcw==
+
+"@octokit/plugin-request-log@^1.0.2":
+  version "1.0.3"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/plugin-request-log/-/plugin-request-log-1.0.3.tgz#70a62be213e1edc04bb8897ee48c311482f9700d"
+  integrity sha1-cKYr4hPh7cBLuIl+5IwxFIL5cA0=
 
 "@octokit/plugin-rest-endpoint-methods@3.17.0":
   version "3.17.0"
@@ -115,6 +160,14 @@
   integrity sha512-NFV3vq7GgoO2TrkyBRUOwflkfTYkFKS0tLAPym7RNpkwLCttqShaEGjthOsPEEL+7LFcYv3mU24+F2yVd3npmg==
   dependencies:
     "@octokit/types" "^4.1.6"
+    deprecation "^2.3.1"
+
+"@octokit/plugin-rest-endpoint-methods@4.10.3":
+  version "4.10.3"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-4.10.3.tgz#d78ddf926bca3b81a4d9b79a463d32b3750a4485"
+  integrity sha1-143fkmvKO4Gk2beaRj0ys3UKRIU=
+  dependencies:
+    "@octokit/types" "^6.8.3"
     deprecation "^2.3.1"
 
 "@octokit/request-error@^2.0.0":
@@ -140,6 +193,20 @@
     once "^1.4.0"
     universal-user-agent "^6.0.0"
 
+"@octokit/request@^5.4.12":
+  version "5.4.14"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/request/-/request-5.4.14.tgz#ec5f96f78333bb2af390afa5ff66f114b063bc96"
+  integrity sha1-7F+W94MzuyrzkK+l/2bxFLBjvJY=
+  dependencies:
+    "@octokit/endpoint" "^6.0.1"
+    "@octokit/request-error" "^2.0.0"
+    "@octokit/types" "^6.7.1"
+    deprecation "^2.0.0"
+    is-plain-object "^5.0.0"
+    node-fetch "^2.6.1"
+    once "^1.4.0"
+    universal-user-agent "^6.0.0"
+
 "@octokit/rest@^17.0.0":
   version "17.11.2"
   resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-17.11.2.tgz#f3dbd46f9f06361c646230fd0ef8598e59183ead"
@@ -149,6 +216,16 @@
     "@octokit/plugin-paginate-rest" "^2.2.0"
     "@octokit/plugin-request-log" "^1.0.0"
     "@octokit/plugin-rest-endpoint-methods" "3.17.0"
+
+"@octokit/rest@^18.0.0":
+  version "18.1.1"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/rest/-/rest-18.1.1.tgz#bd7053c28db3577c936029e9da6bfbd046474a2f"
+  integrity sha1-vXBTwo2zV3yTYCnp2mv70EZHSi8=
+  dependencies:
+    "@octokit/core" "^3.2.3"
+    "@octokit/plugin-paginate-rest" "^2.6.2"
+    "@octokit/plugin-request-log" "^1.0.2"
+    "@octokit/plugin-rest-endpoint-methods" "4.10.3"
 
 "@octokit/types@^4.1.6":
   version "4.1.10"
@@ -163,6 +240,13 @@
   integrity sha512-OlMlSySBJoJ6uozkr/i03nO5dlYQyE05vmQNZhAh9MyO4DPBP88QlwsDVLmVjIMFssvIZB6WO0ctIGMRG+xsJQ==
   dependencies:
     "@types/node" ">= 8"
+
+"@octokit/types@^6.0.3", "@octokit/types@^6.7.1", "@octokit/types@^6.8.0", "@octokit/types@^6.8.3":
+  version "6.9.0"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@octokit/types/-/types-6.9.0.tgz#08505bf87385772032e7d3b08487944f87ee6c52"
+  integrity sha1-CFBb+HOFdyAy59OwhIeUT4fubFI=
+  dependencies:
+    "@octokit/openapi-types" "^5.0.0"
 
 "@semantic-release/changelog@^5.0.1":
   version "5.0.1"
@@ -218,12 +302,34 @@
     micromatch "^4.0.0"
     p-reduce "^2.0.0"
 
-"@semantic-release/github@^7.0.0", "@semantic-release/github@^7.0.7":
+"@semantic-release/github@^7.0.0":
   version "7.0.7"
   resolved "https://registry.yarnpkg.com/@semantic-release/github/-/github-7.0.7.tgz#e3999b06433d08871acd68ecec2b4e212c05d09f"
   integrity sha512-Sai2UucYQ+5rJzKVEVJ4eiZNDdoo0/CzfpValBdeU5h97uJE7t4CoBTmUWkiXlPOx46CSw1+JhI+PHC1PUxVZw==
   dependencies:
     "@octokit/rest" "^17.0.0"
+    "@semantic-release/error" "^2.2.0"
+    aggregate-error "^3.0.0"
+    bottleneck "^2.18.1"
+    debug "^4.0.0"
+    dir-glob "^3.0.0"
+    fs-extra "^9.0.0"
+    globby "^11.0.0"
+    http-proxy-agent "^4.0.0"
+    https-proxy-agent "^5.0.0"
+    issue-parser "^6.0.0"
+    lodash "^4.17.4"
+    mime "^2.4.3"
+    p-filter "^2.0.0"
+    p-retry "^4.0.0"
+    url-join "^4.0.0"
+
+"@semantic-release/github@^7.2.0":
+  version "7.2.0"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/@semantic-release/github/-/github-7.2.0.tgz#925f3efd91adabfc4bbe0de24b79fe1a8a38b4e2"
+  integrity sha1-kl8+/ZGtq/xLvg3iS3n+Goo4tOI=
+  dependencies:
+    "@octokit/rest" "^18.0.0"
     "@semantic-release/error" "^2.2.0"
     aggregate-error "^3.0.0"
     bottleneck "^2.18.1"
@@ -2090,6 +2196,11 @@ is-plain-object@^4.0.0:
   resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-4.1.1.tgz#1a14d6452cbd50790edc7fdaa0aed5a40a35ebb5"
   integrity sha512-5Aw8LLVsDlZsETVMhoMXzqsXwQqr/0vlnBYzIXJbYo2F4yYlhLHs+Ez7Bod7IIQKWkJbJfxrWD7pA1Dw1TKrwA==
 
+is-plain-object@^5.0.0:
+  version "5.0.0"
+  resolved "https://artifactory.twitter.biz:443/api/npm/js-virtual/is-plain-object/-/is-plain-object-5.0.0.tgz#4427f50ab3429e9025ea7d52e9043a9ef4159344"
+  integrity sha1-RCf1CrNCnpAl6n1S6QQ6nvQVk0Q=
+
 is-redirect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-redirect/-/is-redirect-1.0.0.tgz#1d03dded53bd8db0f30c26e4f95d36fc7c87dc24"
@@ -2820,7 +2931,7 @@ node-fetch-npm@^2.0.2:
     json-parse-better-errors "^1.0.0"
     safe-buffer "^5.1.1"
 
-node-fetch@^2.3.0:
+node-fetch@^2.3.0, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
