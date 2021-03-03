@@ -1,0 +1,79 @@
+#!/usr/bin/env zsh
+#
+# checkinclusive
+# Checks for inclusive language
+# @see https://docbird.twitter.biz/inclusive_language/index.html
+# @see https://springfield.edu/gender-pronouns#:~:text=Pronouns%20can%20be%20in%20the,or%20she%2Fher%2Fhers
+# @see https://phabricator.twitter.biz/D619419
+#-------------------------------------------------------------------------------
+
+# set -e
+
+[[ $# -gt 0 ]] || {
+  echo "Need directory"
+  return 1
+}
+
+dir=$1
+
+nonInclusiveLanguageList=(
+  whitelist
+  blacklist
+  master
+  slave
+  grandfathered
+  sanity
+  dummy
+  strawman
+  crazy insane mental
+  redlining
+  blind
+  # Gendered pronouns
+  mankind
+  freshman
+  "man-made"
+  chairman
+  mailman
+  postman
+  policeman
+  fireman
+  salesman
+  steward
+  stewardess
+  waiter
+  waitress
+  congressman
+  boyfriend
+  girlfriend
+  husband
+  wife
+  mother
+  father
+  sister
+  brother
+  son
+  daughter
+  she
+  her
+  hers
+  herself
+  he
+  him
+  his
+  himself
+  "sister teams"
+  "sister nodes"
+  "man hours"
+)
+
+for i in ${nonInclusiveLanguageList[@]}; do
+    echo "checking for [$i]"
+    echo "--------------------------------------------------"
+    rg --no-heading -i -w "$i" "$dir"
+    echo "-[rg --no-heading -i -w \"$i\" \"$dir\"]-"
+    echo "----- done"
+    echo ""
+done
+
+
+
