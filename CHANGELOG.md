@@ -1,3 +1,20 @@
+## [0.9.0](https://github.com/psyrendust/.dotfiles/compare/v0.8.2...v0.9.0) (2021-03-03)
+
+### Features
+
+- **bin:** add checkinclusive ([eefb17f](https://github.com/psyrendust/.dotfiles/commit/eefb17f77579c375800c46c7ebd8bb622e435a17))
+- **bin:** add ldapdiff ([3c0314d](https://github.com/psyrendust/.dotfiles/commit/3c0314dff35b4127e5d6b9eaf64dfea7fcc6f633))
+- **bin:** add wip for stash tool ([428a239](https://github.com/psyrendust/.dotfiles/commit/428a239c9ea89eca940528e0b14056d40d06d621))
+- **plugins:** add groot git alias ([18fe139](https://github.com/psyrendust/.dotfiles/commit/18fe1390aeb02ef1cd90c2de8c366a0a6c2d6d67))
+- **plugins:** gst - git stash untracted files ([46c17c8](https://github.com/psyrendust/.dotfiles/commit/46c17c8a4edc373090de2600f3eb77f52785921c))
+- **templates:** add git-fuzzy plugin and config ([b871a3e](https://github.com/psyrendust/.dotfiles/commit/b871a3e3ad38e17a558133956d12c8c98830d74a))
+- add ZDOT env vars ([166c8a9](https://github.com/psyrendust/.dotfiles/commit/166c8a9ae0ab003f153cb4b0bc44cd35a7fd7a3b))
+- **workspace:** add dropbox path ([8dbd474](https://github.com/psyrendust/.dotfiles/commit/8dbd47453f95099a80ef69ed4369114d7eb00301))
+
+### Bug Fixes
+
+- **plugins:** vscode should see flag value as boolean not a string ([3eec055](https://github.com/psyrendust/.dotfiles/commit/3eec0557ae07b3ef825437f5a561bb5630520c4c))
+
 ### [0.8.2](https://github.com/psyrendust/.dotfiles/compare/v0.8.1...v0.8.2) (2021-02-17)
 
 ### Bug Fixes
