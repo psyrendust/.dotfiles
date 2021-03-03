@@ -408,7 +408,7 @@ compdef _git gsl=git-stash-list
 alias gsp='git stash pop'
 compdef _git gsp=git-stash-pop
 
-alias gst='git stash'
+alias gst='git stash -u'
 compdef _git gst=git-stash
 
 alias gtag='git tag'
