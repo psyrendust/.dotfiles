@@ -5,25 +5,21 @@
 var system = require('system'),
   webpage = require('webpage');
 
-var argv,
-  dims,
-  failure,
-  init,
-  next;
+var argv, dims, failure, init, next;
 
 // Get the command line arguments.
 argv = system.args;
 
 if (argv.length === 1) {
-  console.log("Usage: render.js URL [FRAMES_PER_SECOND]");
+  console.log('Usage: render.js URL [FRAMES_PER_SECOND]');
   phantom.exit(0);
 }
 
 // Utility function to ensure a page load succeeded.
 function checkStatus(status) {
   if (status !== 'success') {
-    console.log("ERROR: Couldn't open " + argv[1] + ".");
-    console.log("ERROR: " + failure);
+    console.log("ERROR: Couldn't open " + argv[1] + '.');
+    console.log('ERROR: ' + failure);
     phantom.exit(1);
   }
 }
@@ -43,21 +39,19 @@ function newPage() {
 
 // Do a first pass to detect the exact dimensions of the asciicast.
 init = newPage();
-init.viewportSize = {width: 9999, height: 9999};
+init.viewportSize = { width: 9999, height: 9999 };
 init.open(argv[1], function (status) {
-
   checkStatus(status);
   dims = init.evaluate(function () {
     var term = $('.asciinema-terminal');
     return [term.width(), term.height()];
   });
 
-  console.log(">> Dimensions: " + dims[0] + "x" + dims[1]);
+  console.log('>> Dimensions: ' + dims[0] + 'x' + dims[1]);
 
   next = newPage();
-  next.viewportSize = {width: dims[0], height: dims[1]};
+  next.viewportSize = { width: dims[0], height: dims[1] };
   next.open(argv[1], function (status) {
-
     var diff,
       frame = 1,
       framerate = argv[2] ? parseInt(argv[2], 10) : 10,
@@ -69,21 +63,21 @@ init.open(argv[1], function (status) {
 
     next.onCallback = function (running, progress) {
       if (progress !== undefined) {
-        console.log(">> Progress: " + progress);
+        console.log('>> Progress: ' + progress);
         return;
       }
       if (running) {
-        console.log(">> Generating screenshots ...");
+        console.log('>> Generating screenshots ...');
         var now = Date.now();
         setTimeout(function screenshot() {
           if (stop) {
-            console.log(">> Done!");
+            console.log('>> Done!');
             phantom.exit(0);
             return;
           }
-          next.render('frames/' + (("00000000" + frame++).substr(-8, 8)) + '.png', {format: 'png'});
+          next.render('frames/' + ('00000000' + frame++).substr(-8, 8) + '.png', { format: 'png' });
           now = Date.now();
-          if ((diff = (interval - now - last)) <= 0) {
+          if ((diff = interval - now - last) <= 0) {
             setTimeout(screenshot, 0);
           } else {
             setTimeout(screenshot, diff);
@@ -95,7 +89,7 @@ init.open(argv[1], function (status) {
       }
     };
 
-    console.log(">> Preparing window ...");
+    console.log('>> Preparing window ...');
     next.evaluate(function () {
       var fetch, ev, el;
       // Hide the control bar and the powered by paragraph.
@@ -112,7 +106,7 @@ init.open(argv[1], function (status) {
           // Start the screenshots.
           callPhantom(true);
           // Check if the player has finished.
-          var prev = "",
+          var prev = '',
             sameCount = 0;
           setTimeout(function checkProgress() {
             var width = $('.gutter')[0].children[0].style.width;
@@ -138,7 +132,5 @@ init.open(argv[1], function (status) {
       // ev = new CustomEvent('click', {bubbles: true});
       el.dispatchEvent(ev);
     });
-
   });
-
 });
