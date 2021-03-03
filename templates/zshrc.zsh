@@ -119,6 +119,7 @@ zplug "plugins/yarn", from:oh-my-zsh, defer:1
 # misc plugins
 # ------------------------------------------------------------------------------
 zplug "/usr/local/opt/fzf", from:local, use:"shell/*.zsh", defer:2
+zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:2
 
 
 # ------------------------------------------------------------------------------
@@ -127,6 +128,7 @@ zplug "/usr/local/opt/fzf", from:local, use:"shell/*.zsh", defer:2
 zplug "$ZDOT_PLUGINS/aliases", from:local, defer:2
 zplug "$ZDOT_PLUGINS/fzf", from:local, defer:2
 zplug "$ZDOT_PLUGINS/git", from:local, defer:2
+zplug "$ZDOT_PLUGINS/git-fuzzy", from:local, defer:2
 
 
 # ------------------------------------------------------------------------------
