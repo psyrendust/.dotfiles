@@ -107,7 +107,6 @@ zplug "plugins/encode64", from:oh-my-zsh, defer:1
 zplug "plugins/extract", from:oh-my-zsh, defer:1
 zplug "plugins/fasd", from:oh-my-zsh, defer:1
 zplug "plugins/fd", from:oh-my-zsh, defer:1
-zplug "plugins/fzf", from:oh-my-zsh, defer:1
 zplug "plugins/git", from:oh-my-zsh, defer:1
 zplug "plugins/man", from:oh-my-zsh, defer:1
 zplug "plugins/osx", from:oh-my-zsh, defer:1
@@ -166,5 +165,3 @@ fi
 # Then, source packages and add commands to $PATH
 # ------------------------------------------------------------------------------
 zplug load
-
-zdot load "$HOME/.fzf.zsh"
