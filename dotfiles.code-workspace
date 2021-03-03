@@ -4,6 +4,10 @@
 			"name": "home",
 			"path": "../",
 		},
+    {
+      "name": "Dropbox",
+      "path": "../Dropbox/Larry/Apps",
+    },
 	],
 	"settings": {
 		"files.watcherExclude": {
