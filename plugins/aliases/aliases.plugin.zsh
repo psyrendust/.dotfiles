@@ -108,7 +108,7 @@ function rmlock() {
   fi
 }
 
-_pluginsAliases="$ZSH_CUSTOM/plugins/aliases"
+_pluginsAliases="$ZDOT_PLUGINS/aliases"
 for plugin in $_pluginsAliases/*.zsh; do
   if [ "$plugin" != "$_pluginsAliases/aliases.plugin.zsh" ]; then
     source "$plugin" 2>&1

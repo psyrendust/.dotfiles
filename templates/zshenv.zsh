@@ -20,8 +20,19 @@
 
 export VISUAL='/usr/local/bin/code --wait'
 export EDITOR="$VISUAL"
+export FZF_PATH="/usr/local/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
-export ZSH_CUSTOM_TEMPLATES="$ZSH_CUSTOM/templates"
+
+export ZDOT="$HOME/.dotfiles"
+export ZDOT_BIN="$ZDOT/bin"
+export ZDOT_CACHE="$ZDOT/cache"
+export ZDOT_FUNCTIONS="$ZDOT/functions"
+export ZDOT_LIB="$ZDOT/lib"
+export ZDOT_PLUGINS="$ZDOT/plugins"
+export ZDOT_TEMPLATES="$ZDOT/templates"
+export ZDOT_THEME="$ZDOT/theme"
+export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Larry/Apps"
+
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "/usr/local/opt/go/libexec" ]] && export GOROOT="/usr/local/opt/go/libexec"
 # export JAVA_VERSION=1.7
@@ -38,8 +49,8 @@ setopt EXTENDED_GLOB
 # Add a function path & load them
 # ------------------------------------------------------------------------------
 fpath=(
-  "$ZSH_CUSTOM"/functions(N-/)
-  "$ZSH_CUSTOM"/functions/*(N-/)
+  "$ZDOT_FUNCTIONS"(N-/)
+  "$ZDOT_FUNCTIONS"/*(N-/)
   "$fpath[@]"
 )
 autoload -Uz compinit

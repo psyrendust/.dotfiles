@@ -123,5 +123,5 @@ export ARCHFLAGS="-arch x86_64"
 # Startup Oh My Zsh
 # ------------------------------------------------------------------------------
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source $ZSH/oh-my-zsh.sh
-[[ -s "$ZSH_CUSTOM/themes/spaceship-setup.zsh" ]] && source $ZSH_CUSTOM/themes/spaceship-setup.zsh
+[[ -s "$ZDOT_THEMES/spaceship-setup.zsh" ]] && source $ZDOT_THEMES/spaceship-setup.zsh
 

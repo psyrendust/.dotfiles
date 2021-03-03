@@ -90,15 +90,15 @@ function _zdot::alias() {
 }
 
 function _zdot::check() {
-  _zdot::run "$ZSH_CUSTOM_TEMPLATES/check-install.zsh"
+  _zdot::run "$ZDOT_TEMPLATES/check-install.zsh"
 }
 
 function _zdot::clear() {
-  rm -rf "$ZSH_CUSTOM/cache"
+  rm -rf "$ZDOT_CACHE"
 }
 
 function _zdot::edit() {
-  code "$ZSH_CUSTOM/dotfiles.code-workspace"
+  code "$ZDOT/dotfiles.code-workspace"
 }
 
 function _zdot::load() {

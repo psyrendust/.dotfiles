@@ -9,7 +9,7 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-mkdir -p "$ZSH_CUSTOM/cache"
+mkdir -p "$ZDOT_CACHE"
 
 # Create an associative array for {key:value} pairs
 # @see https://scriptingosx.com/2019/11/associative-arrays-in-zsh/

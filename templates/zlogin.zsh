@@ -7,7 +7,7 @@
 #
 # Usage: save to ~/.zshenv
 #   #!/usr/bin/env zsh
-#   zdot load "$ZSH_CUSTOM_TEMPLATES/zlogin.zsh"
+#   zdot load "$ZDOT_TEMPLATES/zlogin.zsh"
 #
 # Execution Order
 #   https://github.com/psyrendust/.dotfiles/blob/master/templates/README.md#for-zsh

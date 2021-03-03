@@ -7,7 +7,7 @@
 #
 # Usage: save to ~/.zshenv
 #   #!/usr/bin/env zsh
-#   zdot load "$ZSH_CUSTOM_TEMPLATES/zprofile.zsh"
+#   zdot load "$ZDOT_TEMPLATES/zprofile.zsh"
 #
 # Execution Order
 #   https://github.com/psyrendust/.dotfiles/blob/master/templates/README.md#for-zsh

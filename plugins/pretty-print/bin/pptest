@@ -11,8 +11,8 @@
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
-if [[ $ZSH_CUSTOM == "" ]]; then
-  ZSH_CUSTOM="$HOME/.dotfiles"
+if [[ $ZDOT == "" ]]; then
+  ZDOT="$HOME/.dotfiles"
 fi
 
 pp_special=(
@@ -31,7 +31,7 @@ pp_exclude=(
 pppurple " " "    Pretty Print Colors"
 pppurple "------------------------------------"
 # Output all non-special and non-excluded executables
-for ppfile in $ZSH_CUSTOM/plugins/pretty-print/bin/*; do
+for ppfile in $ZDOT_PLUGINS/pretty-print/bin/*; do
   if [[ -n $( echo $pp_special | grep ${ppfile:t} ) ]] || [[ -n $( echo $pp_exclude | grep ${ppfile:t} ) ]]; then
     continue
   fi
@@ -53,6 +53,6 @@ done
 # ppemphasis "ppemphasis - testing pretty print" | awk '{ printf "%20s %s %s %s %s\n", $1, $2, $3, $4, $5}'
 # pppurple " " " " "        Pretty Print Inline Printing"
 # pppurple "------------------------------------"
-# for ppfile in $ZSH_CUSTOM/plugins/pretty-print/bin/*; do
+# for ppfile in $ZDOT_PLUGINS/pretty-print/bin/*; do
 #   eval "$ppfile -i \"$ppfile \""
 # done

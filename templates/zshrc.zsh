@@ -9,7 +9,7 @@
 # Usage: save to ~/.zshrc
 #   #!/usr/bin/env zsh
 #   [[ -n $DOTFILES_DEBUG ]] && echo "$HOME/.zshrc"
-#   zdot load "$ZSH_CUSTOM_TEMPLATES/zshrc.zsh"
+#   zdot load "$ZDOT_TEMPLATES/zshrc.zsh"
 #
 # Execution Order
 #   https://github.com/psyrendust/.dotfiles/blob/master/templates/README.md#for-zsh
@@ -26,12 +26,12 @@ typeset -a __path_pre __path_post __manpath_pre __manpath_post
 
 
 # Custom path locations for my plugins
-__path_pre+=("$ZSH_CUSTOM/plugins/asciinema2gif/bin")
-__path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
-__path_pre+=("$ZSH_CUSTOM/plugins/npmlist/bin")
-__path_pre+=("$ZSH_CUSTOM/plugins/textcleaner/bin")
-__path_pre+=("$ZSH_CUSTOM/plugins/vscode/bin")
-__path_pre+=("$ZSH_CUSTOM/bin")
+__path_pre+=("$ZDOT_PLUGINS/asciinema2gif/bin")
+__path_pre+=("$ZDOT_PLUGINS/pretty-print/bin")
+__path_pre+=("$ZDOT_PLUGINS/npmlist/bin")
+__path_pre+=("$ZDOT_PLUGINS/textcleaner/bin")
+__path_pre+=("$ZDOT_PLUGINS/vscode/bin")
+__path_pre+=("$ZDOT_BIN")
 __path_pre+=("$HOME/.tmpbin")
 
 
@@ -61,21 +61,20 @@ unset __manpath_post
 # ------------------------------------------------------------------------------
 # Load up nvm
 # nvm.sh -> to thwart nvm's install.sh
-# zdot load "$ZSH_CUSTOM/templates/init_nvm" # Load nvm
+# zdot load "$ZDOT_TEMPLATES/init_nvm" # Load nvm
 
 
 # ------------------------------------------------------------------------------
 # Load up necessary scripts
 # ------------------------------------------------------------------------------
-# Load any private tokens
-zdot load "$HOME/Dropbox/Larry/Apps/github/apiTokens.sh"
-zdot load "$HOME/Dropbox/Larry/Apps/ChromeWebStore/key.sh"
+# Load any private scripts
+zdot load "$ZDOT_DROPBOX_APPS/index.zsh"
 
 
 # ------------------------------------------------------------------------------
 # check install
 # ------------------------------------------------------------------------------
-zdot load "$ZSH_CUSTOM_TEMPLATES/check-install.zsh"
+zdot load "$ZDOT_TEMPLATES/check-install.zsh"
 
 
 # ------------------------------------------------------------------------------
@@ -93,12 +92,6 @@ fi
 # om-my-zsh startup files
 # ------------------------------------------------------------------------------
 zplug "robbyrussell/oh-my-zsh", use:"oh-my-zsh.sh"
-
-
-# ------------------------------------------------------------------------------
-# misc startup files
-# ------------------------------------------------------------------------------
-zplug "/usr/local/opt/fzf", from:local, use:"shell/*.zsh", defer:2
 
 
 # ------------------------------------------------------------------------------
@@ -124,11 +117,17 @@ zplug "plugins/yarn", from:oh-my-zsh, defer:1
 
 
 # ------------------------------------------------------------------------------
+# misc plugins
+# ------------------------------------------------------------------------------
+zplug "/usr/local/opt/fzf", from:local, use:"shell/*.zsh", defer:2
+
+
+# ------------------------------------------------------------------------------
 # dotfiles plugins
 # ------------------------------------------------------------------------------
-zplug "$ZSH_CUSTOM/plugins/aliases", from:local, defer:2
-zplug "$ZSH_CUSTOM/plugins/fzf", from:local, defer:2
-zplug "$ZSH_CUSTOM/plugins/git", from:local, defer:2
+zplug "$ZDOT_PLUGINS/aliases", from:local, defer:2
+zplug "$ZDOT_PLUGINS/fzf", from:local, defer:2
+zplug "$ZDOT_PLUGINS/git", from:local, defer:2
 
 
 # ------------------------------------------------------------------------------
