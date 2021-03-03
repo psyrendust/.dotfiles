@@ -18,8 +18,10 @@
     "plugins/*"
   ],
   "scripts": {
-    "fix": "yarn lint --write",
-    "lint": "prettier '*.{json,md}' '*/**/*.{json,md}' 'package.json' --ignore-path .gitignore --check",
+    "fix": "yarn lint:js --write && yarn lint:json --write",
+    "lint": "yarn lint:js && yarn lint:json",
+    "lint:js": "prettier '*.js' '.*.js' '*/**/*.js' --ignore-path .gitignore --check",
+    "lint:json": "prettier '*.{json,md}' '*/**/*.{json,md}' 'package.json' --ignore-path .gitignore --check",
     "release": "semantic-release --no-ci",
     "release:debug": "ROARR_LOG=true DEBUG='semantic-release:github' yarn release --debug=true",
     "release:dryrun": "yarn release:debug --dry-run --no-ci",
