@@ -1,3 +1,12 @@
+## [0.10.0](https://github.com/psyrendust/.dotfiles/compare/v0.9.0...v0.10.0) (2021-03-03)
+
+### Features
+
+- **bin:** add bak ([5a3ed81](https://github.com/psyrendust/.dotfiles/commit/5a3ed8162d666cbe2215ae8c866aa8284d9ee286))
+- **bin:** add spectrum ([17acbcf](https://github.com/psyrendust/.dotfiles/commit/17acbcfab0f766651d3abe9576f78d1c4c6a7bc0))
+- **plugins:** add colored man pages using fzf and batman ([9aa88da](https://github.com/psyrendust/.dotfiles/commit/9aa88dac630368496c968abb4c737feb7d53ecae))
+- **templates:** add bat-extras ([04fb5ad](https://github.com/psyrendust/.dotfiles/commit/04fb5ad73abde46529b6fb900913deb4cd730383))
+
 ## [0.9.0](https://github.com/psyrendust/.dotfiles/compare/v0.8.2...v0.9.0) (2021-03-03)
 
 ### Features
