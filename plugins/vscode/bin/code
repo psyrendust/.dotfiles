@@ -13,7 +13,32 @@ const { spawn } = require('child_process');
 
 const cmds = ['/usr/local/bin/code'];
 const workspaceReg = /.*\.code-workspace/i;
-let isVerbose = false;
+const boolReg = /^(true|false)$/im;
+
+function isBoolean(val) {
+  if (typeof val === 'boolean') return true;
+  if (boolReg.test(val)) return true;
+  return false;
+}
+
+function getValue(val, defaultValue) {
+  if (isBoolean(val)) {
+    if (typeof val === 'boolean') return val;
+    if (val.toLowerCase() === 'true') return true;
+    if (val.toLowerCase() === 'false') return false;
+  }
+  if (val == null) return defaultValue;
+  return val;
+}
+
+function getBoolean(val, defaultValue) {
+  const value = getValue(val);
+  if (isBoolean(value)) return value;
+  if (defaultValue != null) return defaultValue;
+  return false;
+}
+
+let isVerbose = getBoolean(process.env.DEBUG, false);
 
 /** Filter for workspace files */
 const findWorkspaceFiles = (filename) => workspaceReg.test(filename);
@@ -38,6 +63,7 @@ const openVscode = () => {
 
 /** Open vscode with all options passed to this cli. */
 const openDefault = () => {
+  logger('-- open default');
   cmds.push(...optsArray, ...paths);
   if (passthrough.length) {
     cmds.push('--', ...passthrough);
@@ -46,7 +72,66 @@ const openDefault = () => {
 };
 
 // Gather args
-const argv = minimist(process.argv.slice(2), { '--': true });
+/*
+Options
+  -d --diff <file> <file>           Compare two files with each other.
+  -a --add <folder>                 Add folder(s) to the last active window.
+  -g --goto <file:line[:character]> Open a file at the path on the specified line and character position.
+  -n --new-window                   Force to open a new window.
+  -r --reuse-window                 Force to open a file or folder in an already opened window.
+  -w --wait                         Wait for the files to be closed before returning.
+  --locale <locale>                 The locale to use (e.g. en-US or zh-TW).
+  --user-data-dir <dir>             Specifies the directory that user data is kept in. Can be used to open multiple distinct instances of Code.
+  -h --help                         Print usage.
+
+Extensions Management
+  --extensions-dir <dir>                                      Set the root path for extensions.
+  --list-extensions                                           List the installed extensions.
+  --show-versions                                             Show versions of installed extensions, when using --list-extensions.
+  --category                                                  Filters installed extensions by provided category, when using --list-extensions.
+  --install-extension <extension-id[@version] | path-to-vsix> Installs or updates the extension. The identifier of an extension is always `${publisher}.${name}`. Use `--force` argument to update to latest version. To install
+                                                              a specific version provide `@${version}`. For example: 'vscode.csharp@1.2.3'.
+  --uninstall-extension <extension-id>                        Uninstalls an extension.
+  --enable-proposed-api <extension-id>                        Enables proposed API features for extensions. Can receive one or more extension IDs to enable individually.
+
+Troubleshooting
+  -v --version                       Print version.
+  --verbose                          Print verbose output (implies --wait).
+  --log <level>                      Log level to use. Default is 'info'. Allowed values are 'critical', 'error', 'warn', 'info', 'debug', 'trace', 'off'.
+  -s --status                        Print process usage and diagnostics information.
+  --prof-startup                     Run CPU profiler during startup
+  --disable-extensions               Disable all installed extensions.
+  --disable-extension <extension-id> Disable an extension.
+  --sync <on> <off>                  Turn sync on or off
+  --inspect-extensions <port>        Allow debugging and profiling of extensions. Check the developer tools for the connection URI.
+  --inspect-brk-extensions <port>    Allow debugging and profiling of extensions with the extension host being paused after start. Check the developer tools for the connection URI.
+  --disable-gpu                      Disable GPU hardware acceleration.
+  --max-memory                       Max memory size for a window (in Mbytes).
+  --telemetry
+*/
+const bailFlags = [
+  '-h', '--help',
+  '-v', '--version',
+];
+const knownFlags = new Set([
+  ...bailFlags,
+  '--disable-extensions',
+  '--disable-gpu',
+  '--max-memory',
+  '-n', '--new-window',
+  '--prof-startup',
+  '-r', '--reuse-window',
+  '--telemetry',
+  '--verbose',
+  '-w', '--wait',
+]);
+const cleanedArgv = process.argv.slice(2).map((val) => {
+  if (knownFlags.has(val)) {
+    return `${val}=true`;
+  }
+  return val;
+});
+const argv = minimist(cleanedArgv, { '--': true });
 const { _:paths, '--':passthrough, ...options } = argv;
 
 // Set verbose logging
@@ -56,24 +141,27 @@ if (paths.length === 0) paths.push('.');
 
 // Filter flag options
 const opts = new Map();
+
 for (let key in options) {
-  const isFlag = key.length === 1;
-  const value = options[key];
-  const isBool = typeof value === 'boolean';
-  opts.set(key, { isFlag, isBool, value });
+  const value = getValue(options[key]);
+  const isBool = isBoolean(options[key]);
+  const isShort = key.length === 1;
+  opts.set(key, { isBool, isShort, value });
 }
 
+logger('argv:', process.argv.slice(2));
 logger('minimist:', argv);
 logger('process.stdin.isTTY:', process.stdin.isTTY);
 logger('paths:', paths);
 logger('passthrough:', passthrough);
 logger('options:', options);
 logger('opts:', opts);
+logger('cwd:', process.cwd());
 
 // Create options string from minimist args
 const optsArray = [];
-opts.forEach(({ isBool, isFlag, value }, key) => {
-  const prefix = isFlag ? '-' : '--';
+opts.forEach(({ isBool, isShort, value }, key) => {
+  const prefix = isShort ? '-' : '--';
   optsArray.push(`${prefix}${key}`);
   if (!isBool) optsArray.push(value);
 });
@@ -85,12 +173,12 @@ async function run() {
 
   if (paths.length === 1) {
     logger('-- single path passed');
-    const fileOrDirPath = resolve(paths[0]);
+    const fileOrDirPath = resolve(process.cwd(), paths[0]);
+    logger('-- fileOrDirPath:', fileOrDirPath);
     let stats;
     try {
       stats = fs.statSync(fileOrDirPath);
       logger('-- stats', stats);
-      logger('-- isDir', stats.isDirectory());
     } catch (e) {
       logger('-- ENOENT: no such file or directory', fileOrDirPath);
       stats = {
@@ -110,7 +198,7 @@ async function run() {
     if (totalFound > 0) {
       logger('-- workspace file[s], found:', totalFound);
       let workspaceFile;
-      const onCancel = () => workspaceFile = 'skip';
+      const onCancel = () => workspaceFile = 'cancel';
       const onSubmit = (prompt, answer) => workspaceFile = answer;
       await prompts({
         type: 'select',
@@ -120,20 +208,28 @@ async function run() {
       }, { onCancel, onSubmit });
 
       logger('-- workspaceFile chosen:', workspaceFile);
+      if (workspaceFile === 'cancel') return;
       if (workspaceFile !== 'skip') {
-        cmds.push(workspaceFile);
+        logger('-- workspaceFile chosen:', workspaceFile);
+        const workspaceFilePath = resolve(fileOrDirPath, workspaceFile);
+        logger('-- workspaceFile path:', workspaceFilePath);
+        cmds.push(workspaceFilePath);
         openVscode();
         return;
       }
     }
   }
 
-  logger('-- open default');
   openDefault();
 }
 
 if (process.stdin.isTTY) {
-  run();
+  if (bailFlags.find(flag => opts.has(flag.replace(/-/g, '')))) {
+    // Bail out and call help or version
+    openDefault();
+  } else {
+    run();
+  }
 } else {
   logger('-- using pipe');
   cmds.push(...optsArray);
