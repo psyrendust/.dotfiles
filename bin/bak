@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+# bak
+# Add/remove `.bak` extension for a file.
+#-------------------------------------------------------------------------------
+
+set -e
+
+if [[ "$1" == *.bak ]]; then
+  mv "$1" "$(dirname $1)/$(basename $1 .bak)"
+else
+  mv "$1" "$1.bak"
+fi
