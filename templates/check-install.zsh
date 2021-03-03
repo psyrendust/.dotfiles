@@ -21,6 +21,7 @@ declare -A brew_formulas
 brew_formulas=(
     ["/usr/local/bin/bash"]="bash"
     ["/usr/local/bin/bat"]="bat"
+    ["/usr/local/bin/batman"]="eth-p/software/bat-extras"
     ["/usr/local/bin/fasd"]="fasd"
     ["/usr/local/bin/fd"]="fd"
     ["/usr/local/bin/fzf"]="fzf"
