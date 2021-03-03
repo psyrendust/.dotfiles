@@ -97,7 +97,6 @@ zplug "robbyrussell/oh-my-zsh", use:"oh-my-zsh.sh"
 # ------------------------------------------------------------------------------
 # om-my-zsh plugins
 # ------------------------------------------------------------------------------
-zplug "plugins/colored-man-pages", from:oh-my-zsh, defer:1
 zplug "plugins/colorize", from:oh-my-zsh, defer:1
 zplug "plugins/command-not-found", from:oh-my-zsh, defer:1
 zplug "plugins/copydir", from:oh-my-zsh, defer:1
@@ -126,6 +125,7 @@ zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:2
 # dotfiles plugins
 # ------------------------------------------------------------------------------
 zplug "$ZDOT_PLUGINS/aliases", from:local, defer:2
+zplug "$ZDOT_PLUGINS/colored-man-pages", from:local, defer:2
 zplug "$ZDOT_PLUGINS/fzf", from:local, defer:2
 zplug "$ZDOT_PLUGINS/git", from:local, defer:2
 zplug "$ZDOT_PLUGINS/git-fuzzy", from:local, defer:2
