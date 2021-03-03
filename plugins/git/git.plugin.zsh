@@ -384,6 +384,9 @@ compdef _git gmfromupstream=git-merge
 # alias gpatchit='_git-patchit'
 # compdef _git gpatchit=git-am
 
+alias groot='cd "$(git rev-parse --show-toplevel)" || exit'
+compdef _git groot=git-rev-parse
+
 alias grours="git checkout --ours"
 compdef _git grours=git-checkout
 
