@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #
-# LDAP Comparison
+# LDAP Comparison with vscode
 #-------------------------------------------------------------------------------
 
 set -e
@@ -28,7 +28,7 @@ echo "temp1=[$temp1]";
 echo "temp2=[$temp2]";
 ldapsearch -b cn=users,dc=ods,dc=twitter,dc=corp -h ldap.local.twitter.com -xLLL uid=$user1 | sort > "$temp1"
 ldapsearch -b cn=users,dc=ods,dc=twitter,dc=corp -h ldap.local.twitter.com -xLLL uid=$user2 | sort > "$temp2"
-vscode -wd "$temp1" "$temp2"
+/usr/local/bin/code -wd "$temp1" "$temp2"
 
 # Cleanup
 [[ -f "$temp1" ]] && {
