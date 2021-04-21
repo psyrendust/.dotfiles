@@ -1,14 +1,12 @@
 #!/usr/bin/env zsh
 #
-# Define environment variables for login, non-login, interactive and
-# non-interactive shells.
+# Define aliases, functions, shell options, and key bindings.
 #
 # Authors:
 #   Larry Gordon
 #
 # Usage: save to ~/.zshrc
 #   #!/usr/bin/env zsh
-#   [[ -n $DOTFILES_DEBUG ]] && echo "$HOME/.zshrc"
 #   zdot load "$ZDOT_TEMPLATES/zshrc.zsh"
 #
 # Execution Order
@@ -22,59 +20,7 @@
 # ------------------------------------------------------------------------------
 # Setup paths
 # ------------------------------------------------------------------------------
-typeset -a __path_pre __path_post __manpath_pre __manpath_post
-
-
-# Custom path locations for my plugins
-__path_pre+=("$ZDOT_PLUGINS/asciinema2gif/bin")
-__path_pre+=("$ZDOT_PLUGINS/pretty-print/bin")
-__path_pre+=("$ZDOT_PLUGINS/npmlist/bin")
-__path_pre+=("$ZDOT_PLUGINS/textcleaner/bin")
-__path_pre+=("$ZDOT_PLUGINS/vscode/bin")
-__path_pre+=("$ZDOT_BIN")
-__path_pre+=("$HOME/.tmpbin")
-
-
-# Add GOPATH and GOROOT
-[[ -d "$GOPATH" ]] && [[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
-[[ -d "$GOROOT" ]] && [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
-
-# Add homebrews bin
-[[ -z $(echo $PATH | grep "/usr/local/bin") ]] && __path_pre+=("/usr/local/bin")
-
-# Add manpath
-__manpath_pre+=("/usr/local/share/man")
-
-
-# ------------------------------------------------------------------------------
-# Apply PATHS
-# ------------------------------------------------------------------------------
-export MANPATH="$([[ ${#__manpath_pre} > 0 ]] && printf "%s:" "${__manpath_pre[@]}")$MANPATH$([[ ${#__manpath_post} > 0 ]] && printf ":%s" "${__manpath_post[@]}")"
-export PATH="$([[ ${#__path_pre} > 0 ]] && printf "%s:" "${__path_pre[@]}")$PATH$([[ ${#__path_post} > 0 ]] && printf ":%s" "${__path_post[@]}")"
-
-unset __path_pre
-unset __path_post
-unset __manpath_pre
-unset __manpath_post
-
-
-# ------------------------------------------------------------------------------
-# Load up nvm
-# nvm.sh -> to thwart nvm's install.sh
-# zdot load "$ZDOT_TEMPLATES/init_nvm" # Load nvm
-
-
-# ------------------------------------------------------------------------------
-# Load up necessary scripts
-# ------------------------------------------------------------------------------
-# Load any private scripts
-zdot load "$ZDOT_DROPBOX_APPS/index.zsh"
-
-
-# ------------------------------------------------------------------------------
-# check install
-# ------------------------------------------------------------------------------
-zdot load "$ZDOT_TEMPLATES/check-install.zsh"
+zdot load "$ZDOT_TEMPLATES/zpaths.zsh"
 
 
 # ------------------------------------------------------------------------------

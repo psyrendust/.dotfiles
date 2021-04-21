@@ -23,6 +23,8 @@ export EDITOR="$VISUAL"
 export FZF_PATH="/usr/local/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
 
+export ZPLUG_THREADS=1
+
 export ZDOT="$HOME/.dotfiles"
 export ZDOT_BIN="$ZDOT/bin"
 export ZDOT_CACHE="$ZDOT/cache"

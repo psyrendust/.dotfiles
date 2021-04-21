@@ -90,7 +90,7 @@ function _zdot::alias() {
 }
 
 function _zdot::check() {
-  _zdot::run "$ZDOT_TEMPLATES/check-install.zsh"
+  _zdot::load "$ZDOT_TEMPLATES/check-install.zsh"
 }
 
 function _zdot::clear() {
@@ -121,15 +121,15 @@ function _zdot::update() {
   # 2. clear    -- Remove the cache file
   # 3. update   -- Update installed packages in parallel
   # 4. load     -- Source installed plugins and add installed commands to $PATH
-  echo "[zplug] Remove repositories which are no longer managed" &&
+  echo "[zdot] Remove repositories which are no longer managed" &&
   zplug clean --force &&
   sleep 2 &&
-  echo "[zplug] Remove the cache file" &&
+  echo "[zdot] Remove the cache file" &&
   zplug clear &&
   sleep 2 &&
-  echo "[zplug] Update installed packages in parallel" &&
+  echo "[zdot] Update installed packages in parallel" &&
   zplug update --force &&
   sleep 2 &&
-  echo "[zplug] Source installed plugins and add installed commands to \$PATH" &&
+  echo "[zdot] Source installed plugins and add installed commands to \$PATH" &&
   zplug load --verbose
 }

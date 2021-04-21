@@ -363,6 +363,9 @@ compdef _git gld=git-log
 alias glpr='_git-log-pr'
 compdef _git glpr=git-log
 
+alias gls='glo -n 10'
+compdef _git gls=git-log
+
 alias gm='git merge'
 compdef _git gm=git-merge
 
