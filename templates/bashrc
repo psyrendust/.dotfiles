@@ -4,3 +4,5 @@
 # nvm.sh -> to thwart nvm's install.sh
 [[ -s "$HOME/.init_nvm" ]] && source "$HOME/.init_nvm" # Load nvm
 
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

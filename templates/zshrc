@@ -47,8 +47,6 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  apache2
-  bower
   brew
   colored-man-pages
   colorize
@@ -68,7 +66,6 @@ plugins=(
   node
   npm
   osx
-  ruby
   systemadmin
   urltools
 )
@@ -78,7 +75,6 @@ plugins+=(
   aliases
   git
   git-flow-completion
-  sublime
 )
 
 
@@ -125,3 +121,5 @@ export ARCHFLAGS="-arch x86_64"
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source $ZSH/oh-my-zsh.sh
 [[ -s "$ZSH_CUSTOM/themes/spaceship-setup.zsh" ]] && source $ZSH_CUSTOM/themes/spaceship-setup.zsh
 
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

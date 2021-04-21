@@ -33,8 +33,8 @@ done
 
 ppinfo "Installing dependencies"
 
-for script in $ZSH_CUSTOM/setup/{homebrew,ohmyzsh,rvm,nvm,symlinks}/install.sh; do
-  "$script" 2>&1
-done
+# for script in $ZSH_CUSTOM/setup/{homebrew,ohmyzsh,rvm,nvm,symlinks}/install.sh; do
+#   "$script" 2>&1
+# done
 
 $ZSH_CUSTOM/templates/install.sh 2>&1

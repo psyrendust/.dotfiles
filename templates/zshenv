@@ -37,10 +37,10 @@ setopt EXTENDED_GLOB
 # --qlplugindir       ~/Library/QuickLook           Changes the path for Quicklook Plugin symlinks.
 # --screen_saverdir   ~/Library/Screen\ Savers      Changes the path for Screen Saver symlinks.
 export HOMEBREW_CASK_OPTS="--appdir=/Applications --caskroom=/opt/homebrew-cask/Caskroom --fontdir=~/Library/Fonts --input_methoddir=~/Library/Input\ Methods --prefpanedir=~/Library/PreferencePanes --qlplugindir=~/Library/QuickLook --screen_saverdir=~/Library/Screen\ Savers"
-export GOPATH="$HOME/.go"
-export GOROOT="/usr/local/opt/go/libexec"
-export JAVA_VERSION=1.7
-export JAVA_HOME="$(/usr/libexec/java_home)"
+# export GOPATH="$HOME/.go"
+# export GOROOT="/usr/local/opt/go/libexec"
+# export JAVA_VERSION=1.7
+# export JAVA_HOME="$(/usr/libexec/java_home)"
 
 # ------------------------------------------------------------------------------
 # Setup paths
@@ -56,7 +56,7 @@ export ZSH_CUSTOM="$HOME/.dotfiles"
 __path_pre+=("$ZSH_CUSTOM/plugins/asciinema2gif/bin")
 # __path_pre+=("$ZSH_CUSTOM/plugins/safe-rm/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/pretty-print/bin")
-__path_pre+=("$ZSH_CUSTOM/plugins/sublime/bin")
+# __path_pre+=("$ZSH_CUSTOM/plugins/sublime/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/npmlist/bin")
 __path_pre+=("$ZSH_CUSTOM/plugins/textcleaner/bin")
 __path_pre+=("$ZSH_CUSTOM/bin")
@@ -66,8 +66,8 @@ __path_pre+=("$HOME/.tmpbin")
 # __path_pre+=("$__brew_coreutils/libexec/gnubin")
 
 # Add GOPATH and GOROOT
-[[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
-[[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
+[[ -d "$GOPATH" ]] && [[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
+[[ -d "$GOROOT" ]] && [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
 
 # Add homebrews bin
 # __path_pre+=("/usr/local/bin")
