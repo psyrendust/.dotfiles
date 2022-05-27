@@ -1,10 +1,12 @@
 #!/usr/bin/env zsh
 #
 # del
-# Fuzzy git delete branch
+# Fuzzy git delete local branch and optionally
+# delete the remote branch if it exists.
 #-------------------------------------------------------------------------------
 
 set -e
 
 BRANCH=$(gitbranches | fzf) &&
-git branch -D ${BRANCH}
+git branch -D ${BRANCH} &&
+delremote "${BRANCH}"

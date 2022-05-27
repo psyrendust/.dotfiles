@@ -8,7 +8,7 @@ set -e
 
 # For short sha
 # commits=$(git log --color=always --pretty=oneline --abbrev-commit --reverse) &&
-commits=$(git log --color=always --pretty=oneline --reverse) &&
+commits=$(git log --color=always --oneline --decorate --reverse --max-count 50) &&
 commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse) &&
 # echo -n $(echo "$commit" | sed "s/ .*//")
 echo ${commit} | awk '{ print $1 }'

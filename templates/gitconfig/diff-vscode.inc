@@ -18,7 +18,6 @@
 #   -d --diff <file> <file>           Compare two files with each other.
 # ------------------------------------------------------------------------------
 [difftool "vscode"]
-
     cmd = code -nwd $LOCAL $REMOTE
 [mergetool "vscode"]
     cmd = code -nw $MERGED

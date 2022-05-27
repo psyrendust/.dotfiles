@@ -14,4 +14,5 @@
     head = "!git rev-parse HEAD | cut -b -7"
     lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
     plus = commit -a --amend --no-edit
+    root = "!f() { root=$(git rev-parse --git-dir) && root=$(cd \"$root\" && pwd)/ && echo \"${root%%/.git/*}\"; }; f"
     unassume = update-index --no-assume-unchanged

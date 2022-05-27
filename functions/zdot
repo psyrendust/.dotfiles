@@ -23,7 +23,7 @@ function zdot() {
   shift
 
   # Subcommand functions start with _ so that they don't
-  # appear as completion entries when looking for `omz`
+  # appear as completion entries when looking for `zdot`
   (( $+functions[_zdot::$command] )) || {
     _zdot::help
     return 1
@@ -41,6 +41,7 @@ function _zdot {
     'clear:Clear the cache directory'
     'edit:Open dotfiles vscode workspace'
     'load:Source a file if it exists'
+    'notes:Open notes folder in vscode'
     'update:Update dotfiles'
   )
 
@@ -57,7 +58,9 @@ if (( ! $+functions[compinit] )); then
 fi
 compdef _zdot zdot
 
-function _zdot::help {
+function _zdot::noop() {}
+
+function _zdot::help() {
   cat <<EOF
 Usage: zdot <command> [options]
 
@@ -69,6 +72,7 @@ Available commands:
   clear               Clear the cache directory
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
+  notes               Open notes folder in vscode
   update              Update dotfiles
 
 EOF
@@ -86,11 +90,11 @@ EOF
 #    1 if it does not exist
 #
 function _zdot::alias() {
-    (( $+aliases[$1] )) && echo $aliases[$1]
+  (( $+aliases[$1] )) && echo $aliases[$1]
 }
 
 function _zdot::check() {
-  _zdot::run "$ZDOT_TEMPLATES/check-install.zsh"
+  _zdot::load "$ZDOT_TEMPLATES/check-install.zsh"
 }
 
 function _zdot::clear() {
@@ -115,21 +119,26 @@ EOF
   [[ -f "$1" ]] && . "$1"
 }
 
+function _zdot::notes() {
+  [[ -d "$HOME/workspace/notes" ]] && code "$HOME/workspace/notes"
+  [[ -d "$HOME/dev/notes" ]] && code "$HOME/dev/notes"
+}
+
 function _zdot::update() {
   # zplug refresh
   # 1. clean    -- Remove repositories which are no longer managed
   # 2. clear    -- Remove the cache file
   # 3. update   -- Update installed packages in parallel
   # 4. load     -- Source installed plugins and add installed commands to $PATH
-  echo "[zplug] Remove repositories which are no longer managed" &&
+  echo "[zdot] Remove repositories which are no longer managed" &&
   zplug clean --force &&
   sleep 2 &&
-  echo "[zplug] Remove the cache file" &&
+  echo "[zdot] Remove the cache file" &&
   zplug clear &&
   sleep 2 &&
-  echo "[zplug] Update installed packages in parallel" &&
+  echo "[zdot] Update installed packages in parallel" &&
   zplug update --force &&
   sleep 2 &&
-  echo "[zplug] Source installed plugins and add installed commands to \$PATH" &&
+  echo "[zdot] Source installed plugins and add installed commands to \$PATH" &&
   zplug load --verbose
 }

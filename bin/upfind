@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+# upfind
+# Walk directory tree upwards and search for a file.
+#-------------------------------------------------------------------------------
+
+set -e
+
+while [[ $PWD != / ]] && [[ -z "$result" ]]; do
+  result=$(fd "$@" --max-depth 1 "$PWD"/)
+  cd ..
+done
+
+echo "$result"

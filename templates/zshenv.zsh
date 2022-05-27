@@ -18,10 +18,13 @@
 # ------------------------------------------------------------------------------
 
 
+export BAT_PAGER="less -R"
 export VISUAL='/usr/local/bin/code --wait'
 export EDITOR="$VISUAL"
 export FZF_PATH="/usr/local/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
+
+export ZPLUG_THREADS=1
 
 export ZDOT="$HOME/.dotfiles"
 export ZDOT_BIN="$ZDOT/bin"
@@ -55,5 +58,8 @@ fpath=(
 )
 autoload -Uz compinit
 autoload -Uz zdot
+autoload -Uz pkg
 
 compinit
+zdot noop
+pkg noop

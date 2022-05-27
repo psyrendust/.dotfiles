@@ -8,6 +8,12 @@
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
+function cdroot() {
+  local root
+  root=$(git root) || return 1
+  cd "$root"
+}
+
 function _current_branch() {
   ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
   ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
@@ -360,8 +366,18 @@ compdef _git gls=git-log
 alias gld='_git-log-diff'
 compdef _git gld=git-log
 
+# alias glog='git log --oneline --decorate'
+alias glog='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
+compdef _git glog=git-log
+
+alias glol='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
+compdef _git glol=git-log
+
 alias glpr='_git-log-pr'
 compdef _git glpr=git-log
+
+alias gls='glo -n 10'
+compdef _git gls=git-log
 
 alias gm='git merge'
 compdef _git gm=git-merge
@@ -381,8 +397,8 @@ compdef _git gmfromroot=git-merge
 alias gmfromupstream='_git-merge-from-upstream'
 compdef _git gmfromupstream=git-merge
 
-# alias gpatchit='_git-patchit'
-# compdef _git gpatchit=git-am
+alias gmt='git mergetool'
+compdef _git gmt=git-mergetool
 
 alias groot='cd "$(git rev-parse --show-toplevel)" || exit'
 compdef _git groot=git-rev-parse
@@ -427,4 +443,5 @@ compdef _git gun=git-reset
 # - adds timestamp to commit message.
 # - Replaces `git add -a` with faster implementation
 #   that is optimized for large repos.
-alias gwip='git-add-all; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'
+alias gwip='git-add-all; git rm $(git ls-files --deleted) 2> /dev/null; gcwip'
+alias gcwip='git commit --no-verify --no-gpg-sign -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'

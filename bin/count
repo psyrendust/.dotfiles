@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+#
+# count
+# Recursively count all files in a directory
+#-------------------------------------------------------------------------------
+
+set -e
+
+SEARCH_PATH="${1:-.}"
+TOTAL_FILES=$(fd --type f '.*' ${SEARCH_PATH} | wc -l | xargs);
+echo "${TOTAL_FILES}"

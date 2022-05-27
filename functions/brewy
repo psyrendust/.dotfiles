@@ -1,0 +1,236 @@
+#!/usr/bin/env zsh
+#
+# Utility to manage Homebrew user installed packages.
+#
+# Authors:
+#   Larry Gordon
+#
+# Usage: brewy
+#
+# @see
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
+#
+#
+#
+#
+# Install Homebrew
+#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#
+# Uninstall Homebrew
+#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+# ------------------------------------------------------------------------------
+#
+# https://stackoverflow.com/questions/21758536/homebrew-list-only-installed-top-level-formulas
+# A better alternative to listing everything installed
+#     ❯ brew bundle dump --file -
+#     Running `brew update --preinstall`...
+#     ==> Auto-updated Homebrew!
+#     Updated 1 tap (homebrew/core).
+#     ==> Updated Formulae
+#     Updated 1 formula.
+#
+#     ==> Tapping homebrew/bundle
+#     Cloning into '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-bundle'...
+#     remote: Enumerating objects: 6380, done.
+#     remote: Counting objects: 100% (558/558), done.
+#     remote: Compressing objects: 100% (366/366), done.
+#     remote: Total 6380 (delta 265), reused 425 (delta 189), pack-reused 5822
+#     Receiving objects: 100% (6380/6380), 1.49 MiB | 4.63 MiB/s, done.
+#     Resolving deltas: 100% (3688/3688), done.
+#     Tapped 1 command (98 files, 1.8MB).
+#     Warning: No services available to control with `brew services`
+#     tap "edamameldn/tap"
+#     tap "eth-p/software"
+#     tap "homebrew/bundle"
+#     tap "homebrew/cask"
+#     tap "homebrew/core"
+#     tap "homebrew/services"
+#     brew "bash"
+#     brew "bat"
+#     brew "diff-so-fancy"
+#     brew "exa"
+#     brew "fasd"
+#     brew "fd"
+#     brew "fzf"
+#     brew "git"
+#     brew "git-delta"
+#     brew "git-recent"
+#     brew "less"
+#     brew "nghttp2"
+#     brew "prettier"
+#     brew "pygments"
+#     brew "ripgrep"
+#     brew "tree"
+#     brew "zsh"
+#     brew "edamameldn/tap/tape-cli"
+#     brew "eth-p/software/bat-extras"
+#     cask "qlstephen"
+#     cask "sbarex-qlmarkdown"
+#     cask "suspicious-package"
+#     cask "syntax-highlight"
+#
+#
+# List user installed packages
+#     ❯ brew ls --versions $(brew leaves -r)
+#     bash 5.1.8
+#     bat-extras 2021.04.06
+#     diff-so-fancy 1.4.2
+#     exa 0.10.1
+#     fasd 1.0.1
+#     fd 8.2.1
+#     fzf 0.27.0
+#     git 2.32.0
+#     git-recent 1.1.1
+#     less 581.2_1
+#     pygments 2.9.0
+#     tape-cli 0.14.0-0
+#     tree 1.8.0
+#     zsh 5.8_1
+
+# Issue with installed taps
+# You can get the following using: `brew leaves -r`
+#     edamameldn/tap/tape-cli
+#     eth-p/software/bat-extras
+#
+#     brew install eth-p/software/bat-extras
+#     brew install edamameldn/tap/tape-cli
+#
+# List user installed packages
+#     ❯ brew ls --versions $(brew leaves -r) | cut -d' ' -f1
+#     bash
+#     bat-extras
+#     diff-so-fancy
+#     exa
+#     fasd
+#     fd
+#     fzf
+#     git
+#     git-recent
+#     less
+#     pygments
+#     tape-cli
+#     tree
+#     zsh
+
+# List user installed casks
+#     ❯ brew ls --cask --versions
+#     qlstephen 1.5.1
+#     sbarex-qlmarkdown 1.0.1
+#     suspicious-package 3.7,773
+#     syntax-highlight 2.0.8
+
+# List user installed casks without versions
+#     ❯ brew ls --cask --versions  | cut -d' ' -f1
+#     qlstephen
+#     sbarex-qlmarkdown
+#     suspicious-package
+#     syntax-highlight
+
+# List taps
+#     ❯ brew tap
+#     edamameldn/tap
+#     eth-p/software
+#     homebrew/cask
+#     homebrew/core
+#     homebrew/services
+
+function brewy() {
+  [[ $# -gt 0 ]] || {
+    _brewy::help
+    return 1
+  }
+
+  local command="$1"
+  shift
+
+  # Subcommand functions start with _ so that they don't
+  # appear as completion entries when looking for `pkg`
+  (( $+functions[_brewy::$command] )) || {
+    _brewy::help
+    return 1
+  }
+
+  _brewy::$command "$@"
+}
+
+function _brewy {
+  local -a cmds subcmds
+  cmds=(
+    'help:Usage information'
+    'deps:Print out package.json dependencies'
+    'dev:Print out package.json devDependencies'
+    'has:Check if command is in package.json scripts'
+    'run:Run a command in package.json scripts'
+    'scripts:Print out package.json scripts'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'command' cmds
+  fi
+
+  return 0
+}
+
+if (( ! $+functions[compinit] )); then
+  autoload -Uz compinit
+  compinit
+fi
+compdef _brewy pkg
+
+function _brewy::noop() {}
+
+function _brewy::help() {
+  cat <<EOF
+Usage: pkg <command> [options]
+
+Available commands:
+
+  help        Print this help message
+  deps        Print out package.json dependencies
+  dev         Print out package.json devDependencies
+  has         Check if command is in package.json scripts
+  run         Run a command in package.json scripts
+  scripts     Print out package.json scripts
+
+EOF
+}
+
+function _brewy::path() {
+  local pathname="${@%%+(package.json)}"
+  pathname="${pathname%%+(/)}"
+  local pkg="$(cd "$pathname" && upfind 'package.json')"
+  echo "$pkg"
+}
+
+function _brewy::deps() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.dependencies'
+}
+
+function _brewy::dev() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.devDependencies'
+}
+
+function _brewy::has() {
+  local pkg="$(pkg path)"
+  [[ $(cat "$pkg" | jq ".scripts.\"$1\"") != "null" ]] && return
+  false
+}
+
+function _brewy::run() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  local choice=$(cat "$pkg" | jq '.scripts | keys[]' | fzf --tac | tr -d '"') &&
+  yarn $choice
+}
+
+function _brewy::scripts() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.scripts'
+}

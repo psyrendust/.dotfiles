@@ -1,0 +1,98 @@
+#!/usr/bin/env zsh
+#
+# check
+# Runs package.json checks
+#
+# Required libs:
+#
+# chalk-cli
+#    check if you have it installed
+#       which chalk
+#    https://www.npmjs.com/package/chalk-cli
+#       npm install --global chalk-cli
+#
+# fd
+#    check if you have it installed
+#       which fd
+#    https://github.com/sharkdp/fd#on-macos
+#       brew install fd
+#    https://github.com/sharkdp/fd#from-npm
+#       npm install -g fd-find
+#
+# jq
+#    check if you have it installed
+#       which jq
+#    https://stedolan.github.io/jq/
+#       brew install jq
+#
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Search for a file starting from the current directory and in successive parent
+# directories all the way up to the root directory of the filesystem.
+function _upfind() {
+  while [[ $PWD != / ]] && [[ -z "$result" ]]; do
+    result=$(fd "$@" --max-depth 1 "$PWD"/)
+    cd ..
+  done
+
+  echo "$result"
+}
+
+# Use _upfind to search for the nearest package.json file
+function _pkgpath() {
+  local pathname="${@%%+(package.json)}"
+  pathname="${pathname%%+(/)}"
+  local pkg="$(cd "$pathname" && _upfind 'package.json')"
+  echo "$pkg"
+}
+
+# Check if a package.json contains a script by name.
+function _pkghas() {
+  local pkg="$(_pkgpath)"
+  [[ $(cat "$pkg" | jq ".scripts.\"$1\"") != "null" ]] && return
+
+  false
+}
+
+# Run a series of scripts from package.json
+function checkall() {
+  skipped=()
+  counter=1
+  increment() {
+    ((counter+=1))
+  }
+  runCommand() {
+    idx="$1"
+    shift
+    cmd="$1"
+    shift
+    args="$@"
+    if _pkghas "$cmd"; then
+      chalk -t "{bgBlue  INFO } {blue.bold running ${cmd} - ${idx}/6}"
+      yarn ${cmd} ${args} && increment
+    else
+      skipped+=("$cmd")
+    fi
+  }
+  runSuccess() {
+    printf -v joined '%s, ' "${skipped[@]}"
+    chalk -t "{bgGreen  SUCCESS } {green.bold All checks passed - ran $counter of 5 checks}"
+    chalk -t "{bgGreen  SUCCESS } {green.bold Skipped ${#skipped[@]} checks: [${joined%%, }]}"
+  }
+  funFail() {
+    chalk -t "{bgRed  FAILURE } {red.bold fail}"
+  }
+  (
+    runCommand 1 check-workspace &&
+    runCommand 2 translations check &&
+    runCommand 3 typecheck &&
+    runCommand 4 lint &&
+    runCommand 5 test --coverage &&
+    runCommand 6 translations-extract &&
+    runSuccess
+  ) || runFail
+}
+
+checkall $@

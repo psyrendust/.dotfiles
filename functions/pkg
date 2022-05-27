@@ -1,0 +1,113 @@
+#!/usr/bin/env zsh
+#
+# Define pkg command for package.json scripts
+#
+# Authors:
+#   Larry Gordon
+#
+# Usage: pkg
+#
+# @see https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-simple-completion-functions-using-_describe
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
+# ------------------------------------------------------------------------------
+
+function pkg() {
+  [[ $# -gt 0 ]] || {
+    _pkg::help
+    return 1
+  }
+
+  local command="$1"
+  shift
+
+  # Subcommand functions start with _ so that they don't
+  # appear as completion entries when looking for `pkg`
+  (( $+functions[_pkg::$command] )) || {
+    _pkg::help
+    return 1
+  }
+
+  _pkg::$command "$@"
+}
+
+function _pkg {
+  local -a cmds subcmds
+  cmds=(
+    'help:Usage information'
+    'deps:Print out package.json dependencies'
+    'dev:Print out package.json devDependencies'
+    'has:Check if command is in package.json scripts'
+    'run:Run a command in package.json scripts'
+    'scripts:Print out package.json scripts'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'command' cmds
+  fi
+
+  return 0
+}
+
+if (( ! $+functions[compinit] )); then
+  autoload -Uz compinit
+  compinit
+fi
+compdef _pkg pkg
+
+function _pkg::noop() {}
+
+function _pkg::help() {
+  cat <<EOF
+Usage: pkg <command> [options]
+
+Available commands:
+
+  help        Print this help message
+  deps        Print out package.json dependencies
+  dev         Print out package.json devDependencies
+  has         Check if command is in package.json scripts
+  run         Run a command in package.json scripts
+  scripts     Print out package.json scripts
+
+EOF
+}
+
+function _pkg::path() {
+  local pathname="${@%%+(package.json)}"
+  pathname="${pathname%%+(/)}"
+  local pkg="$(cd "$pathname" && upfind 'package.json')"
+  echo "$pkg"
+}
+
+function _pkg::deps() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.dependencies'
+}
+
+function _pkg::dev() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.devDependencies'
+}
+
+function _pkg::has() {
+  local pkg="$(pkg path)"
+  [[ $(cat "$pkg" | jq ".scripts.\"$1\"") != "null" ]] && return
+  false
+}
+
+function _pkg::run() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  local choice=$(cat "$pkg" | jq '.scripts | keys[]' | fzf --tac | tr -d '"') &&
+  yarn $choice
+}
+
+function _pkg::scripts() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.scripts'
+}

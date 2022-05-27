@@ -21,12 +21,18 @@ alias cat='bat --paging=never'
 alias catp='bat'
 alias ccat='/bin/cat'
 alias changelogreset="conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+# Clear screen and reset scroll-back
+# @see https://apple.stackexchange.com/questions/31872/how-do-i-reset-the-scrollback-in-the-terminal-via-a-shell-command/113168#113168
+alias klear="clear && printf '\e[3J'"
 alias l='ls -CFH'
 alias la='l -A'
-alias li='l -l'
-alias ll='la -l'
+# alias li='l -l'
+# alias ll='la -l'
+# Use https://github.com/ogham/exa
+alias li='exa -lgh --group-directories-first'
+alias ll='li -a'
+
 alias rmrf="rm -rf"
-alias scripts="cat package.json | jq '.scripts'"
 alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
 alias version="cat package.json | jq '.version'"
@@ -108,10 +114,10 @@ function rmlock() {
   fi
 }
 
-_pluginsAliases="$ZDOT_PLUGINS/aliases"
-for plugin in $_pluginsAliases/*.zsh; do
-  if [ "$plugin" != "$_pluginsAliases/aliases.plugin.zsh" ]; then
-    source "$plugin" 2>&1
-  fi
-done
-unset _pluginsAliases
+# _pluginsAliases="$ZDOT_PLUGINS/aliases"
+# for plugin in $_pluginsAliases/*.zsh; do
+#   if [ "$plugin" != "$_pluginsAliases/aliases.plugin.zsh" ]; then
+#     source "$plugin" 2>&1
+#   fi
+# done
+# unset _pluginsAliases
