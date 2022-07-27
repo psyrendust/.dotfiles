@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+# trimleading
+# Trim leading whitespace
+#-------------------------------------------------------------------------------
+
+set -e
+
+sed -e 's/^[[:space:]]*//'

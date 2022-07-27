@@ -286,6 +286,9 @@ compdef _git gaa=git-add
 alias gass='git update-index --assume-unchanged'
 compdef _git gass=git-update-index
 
+alias gb='gitbranches'
+compdef _git gb=git-branch
+
 alias gbdel='git branch -D'
 compdef _git gbdel=git-branch
 

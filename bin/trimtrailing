@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+# trimtrailing
+# Trim trailing whitespace
+#-------------------------------------------------------------------------------
+
+set -e
+
+sed -e 's/[[:space:]]*$//'

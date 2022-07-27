@@ -7,6 +7,6 @@
 
 set -e
 
-BRANCH=$(gitbranches | fzf) &&
+BRANCH=$(gitbranches | fzf | trimleading) &&
 git branch -D ${BRANCH} &&
 delremote "${BRANCH}"
