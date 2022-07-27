@@ -1,3 +1,10 @@
+## [0.11.0](https://github.com/psyrendust/.dotfiles/compare/v0.10.0...v0.11.0) (2022-07-27)
+
+### Features
+
+- update how we search for git branches ([5223ac8](https://github.com/psyrendust/.dotfiles/commit/5223ac84cc371339e061ce229b2ad8667f34bebd))
+- various updates ([318a0e3](https://github.com/psyrendust/.dotfiles/commit/318a0e3b72ecf0e5ba7a8eee0a0d77fb404f40bd))
+
 ## [0.10.0](https://github.com/psyrendust/.dotfiles/compare/v0.9.0...v0.10.0) (2021-03-03)
 
 ### Features
