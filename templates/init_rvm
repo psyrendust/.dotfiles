@@ -1,2 +1,4 @@
+#!/usr/bin/env zsh
+
 # export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 zdot load "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 export NVM_DIR="$HOME/.nvm"
 
 # Find the correct nvm init script
