@@ -1,3 +1,9 @@
+## [0.13.1](https://github.com/psyrendust/.dotfiles/compare/v0.13.0...v0.13.1) (2022-08-03)
+
+### Bug Fixes
+
+- **iterm2:** fix incorrect path for vs code ([88fcf3f](https://github.com/psyrendust/.dotfiles/commit/88fcf3f0a063b7151e64da7fa380d6e2a78bf926))
+
 ## [0.13.0](https://github.com/psyrendust/.dotfiles/compare/v0.12.0...v0.13.0) (2022-08-03)
 
 ### Features
