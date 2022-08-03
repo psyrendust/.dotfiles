@@ -1,3 +1,9 @@
+## [0.13.0](https://github.com/psyrendust/.dotfiles/compare/v0.12.0...v0.13.0) (2022-08-03)
+
+### Features
+
+- **yarn:** upgrade outdated dependencies ([efc3a4a](https://github.com/psyrendust/.dotfiles/commit/efc3a4aee4dcd62b2a5d1ac062c853208fe4438b))
+
 ## [0.12.0](https://github.com/psyrendust/.dotfiles/compare/v0.11.1...v0.12.0) (2022-08-03)
 
 ### Features
