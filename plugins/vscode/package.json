@@ -4,7 +4,13 @@
   "private": true,
   "description": "Dotfiles vscode plugin",
   "license": "MIT",
-  "main": "index.js",
+  "main": "./bin/vscode",
+  "bin": {
+    "vscode": "./bin/vscode"
+  },
+  "files": [
+    "bin"
+  ],
   "dependencies": {
     "minimist": "^1.2.5",
     "prompts": "^2.4.0"
