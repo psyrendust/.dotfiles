@@ -7,7 +7,7 @@
 set -e
 
 while [[ $PWD != / ]] && [[ -z "$result" ]]; do
-  result=$(fd "$@" --max-depth 1 "$PWD"/)
+  result=$(fd --glob --hidden "$@" --max-depth 1 "$PWD"/)
   cd ..
 done
 
