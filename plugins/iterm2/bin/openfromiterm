@@ -14,9 +14,10 @@
 #   2. Locate the location of this script, it's usually `~/.dotfiles/plugins/iterm2/bin/openfromiterm`
 #   3) Open iTerm2 preferences. Go to Profiles -> Your default profile -> Advanced.
 #   4) Select "Always run command..." under Semantic History
-#   5) Enter "~/.dotfiles/plugins/iterm2/bin/openfromiterm \5 \1" as the command
-#   6) Command-Click on a filename in the terminal, like in a `git show --name-status` output, or git status result
-#   7) Enjoy.
+#   5) Enter `/Users/<username>/.dotfiles/plugins/iterm2/bin/openfromiterm "\1" "\2" "\3" "\4" "\5"` as the command
+#   6) Be sure to replace `<username>` with your own user name
+#   7) Command-Click on a filename in the terminal, like in a `git show --name-status` output, or git status result
+#   8) Enjoy.
 #
 #   openfromiterm <pwd> <path to file>
 #
