@@ -1,12 +1,16 @@
 {
-	"folders": [
-		{
+  "folders": [
+    {
+      "name": "Dotfiles",
+      "path": "../.dotfiles",
+    },
+    {
 			"name": "home",
 			"path": "../",
 		},
     {
       "name": "Dropbox",
-      "path": "../Dropbox/Larry/Apps",
+      "path": "../Dropbox/Apps",
     },
 	],
 	"settings": {
@@ -17,7 +21,7 @@
 			// folders
 			".cache/": true,
 			".config/": true,
-			// ".dotfiles/": true,
+      ".dotfiles/": true,
 			".dropbox/": true,
 			".git-trickle-fetch/": true,
 			".gitdumps/": true,
