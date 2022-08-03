@@ -1,0 +1,170 @@
+#!/usr/bin/env zsh
+#
+# openfromiterm - Allow iterm2 Semantic History to handle file paths
+#
+# When clicking on a filename in iTerm2 using Semantic History and the path of
+# the file does not match the pwd iTerm2 will try and open the filename in your
+# default browser window. This script will detect if you are trying to open a
+# file within a git repo and attempt to prepend the correct path to the filename.
+# This is useful when you are in a subfolder of a git repo and you run `git status`
+# or `git show --name-status` and try clicking on the filename in the output.
+#
+# Usage:
+#   1. Install iTerm2
+#   2. Locate the location of this script, it's usually `~/.dotfiles/plugins/iterm2/bin/openfromiterm`
+#   3) Open iTerm2 preferences. Go to Profiles -> Your default profile -> Advanced.
+#   4) Select "Always run command..." under Semantic History
+#   5) Enter "~/.dotfiles/plugins/iterm2/bin/openfromiterm \5 \1" as the command
+#   6) Command-Click on a filename in the terminal, like in a `git show --name-status` output, or git status result
+#   7) Enjoy.
+#
+#   openfromiterm <pwd> <path to file>
+#
+#---------------------------------------------------------------------------------------------------
+
+set -e
+# --------------------------------------------------------------------------------------------------
+# Initialize our environment
+myhome="/Users/$(whoami)"
+source "$myhome/.dotfiles/templates/zshenv.zsh"
+source "$myhome/.dotfiles/templates/zpaths.zsh"
+logfile="$ZDOT_CACHE/.openfromiterm.log"
+
+
+# --------------------------------------------------------------------------------------------------
+# Setup some variables
+ckeck="[ ✅ ]"
+xmark="[ ❌ ]"
+
+filename="$1"
+lineNumber="$2"
+prefix="$3"
+suffix="$4"
+workingDirectory="$5"
+
+
+# --------------------------------------------------------------------------------------------------
+# Setup logging
+logDecisionMsg=""
+function log() { echo $1 >> $logfile }
+function logReset() { echo -n "" > $logfile }
+function logHeader() { log "------------------------------------------------------------------------------------------------------------------------" }
+function logHr() { log "| ------------------------------------------------------------------------------" }
+function logInfo() { log "| -- $1" }
+function logDecision() { logDecisionMsg="$1" }
+function logYes() { log "| $ckeck $logDecisionMsg$1" }
+function logNo() { log "| $xmark $logDecisionMsg$1" }
+function logEnd() { log ""; log "" }
+[ ! -f $logfile ] && touch $logfile
+if test "$(wc -l < $logfile)" -gt "50"; then
+  logReset
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# Print variables
+logHeader
+logInfo "            PATH: [ $PATH ]"
+logInfo "          myhome: [ $myhome ]"
+logInfo "         logfile: [ $logfile ]"
+logInfo "               0: [ $0 ]"
+logInfo "        filename: [ $filename ]"
+logInfo "      lineNumber: [ $lineNumber ]"
+logInfo "          prefix: [ $prefix ]"
+logInfo "          suffix: [ $suffix ]"
+logInfo "workingDirectory: [ $workingDirectory ]"
+logInfo "      pwd before: [ $(pwd) ]"
+
+cd "$workingDirectory"
+logInfo "       pwd after: [ $(pwd) ]" >> $logfile
+logHr
+
+# --------------------------------------------------------------------------------------------------
+# If the filename is a url open it
+logDecision "url check: [ $filename ]"
+if [[ "$filename" == http* ]] || [[ "$filename" == ssh* ]] || [[ "$filename" == telnet* ]]; then
+  logYes
+  /usr/bin/open "$filename"
+  logEnd
+  exit
+else
+  logNo
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# See if we are in a git working tree
+logDecision "is inside working tree"
+if $(git rev-parse --show-toplevel > /dev/null 2>&1); then
+  logYes "\c"
+  gitrootdir="$(git rev-parse --show-toplevel)/"
+else
+  logNo
+  logDecision "is inside .git folder"
+  if [[ $(pwd) = *.git/* || $(pwd) = *.git ]]; then
+    logYes "\c"
+    gitrootdir="$(dirname $(pwd))/"
+  else
+    logNo "\c"
+    gitrootdir=""
+  fi
+fi
+log " -- gitrootdir: [ $gitrootdir ]"
+
+
+# --------------------------------------------------------------------------------------------------
+# Determine the best possible file path to open
+gitrootfilepath="${gitrootdir}${filename}"
+logDecision "does file exist in gitroot: [ $gitrootfilepath ]"
+if [ -e "$gitrootfilepath" ]; then
+  logYes "\c"
+  newfilepath="$gitrootfilepath"
+  log " -- newfilepath: [ $newfilepath ]"
+else
+  logNo
+  logDecision "does base file path exist: [ $filename ]"
+  if [ -e "$filename" ]; then
+    logYes "\c"
+    newfilepath="$filename"
+    log " -- newfilepath: [ $newfilepath ]"
+  else
+    logNo
+    logDecision "is file upwards in directory tree"
+    upfindfilepath=$(upfind "$filename")
+    if [ -e "$upfindfilepath" ]; then
+      logYes "\c"
+      newfilepath="$upfindfilepath"
+    else
+      logNo "\c"
+    fi
+    log " -- upfindfilepath: [ $upfindfilepath ]"
+  fi
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# If the new file path is a text file, open it with vscode;
+# otherwise use the open command
+logDecision "does the file exist [ $newfilepath ]"
+if [ -e "$newfilepath" ]; then
+  logYes
+  logDecision "is this a text file"
+  if [[ -z $(file "$newfilepath" | grep "text") ]]; then
+    logNo
+    logInfo "-- using open command"
+    open "$newfilepath" &>/dev/null
+    logEnd
+    exit
+  else
+    logYes
+  fi
+else
+  logNo
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# Fallback to opening the nonexistent file with vscode
+logInfo "-- -- using vcode command"
+vscode $newfilepath
+logEnd
