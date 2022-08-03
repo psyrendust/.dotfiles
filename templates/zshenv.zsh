@@ -50,7 +50,7 @@ export ZDOT_LIB="$ZDOT/lib"
 export ZDOT_PLUGINS="$ZDOT/plugins"
 export ZDOT_TEMPLATES="$ZDOT/templates"
 export ZDOT_THEME="$ZDOT/theme"
-export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Larry/Apps"
+export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Apps"
 
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
