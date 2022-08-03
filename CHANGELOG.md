@@ -1,3 +1,11 @@
+## [0.12.0](https://github.com/psyrendust/.dotfiles/compare/v0.11.1...v0.12.0) (2022-08-03)
+
+### Features
+
+- add iterm2 plugin to support cmd click on filenames ([0c10a6a](https://github.com/psyrendust/.dotfiles/commit/0c10a6a293db82962348ee61243bfc0883392055))
+- **upfind:** allow searches for hidden dotfiles ([59641e1](https://github.com/psyrendust/.dotfiles/commit/59641e1dc5ddad7f056093255f53776f8a3a30aa))
+- update dropbox apps path to new generic location ([b68247e](https://github.com/psyrendust/.dotfiles/commit/b68247e89c7d10c1051d037e689ebb00266090a9))
+
 ### [0.11.1](https://github.com/psyrendust/.dotfiles/compare/v0.11.0...v0.11.1) (2022-08-03)
 
 ### Bug Fixes
