@@ -1,3 +1,9 @@
+### [0.11.1](https://github.com/psyrendust/.dotfiles/compare/v0.11.0...v0.11.1) (2022-08-03)
+
+### Bug Fixes
+
+- add homebrew path for x86_64 and arm64 architectures ([5396406](https://github.com/psyrendust/.dotfiles/commit/5396406fb6f85006950e4b305f20c196232f3190))
+
 ## [0.11.0](https://github.com/psyrendust/.dotfiles/compare/v0.10.0...v0.11.0) (2022-07-27)
 
 ### Features
