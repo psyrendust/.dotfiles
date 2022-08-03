@@ -152,7 +152,7 @@ if [ -e "$newfilepath" ]; then
   if [[ -z $(file "$newfilepath" | grep "text") ]]; then
     logNo
     logInfo "-- using open command"
-    open "$newfilepath" &>/dev/null
+    /usr/bin/open "$newfilepath" &>/dev/null
     logEnd
     exit
   else
@@ -165,6 +165,6 @@ fi
 
 # --------------------------------------------------------------------------------------------------
 # Fallback to opening the nonexistent file with vscode
-logInfo "-- -- using vcode command"
-vscode $newfilepath
+logInfo "-- -- using vs code command"
+/usr/local/bin/code $newfilepath
 logEnd
