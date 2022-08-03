@@ -12,7 +12,7 @@
     "bin"
   ],
   "dependencies": {
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "prompts": "^2.4.0"
   }
 }
