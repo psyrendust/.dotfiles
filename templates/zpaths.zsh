@@ -36,10 +36,10 @@ __path_pre+=("$HOME/.tmpbin")
 [[ -d "$GOROOT" ]] && [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
 
 # Add homebrews bin
-[[ -z $(echo $PATH | grep "/usr/local/bin") ]] && __path_pre+=("/usr/local/bin")
+[[ -z $(echo $PATH | grep "$ZDOT_BREW_ROOT/bin") ]] && __path_pre+=("$ZDOT_BREW_ROOT/bin")
 
 # Add manpath
-__manpath_pre+=("/usr/local/share/man")
+__manpath_pre+=("$ZDOT_BREW_ROOT/share/man")
 
 
 # ------------------------------------------------------------------------------

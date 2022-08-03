@@ -37,7 +37,7 @@ _fzf_compgen_dir() {
 
 # Setup fzf
 # ---------
-if [[ ! "$PATH" == */usr/local/opt/fzf/bin* ]]; then
+if [[ ! "$PATH" == *$ZDOT_BREW_ROOT/opt/fzf/bin* ]]; then
   export PATH="${PATH:+${PATH}:}${FZF_PATH}/bin"
 fi
 

@@ -17,11 +17,27 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
 # ------------------------------------------------------------------------------
 
+# Initialize Zdot's hash definitions
+# declare -A ZDOTHASH
+# ZDOTHASH[BIN]="$HOME/.dotfiles/bin"
+# A variable as a starting point of zplug
+# typeset -gx ZDOT_ROOT="${${(%):-%N}:A:h}"
+
+# What architecture are we using
+export ZDOT_ARCH=$(uname -m)
+if [[ $ZDOT_ARCH == "arm64" ]]; then
+  export ZDOT_M1=1
+  export ZDOT_BREW_ROOT="/opt/homebrew"
+elif [[ $ZDOT_ARCH == "x86_64" ]]; then
+  export ZDOT_X86=1
+  export ZDOT_BREW_ROOT="/usr/local"
+fi
 
 export BAT_PAGER="less -R"
+# vscode always saves to this location even on M1 macs
 export VISUAL='/usr/local/bin/code --wait'
 export EDITOR="$VISUAL"
-export FZF_PATH="/usr/local/opt/fzf"
+export FZF_PATH="$ZDOT_BREW_ROOT/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
 
 export ZPLUG_THREADS=1
@@ -37,7 +53,7 @@ export ZDOT_THEME="$ZDOT/theme"
 export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Larry/Apps"
 
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
-[[ -d "/usr/local/opt/go/libexec" ]] && export GOROOT="/usr/local/opt/go/libexec"
+[[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
 # export JAVA_VERSION=1.7
 # export JAVA_HOME="$(/usr/libexec/java_home)"
 

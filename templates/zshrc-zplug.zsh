@@ -63,7 +63,7 @@ zplug "plugins/yarn", from:oh-my-zsh, defer:1
 # ------------------------------------------------------------------------------
 # misc plugins
 # ------------------------------------------------------------------------------
-zplug "/usr/local/opt/fzf", from:local, use:"shell/*.zsh", defer:2
+zplug "$ZDOT_BREW_ROOT/opt/fzf", from:local, use:"shell/*.zsh", defer:2
 zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:2
 
 

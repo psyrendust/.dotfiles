@@ -27,20 +27,20 @@ declare -A brew_formula_apps
 # val: formula name
 # Regular bash executables
 brew_formulas=(
-  ["/usr/local/bin/bash"]="bash"
-  ["/usr/local/bin/bat"]="bat"
-  ["/usr/local/bin/batman"]="eth-p/software/bat-extras"
-  ["/usr/local/bin/diff-so-fancy"]="diff-so-fancy"
-  ["/usr/local/bin/exa"]="exa"
-  ["/usr/local/bin/fasd"]="fasd"
-  ["/usr/local/bin/fd"]="fd"
-  ["/usr/local/bin/fzf"]="fzf"
-  ["/usr/local/bin/git"]="git"
-  ["/usr/local/bin/git-recent"]="git-recent"
-  ["/usr/local/bin/pygmentize"]="pygments"
-  ["/usr/local/bin/rg"]="ripgrep"
-  ["/usr/local/bin/tree"]="tree"
-  ["/usr/local/bin/zsh"]="zsh"
+  ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
+  ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
+  ["$ZDOT_BREW_ROOT/bin/batman"]="eth-p/software/bat-extras"
+  ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
+  ["$ZDOT_BREW_ROOT/bin/exa"]="exa"
+  ["$ZDOT_BREW_ROOT/bin/fasd"]="fasd"
+  ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
+  ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
+  ["$ZDOT_BREW_ROOT/bin/git"]="git"
+  ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
+  ["$ZDOT_BREW_ROOT/bin/pygmentize"]="pygments"
+  ["$ZDOT_BREW_ROOT/bin/rg"]="ripgrep"
+  ["$ZDOT_BREW_ROOT/bin/tree"]="tree"
+  ["$ZDOT_BREW_ROOT/bin/zsh"]="zsh"
 )
 # Quicklook plugins
 # @see https://github.com/sindresorhus/quick-look-plugins#install-all
