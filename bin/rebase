@@ -9,4 +9,4 @@ set -e
 # HASH=`ghash` &&
 # git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
 # git rebase -i $(ghash)^
-git rebase -i origin/$(git_main_branch)
+git rebase -i origin/${1:-master}
