@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# git-parent
+# What is the nearest commit that resides on a branch other than the current branch, and which branch is that?
+# https://stackoverflow.com/questions/3161204/how-to-find-the-nearest-parent-of-a-git-branch
+# https://gist.github.com/joechrysler/6073741
+#-------------------------------------------------------------------------------
+
+set -e
+
+# git show-branch \
+#   | sed "s/].*//" \
+#   | grep "\*" \
+#   | grep -v "$(git rev-parse --abbrev-ref HEAD)" \
+#   | head -n1 \
+#   | sed "s/^.*\[//"
+
+git show-branch -a \
+| grep '\*' \
+| grep -v `git rev-parse --abbrev-ref HEAD` \
+| head -n1 \
+| sed 's/.*\[\(.*\)\].*/\1/' \
+| sed 's/[\^~].*//'
