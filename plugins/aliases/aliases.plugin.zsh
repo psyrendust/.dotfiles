@@ -16,7 +16,6 @@ HELPDIR=/usr/local/share/zsh/help
 
 [[ -d $HOME/.rvm/bin ]] && export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
-alias antigenupdate="antigen reset; antigen update;"
 alias cat='bat --paging=never'
 alias catp='bat'
 alias ccat='/bin/cat'
