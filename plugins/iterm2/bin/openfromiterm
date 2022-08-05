@@ -24,19 +24,44 @@
 #---------------------------------------------------------------------------------------------------
 
 set -e
+
 # --------------------------------------------------------------------------------------------------
 # Initialize our environment
-myhome="/Users/$(whoami)"
-source "$myhome/.dotfiles/templates/zshenv.zsh"
-source "$myhome/.dotfiles/templates/zpaths.zsh"
-logfile="$ZDOT_CACHE/.openfromiterm.log"
+# --------------------------------------------------------------------------------------------------
+if [[ -n "$(which datetimestamp | grep "not found")" ]]; then
+  myhome="/Users/$(whoami)"
+  source "$myhome/.dotfiles/templates/zshenv.zsh"
+  source "$myhome/.dotfiles/templates/zpaths.zsh"
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# Setup logging
+# --------------------------------------------------------------------------------------------------
+logfile="$ZDOT_CACHE/openfromiterm.log"
+loglen="100"
+logDecisionMsg=""
+[ ! -f $logfile ] && touch $logfile
+function log() { echo $@ >> $logfile }
+function logReset() { echo -n "" > $logfile }
+function logTime() { log "| last checked at: $(datetimestamp)" }
+function logBegin() { log "------------------------------------------------------------------------------------------------------------------------" }
+function logHr() { log "| ------------------------------------------------------------------------------" }
+function logHeader() { logHr; log "| $1" }
+function logTitle() { log "| ||||    $1    ||||" }
+function logInfo() { log "|   -- $1" }
+function logDecision() { logDecisionMsg="$1" }
+function logYes() { log "|   [ ✅ ] $logDecisionMsg $1" }
+function logNo() { log "|   [ ❌ ] $logDecisionMsg $1" }
+function logEnd() { log ""; log "" }
+if test "$(wc -l < $logfile)" -gt "$loglen"; then
+  logReset
+fi
 
 
 # --------------------------------------------------------------------------------------------------
 # Setup some variables
-ckeck="[ ✅ ]"
-xmark="[ ❌ ]"
-
+# --------------------------------------------------------------------------------------------------
 filename="$1"
 lineNumber="$2"
 prefix="$3"
@@ -44,27 +69,11 @@ suffix="$4"
 workingDirectory="$5"
 
 
+logBegin
+logTime
 # --------------------------------------------------------------------------------------------------
-# Setup logging
-logDecisionMsg=""
-function log() { echo $1 >> $logfile }
-function logReset() { echo -n "" > $logfile }
-function logHeader() { log "------------------------------------------------------------------------------------------------------------------------" }
-function logHr() { log "| ------------------------------------------------------------------------------" }
-function logInfo() { log "| -- $1" }
-function logDecision() { logDecisionMsg="$1" }
-function logYes() { log "| $ckeck $logDecisionMsg$1" }
-function logNo() { log "| $xmark $logDecisionMsg$1" }
-function logEnd() { log ""; log "" }
-[ ! -f $logfile ] && touch $logfile
-if test "$(wc -l < $logfile)" -gt "50"; then
-  logReset
-fi
-
-
+logHeader "Print variables"
 # --------------------------------------------------------------------------------------------------
-# Print variables
-logHeader
 logInfo "            PATH: [ $PATH ]"
 logInfo "          myhome: [ $myhome ]"
 logInfo "         logfile: [ $logfile ]"
@@ -77,11 +86,11 @@ logInfo "workingDirectory: [ $workingDirectory ]"
 logInfo "      pwd before: [ $(pwd) ]"
 
 cd "$workingDirectory"
-logInfo "       pwd after: [ $(pwd) ]" >> $logfile
-logHr
+logInfo "       pwd after: [ $(pwd) ]"
 
 # --------------------------------------------------------------------------------------------------
-# If the filename is a url open it
+logHeader "If the filename is a url open it"
+# --------------------------------------------------------------------------------------------------
 logDecision "url check: [ $filename ]"
 if [[ "$filename" == http* ]] || [[ "$filename" == ssh* ]] || [[ "$filename" == telnet* ]]; then
   logYes
@@ -94,7 +103,8 @@ fi
 
 
 # --------------------------------------------------------------------------------------------------
-# See if we are in a git working tree
+logHeader "See if we are in a git working tree"
+# --------------------------------------------------------------------------------------------------
 logDecision "is inside working tree"
 if $(git rev-parse --show-toplevel > /dev/null 2>&1); then
   logYes "\c"
@@ -114,8 +124,11 @@ log " -- gitrootdir: [ $gitrootdir ]"
 
 
 # --------------------------------------------------------------------------------------------------
-# Determine the best possible file path to open
+logHeader "Determine the best possible file path to open"
+# --------------------------------------------------------------------------------------------------
+filenamedir="$(dirname "$filename")/"
 gitrootfilepath="${gitrootdir}${filename}"
+gitrootfilepath="${gitrootfilepath#"$filenamedir"}"
 logDecision "does file exist in gitroot: [ $gitrootfilepath ]"
 if [ -e "$gitrootfilepath" ]; then
   logYes "\c"
@@ -144,8 +157,8 @@ fi
 
 
 # --------------------------------------------------------------------------------------------------
-# If the new file path is a text file, open it with vscode;
-# otherwise use the open command
+logHeader "If the new file path is a text file, open it with vscode; otherwise use the open command"
+# --------------------------------------------------------------------------------------------------
 logDecision "does the file exist [ $newfilepath ]"
 if [ -e "$newfilepath" ]; then
   logYes
@@ -158,6 +171,10 @@ if [ -e "$newfilepath" ]; then
     exit
   else
     logYes
+    logInfo "-- -- using vs code command"
+    /usr/local/bin/code $newfilepath
+    logEnd
+    exit
   fi
 else
   logNo
@@ -165,7 +182,9 @@ fi
 
 
 # --------------------------------------------------------------------------------------------------
-# Fallback to opening the nonexistent file with vscode
+logHeader "Fallback to opening the nonexistent file with vscode"
+# --------------------------------------------------------------------------------------------------
 logInfo "-- -- using vs code command"
 /usr/local/bin/code $newfilepath
+
 logEnd
