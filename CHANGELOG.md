@@ -1,3 +1,9 @@
+## [0.15.0](https://github.com/psyrendust/.dotfiles/compare/v0.14.0...v0.15.0) (2022-08-05)
+
+### Features
+
+- **check-install:** add odiff-bin ([1f93584](https://github.com/psyrendust/.dotfiles/commit/1f93584c8a22d09bd262cc2f2d0432004e9ff91b))
+
 ## [0.14.0](https://github.com/psyrendust/.dotfiles/compare/v0.13.1...v0.14.0) (2022-08-05)
 
 ### Features
