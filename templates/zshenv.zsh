@@ -54,8 +54,6 @@ export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Apps"
 
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
-# export JAVA_VERSION=1.7
-# export JAVA_HOME="$(/usr/libexec/java_home)"
 
 
 # ------------------------------------------------------------------------------
