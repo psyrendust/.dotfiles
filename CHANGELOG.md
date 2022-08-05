@@ -1,3 +1,9 @@
+## [0.16.0](https://github.com/psyrendust/.dotfiles/compare/v0.15.0...v0.16.0) (2022-08-05)
+
+### Features
+
+- **gitconfig:** enable vscode 3-way merge ([b8172b8](https://github.com/psyrendust/.dotfiles/commit/b8172b8abb0392d5c8cd88608912ee905785e2d6))
+
 ## [0.15.0](https://github.com/psyrendust/.dotfiles/compare/v0.14.0...v0.15.0) (2022-08-05)
 
 ### Features
