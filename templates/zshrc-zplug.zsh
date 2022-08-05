@@ -80,7 +80,6 @@ zplug "$ZDOT_PLUGINS/git-fuzzy", from:local, defer:2
 # ------------------------------------------------------------------------------
 # zsh plugins
 # ------------------------------------------------------------------------------
-# zplug "so-fancy/diff-so-fancy", as:command, defer:0
 zplug "zsh-users/zsh-completions", defer:0
 zplug "zsh-users/zsh-syntax-highlighting", defer:0
 zplug "zsh-users/zsh-history-substring-search", defer:3
