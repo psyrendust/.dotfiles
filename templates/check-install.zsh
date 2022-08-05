@@ -9,8 +9,6 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-set -e
-
 # --------------------------------------------------------------------------------------------------
 # Initialize our environment
 # --------------------------------------------------------------------------------------------------
@@ -65,8 +63,9 @@ logTitle "npm package check"
 npm_global_packages=(
   "chalk-cli"
   "jest"
-  "jez/bars"
+  "jez/bars"      # used with brew git-heatmap: https://github.com/jez/bars
   "live-server"
+  "odiff-bin"     # image diff tool: https://github.com/dmtrKovalenko/odiff
 )
 
 # ------------------------------------------------------------------------------
@@ -129,12 +128,12 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
   ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
   ["$ZDOT_BREW_ROOT/bin/batman"]="eth-p/software/bat-extras"
-  ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
   ["$ZDOT_BREW_ROOT/bin/exa"]="exa"
   ["$ZDOT_BREW_ROOT/bin/fasd"]="fasd"
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
+  ["$ZDOT_BREW_ROOT/bin/git-heatmap"]="git-heatmap"   # https://github.com/jez/git-heatmap
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
   ["$ZDOT_BREW_ROOT/bin/pygmentize"]="pygments"
   ["$ZDOT_BREW_ROOT/bin/rg"]="ripgrep"
