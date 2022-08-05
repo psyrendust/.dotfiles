@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#
+# datestamp
+# Output current date as yyyy-mm-dd
+#-------------------------------------------------------------------------------
+
+set -e
+
+echo $(date '+%Y-%m-%d')
