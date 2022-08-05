@@ -1,3 +1,17 @@
+## [0.14.0](https://github.com/psyrendust/.dotfiles/compare/v0.13.1...v0.14.0) (2022-08-05)
+
+### Features
+
+- **bin:** add datestamp cli ([3d395d1](https://github.com/psyrendust/.dotfiles/commit/3d395d14fdc4284aecb0d576e9985cf96a4d941e))
+- **bin:** add datetimestamp cli ([34f1013](https://github.com/psyrendust/.dotfiles/commit/34f101303712caebc57763e12ccab801647471a4))
+- **bin:** add default branch to rebase script ([5a3fb20](https://github.com/psyrendust/.dotfiles/commit/5a3fb200c5ef6799e143d43b2f86947d8d27199f))
+- **bin:** add git-parent script ([38ac367](https://github.com/psyrendust/.dotfiles/commit/38ac36740036d2e68edb0577d1291dd6672502b6))
+- **bin:** removing ldap script files ([7256d34](https://github.com/psyrendust/.dotfiles/commit/7256d34f37525961c5474b9a2f0db3aebe98234c))
+- **check-install:** add logging to logfile and check for npm packages ([69e70e8](https://github.com/psyrendust/.dotfiles/commit/69e70e861a3952afe32a309484825b4490c8694c))
+- **gitconfig:** add new git aliases ([216984c](https://github.com/psyrendust/.dotfiles/commit/216984cbed5391d36bde33026554e126b130be73))
+- **iterm2:** update logging for openfromiterm ([a941c15](https://github.com/psyrendust/.dotfiles/commit/a941c150fadad0ad5e7a170ecdc819c2d86ffe9e))
+- **zpaths:** add ZDOT_DROPBOX_BIN path ([b44644a](https://github.com/psyrendust/.dotfiles/commit/b44644a822f8d1fcfd3fabd84e19e960cb91d759))
+
 ## [0.13.1](https://github.com/psyrendust/.dotfiles/compare/v0.13.0...v0.13.1) (2022-08-03)
 
 ### Bug Fixes
