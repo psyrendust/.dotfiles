@@ -9,20 +9,119 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
-mkdir -p "$ZDOT_CACHE"
-# local DEBUG=true
+set -e
 
-log() {
-  if [[ -n $DEBUG ]]; then
-    echo $@
-  fi
-}
+# --------------------------------------------------------------------------------------------------
+# Initialize our environment
+# --------------------------------------------------------------------------------------------------
+if [[ -n "$(which datetimestamp | grep "not found")" ]]; then
+  myhome="/Users/$(whoami)"
+  source "$myhome/.dotfiles/templates/zshenv.zsh"
+  source "$myhome/.dotfiles/templates/zpaths.zsh"
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+# Setup logging
+# --------------------------------------------------------------------------------------------------
+logfile="$ZDOT_CACHE/check-install.log"
+loglen="143"
+logDecisionMsg=""
+[ ! -f $logfile ] && touch $logfile
+function log() { echo $@ >> $logfile }
+function logReset() { echo -n "" > $logfile }
+function logTime() { log "| last checked at: $(datetimestamp)" }
+function logBegin() { log "------------------------------------------------------------------------------------------------------------------------" }
+function logHr() { log "| ------------------------------------------------------------------------------" }
+function logHeader() { logHr; log "| $1" }
+function logTitle() { log "| ||||    $1    ||||" }
+function logInfo() { log "|   -- $1" }
+function logDecision() { logDecisionMsg="$1" }
+function logYes() { log "|   [ ✅ ] $logDecisionMsg $1" }
+function logNo() { log "|   [ ❌ ] $logDecisionMsg $1" }
+function logEnd() { log ""; log "" }
+if test "$(wc -l < $logfile)" -gt "$loglen"; then
+  logReset
+fi
+
 
 # Create an associative array for {key:value} pairs
 # @see https://scriptingosx.com/2019/11/associative-arrays-in-zsh/
+declare -A brew_formula_quicklook
 declare -A brew_formulas
-declare -A brew_formula_apps
+# Create arrays
+local brew_formulas_missing=()
+local cleanup_quarantine_attributes=()
+local npm_global_packages=()
+local npm_packages_missing=()
 
+
+logBegin
+logTime
+logHr
+# --------------------------------------------------------------------------------------------------
+logTitle "npm package check"
+# --------------------------------------------------------------------------------------------------
+npm_global_packages=(
+  "chalk-cli"
+  "jest"
+  "jez/bars"
+  "live-server"
+)
+
+# ------------------------------------------------------------------------------
+logHeader "npm_global_packages: ${#npm_global_packages[@]}"
+# ------------------------------------------------------------------------------
+for pkg in ${npm_global_packages[@]}; do logInfo "$pkg"; done
+
+# ------------------------------------------------------------------------------
+logHeader "Check for missing npm packages"
+# ------------------------------------------------------------------------------
+installed_npm_global_packages="$(npm list -g --depth=0)"
+for pkg in ${npm_global_packages[@]}; do
+  logDecision "found npm package [ $pkg ]"
+  if [[ -z "$(echo $installed_npm_global_packages | grep "$pkg")" ]]; then
+    logNo
+    npm_packages_missing+=("$pkg")
+  else
+    logYes
+  fi
+done
+
+# ------------------------------------------------------------------------------
+logHeader "missing npm packages: ${#npm_packages_missing[@]}"
+# ------------------------------------------------------------------------------
+for pkg in ${npm_packages_missing[@]}; do logInfo "  $pkg"; done
+
+# ------------------------------------------------------------------------------
+logHeader "Report missing npm packages and ask if we should install them"
+# ------------------------------------------------------------------------------
+if [[ ! ${#npm_packages_missing[@]} -eq 0 ]]; then
+  log "|   ask if we should install missing npm packages"
+  logDecision "Should we install missing npm packages"
+  printf "\033[0;31mMissing npm packages:\033[0m\n"
+  printf --  \
+    "  - \033[0;31m%s\033[0m: not installed\n" \
+    "${npm_packages_missing[@]}"
+  printf "\n"
+  printf "Install? [y/N]: "
+  if read -q; then
+    logYes
+    echo;
+    logDecision "installing missing packages"
+    npm install -g ${npm_packages_missing[@]} && logYes || logNo
+  else
+    logNo
+  fi
+  echo
+else
+  log "|   nothing to ask; no missing npm packages"
+fi
+
+
+# --------------------------------------------------------------------------------------------------
+logHr; logTitle "homebrew formulas check"
+# --------------------------------------------------------------------------------------------------
 # key: location
 # val: formula name
 # Regular bash executables
@@ -44,58 +143,75 @@ brew_formulas=(
 )
 # Quicklook plugins
 # @see https://github.com/sindresorhus/quick-look-plugins#install-all
-brew_formula_apps=(
+brew_formula_quicklook=(
   ["/Applications/QLMarkdown.app"]="sbarex-qlmarkdown"
   ["/Applications/Syntax Highlight.app"]="syntax-highlight"
   ["$HOME/Library/QuickLook/QLStephen.qlgenerator"]="qlstephen"
   ["/Applications/Suspicious Package.app"]="suspicious-package"
 )
-brew_formulas+=(${(kv)brew_formula_apps})
+brew_formulas+=(${(kv)brew_formula_quicklook})
 
-log "brew_formulas:"
-log ${(kv)brew_formulas}""
-log ""
+# ------------------------------------------------------------------------------
+logHeader "brew_formulas: ${#brew_formulas[@]}"
+# ------------------------------------------------------------------------------
+for value in ${(v)brew_formulas}; do logInfo "$value"; done
 
-local brew_formulas_missing=()
-local cleanup_attributes=()
-
-# Check for missing formulas
+# ------------------------------------------------------------------------------
+logHeader "Check for missing formulas"
+# ------------------------------------------------------------------------------
 for key value in ${(kv)brew_formulas}; do
-  log "[$key] - [$value]"
+  logDecision "found brew formula [ $key ] - [ $value ]"
   if [[ ! -a "$key" ]]; then
-    log "-- missing $key"
+    logNo
     brew_formulas_missing+=("$value")
-    if [[ -n $(echo "${(v)brew_formula_apps}" | grep "$value") ]]; then
-      log "---- is Application $key"
-      cleanup_attributes+=("$key")
+    logDecision "is missing formula a quicklook plugin $value"
+    if [[ -n $(echo "${(v)brew_formula_quicklook}" | grep "$value") ]]; then
+      logYes
+      cleanup_quarantine_attributes+=("$key")
+    else
+      logNo
     fi
+  else
+    logYes
   fi
 done
 
-log ""
-log "missing formulas:"
-for value in ${brew_formulas_missing[@]}; do
-  log "- $value"
-done
+# ------------------------------------------------------------------------------
+logHeader "missing formulas: ${#brew_formulas_missing[@]}"
+# ------------------------------------------------------------------------------
+for value in ${brew_formulas_missing[@]}; do logInfo "$value"; done
 
-# Report missing formulas and ask if we should install them
+# ------------------------------------------------------------------------------
+logHeader "Report missing formulas and ask if we should install them"
+# ------------------------------------------------------------------------------
 if [[ ! ${#brew_formulas_missing[@]} -eq 0 ]]; then
+  log "|   ask if we should install missing formulas"
+  logDecision "Should we install missing formulas"
   printf "\033[0;31mMissing homebrew formulas:\033[0m\n"
   printf --  \
-    "- \033[0;31m%s\033[0m: not installed\n" \
+    "  - \033[0;31m%s\033[0m: not installed\n" \
     "${brew_formulas_missing[@]}"
+  printf "\n"
   printf "Install? [y/N]: "
   if read -q; then
+    logYes
     echo;
-    brew install ${brew_formulas_missing[@]}
+    logDecision "installing missing formulas"
+    brew install ${brew_formulas_missing[@]} && logYes || logNo
+  else
+    logNo
   fi
-  echo;
+  echo
+else
+  log "|   nothing to ask; no missing formulas"
 fi
 
-# Cleanup quarantine attributes
-log ""
-log "cleanup attributes:"
-for key in ${cleanup_attributes[@]}; do
-  log "[$key]"
-  xattr -r -d com.apple.quarantine "$key"
+# ------------------------------------------------------------------------------
+logHeader "Cleanup quarantine attributes: ${#cleanup_quarantine_attributes[@]}"
+# ------------------------------------------------------------------------------
+for key in ${cleanup_quarantine_attributes[@]}; do
+  logDecision "cleaning quarantine attribute [ $key ]"
+  xattr -dr com.apple.quarantine "$key" && logYes || logNo
 done
+
+logEnd
