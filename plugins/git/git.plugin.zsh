@@ -318,8 +318,8 @@ alias gconflicts="grep -lr --exclude-dir="node_modules" '<<<<<<<' ."
 alias gcundo='git reset --soft HEAD~1'
 compdef _git gcundo=git-reset
 
-alias gcunstage='git reset HEAD~1'
-compdef _git gcunstage=git-reset
+alias gunstage='git reset'
+compdef _git gunstage=git-reset
 
 alias gcreset='gcundo && gcunstage && grhh'
 compdef _git gcreset=git-reset
