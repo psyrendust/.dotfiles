@@ -1,3 +1,10 @@
+## [0.17.0](https://github.com/psyrendust/.dotfiles/compare/v0.16.0...v0.17.0) (2022-08-10)
+
+### Features
+
+- **bin:** add script to find the most used commands in history ([20edd86](https://github.com/psyrendust/.dotfiles/commit/20edd8691b338c5e670a6deb862cc2df0c5e9f47))
+- **git:** simplify gunstage command ([6a6bc14](https://github.com/psyrendust/.dotfiles/commit/6a6bc1418d73d03d9cad8566c34d2d6379c95cd2))
+
 ## [0.16.0](https://github.com/psyrendust/.dotfiles/compare/v0.15.0...v0.16.0) (2022-08-05)
 
 ### Features
