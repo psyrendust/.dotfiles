@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh --login
+#
+# most-used-commands
+# Output the most used commands saved in history
+#-------------------------------------------------------------------------------
+
+# Set the default count to 20
+COUNT="${1:-20}"
+
+# These variables need to be set since they are not available in noninteractive shells
+export HISTFILE=~/.zsh_history
+export HISTSIZE=50000
+
+# Forces reading the history file
+fc -R
+
+# Read the history from begining to end and count the commands
+fc -l 1 |
+
+  # Process each line from history
+  #   1. Add each command to hash
+  #   2. Increase the count for each entry in the hash
+  #   3. Print out the hash and calculate the percentage for each command
+  awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' |
+
+  # Exclude anything that starts with a "./"
+  #   1. -v: Invert the sense of matching, to select non-matching lines
+  grep -v "./" |
+
+  # Format into multiple columns:
+  #   1. -c: Output is formatted to a width specified as number of characters
+  #   2. -s: Specify the possible input item delimiters
+  #   3. -t: Determine the number of columns the input contains and create table
+  column -c3 -s " " -t |
+
+  # Sort by:
+  #   1. -n: compare according to string numerical value
+  #   2. -r: shuffle, but group identical keys
+  sort -nr |
+
+  # Add lines to file
+  nl |
+
+  # Only display the number of entries we want
+  head --lines=$COUNT
