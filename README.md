@@ -19,6 +19,6 @@ $HOME/.dotfiles/setup/bootstrap.sh
 Change your shell to zsh:
 
 ```shell
-chsh -s /usr/local/bin/zsh
-sudo chsh -s /usr/local/bin/zsh
+chsh -s /opt/homebrew/bin/zsh
+sudo chsh -s /opt/homebrew/bin/zsh
 ```
