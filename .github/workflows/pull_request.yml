@@ -6,8 +6,6 @@ on:
 
 jobs:
   lint:
-    name: Lint CI
-
     runs-on: ubuntu-latest
 
     steps:
