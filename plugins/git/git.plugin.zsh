@@ -373,6 +373,9 @@ compdef _git gld=git-log
 alias glog='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
 compdef _git glog=git-log
 
+alias glogme='glog --author="$(git config --get user.name)"'
+compdef _git glog=git-log
+
 alias glol='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
 compdef _git glol=git-log
 
