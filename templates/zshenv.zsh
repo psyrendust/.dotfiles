@@ -45,6 +45,7 @@ export ZPLUG_THREADS=1
 export ZDOT="$HOME/.dotfiles"
 export ZDOT_BIN="$ZDOT/bin"
 export ZDOT_CACHE="$ZDOT/cache"
+export ZDOT_GIT_CONFIG="$ZDOT/templates/gitconfig"
 export ZDOT_FUNCTIONS="$ZDOT/functions"
 export ZDOT_LIB="$ZDOT/lib"
 export ZDOT_PLUGINS="$ZDOT/plugins"
