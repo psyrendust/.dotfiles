@@ -26,6 +26,7 @@
 			".git-trickle-fetch/": true,
 			".gitdumps/": true,
 			".gitstats/": true,
+      ".kube/": true,
 			".npm-global/": true,
 			".npm/": true,
 			".nvm/": true,
@@ -33,8 +34,10 @@
 			".ssh/": true,
 			".Trash/": true,
 			".vscode/": true,
+			".wakatime/": true,
 			".watchman/": true,
 			// ".zplug/": true,
+			".zsh_sessions/": true,
 			".zsh_git_completion/": true,
 			"Applications/": true,
 			"Desktop/": true,
@@ -68,8 +71,11 @@
 			".*log": true,
 			".bash_sessions": true,
 			".CFUserTextEncoding": true,
+      ".dependency-cruiser.js": true,
 			".DS_Store": true,
 			".hushlogin": true,
+			".lesshst": true,
+			".wakatime.???": true,
 			".cups/": true,
 			".node-gyp/": true,
 			".subversion/": true,
@@ -93,6 +99,10 @@
 			// ".zsh_history*": true,
 			// ".zshenv*": true,
 			// ".zshrc*": true,
+      // Work specific stuff
+      ".obs/": true,
+      ".swiftpm/": true,
+      "observe/": true,
 		}
 	}
 }
