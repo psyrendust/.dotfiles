@@ -1,3 +1,15 @@
+## [0.18.0](https://github.com/psyrendust/.dotfiles/compare/v0.17.0...v0.18.0) (2023-07-11)
+
+### Features
+
+- **check-install:** update dependencies ([ec89edb](https://github.com/psyrendust/.dotfiles/commit/ec89edbbabb881f95342b56becc3b16d93cb9d3d))
+- **core.inc:** add git user name ([a07c1e3](https://github.com/psyrendust/.dotfiles/commit/a07c1e3af693dcd64aee69e43ed9538e61b4f4b0))
+- **git:** add glogme git alias ([ec04b82](https://github.com/psyrendust/.dotfiles/commit/ec04b829f4473098b5de7ebcb859eb974958a07f))
+- **init_nvm:** add nvm bash completions ([682b278](https://github.com/psyrendust/.dotfiles/commit/682b278a7746302a9075182e9fb24e456b4a6d41))
+- **zpaths:** add coreutils bin path ([2efe5ed](https://github.com/psyrendust/.dotfiles/commit/2efe5ed027ee0c8c493c17083fe496b3165ed0d7))
+- **zshenv:** add exported var for git config dir ([16bf736](https://github.com/psyrendust/.dotfiles/commit/16bf73625d3888374ecc1da8039893369007db2e))
+- **zshrc:** add template for zshrc file ([9080c0b](https://github.com/psyrendust/.dotfiles/commit/9080c0b331651f89a373005e445417f60aadbb25))
+
 ## [0.17.0](https://github.com/psyrendust/.dotfiles/compare/v0.16.0...v0.17.0) (2022-08-10)
 
 ### Features
