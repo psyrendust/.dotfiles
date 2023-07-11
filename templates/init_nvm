@@ -14,6 +14,8 @@ fi
 
 # This loads nvm"
 zdot load "$NVM_INIT_SCRIPT_DIR/nvm.sh"
+# This loads nvm bash_completion
+zdot load "$NVM_INIT_SCRIPT_DIR/bash_completion"
 
 # Autoload add-zsh-hook
 autoload -U add-zsh-hook
