@@ -44,7 +44,9 @@ fi
 
 
 # Create an associative array for {key:value} pairs
-# @see https://scriptingosx.com/2019/11/associative-arrays-in-zsh/
+# @see https://scriptingosx.com/2019/11/associative-a`rrays-in-zsh/
+declare -A brew_formula_apps
+declare -A brew_formula_fonts
 declare -A brew_formula_quicklook
 declare -A brew_formulas
 # Create arrays
@@ -63,7 +65,6 @@ logTitle "npm package check"
 npm_global_packages=(
   "chalk-cli"
   "jest"
-  "jez/bars"      # used with brew git-heatmap: https://github.com/jez/bars
   "live-server"
   "odiff-bin"     # image diff tool: https://github.com/dmtrKovalenko/odiff
 )
@@ -108,7 +109,7 @@ if [[ ! ${#npm_packages_missing[@]} -eq 0 ]]; then
     logYes
     echo;
     logDecision "installing missing packages"
-    npm install -g ${npm_packages_missing[@]} && logYes || logNo
+    npm install --location=global ${npm_packages_missing[@]} && logYes || logNo
   else
     logNo
   fi
@@ -128,27 +129,47 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
   ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
   ["$ZDOT_BREW_ROOT/bin/batman"]="eth-p/software/bat-extras"
+  ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
+  ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
   ["$ZDOT_BREW_ROOT/bin/exa"]="exa"
   ["$ZDOT_BREW_ROOT/bin/fasd"]="fasd"
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
+  ["$ZDOT_BREW_ROOT/bin/fig"]="fig"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
-  ["$ZDOT_BREW_ROOT/bin/git-heatmap"]="git-heatmap"   # https://github.com/jez/git-heatmap
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
+  ["$ZDOT_BREW_ROOT/bin/graphviz"]="graphviz"
+  ["$ZDOT_BREW_ROOT/bin/jq"]="jq"
   ["$ZDOT_BREW_ROOT/bin/pygmentize"]="pygments"
   ["$ZDOT_BREW_ROOT/bin/rg"]="ripgrep"
+  ["$ZDOT_BREW_ROOT/bin/swda"]="swiftdefaultappsprefpane"
   ["$ZDOT_BREW_ROOT/bin/tree"]="tree"
   ["$ZDOT_BREW_ROOT/bin/zsh"]="zsh"
 )
+# Apps
+brew_formula_apps=(
+  ["$ZDOT_BREW_ROOT/Caskroom/rectangle"]="rectangle"
+)
+brew_formulas+=(${(kv)brew_formula_apps})
 # Quicklook plugins
 # @see https://github.com/sindresorhus/quick-look-plugins#install-all
 brew_formula_quicklook=(
-  ["/Applications/QLMarkdown.app"]="sbarex-qlmarkdown"
-  ["/Applications/Syntax Highlight.app"]="syntax-highlight"
-  ["$HOME/Library/QuickLook/QLStephen.qlgenerator"]="qlstephen"
-  ["/Applications/Suspicious Package.app"]="suspicious-package"
+  ["$ZDOT_BREW_ROOT/Caskroom/qlmarkdown"]="qlmarkdown"
+  ["$ZDOT_BREW_ROOT/Caskroom/syntax-highlight"]="syntax-highlight"
+  ["$ZDOT_BREW_ROOT/Caskroom/qlstephen"]="qlstephen"
+  ["$ZDOT_BREW_ROOT/Caskroom/suspicious-package"]="suspicious-package"
 )
 brew_formulas+=(${(kv)brew_formula_quicklook})
+# Dev Fonts
+brew_formula_fonts=(
+  ["$ZDOT_BREW_ROOT/Caskroom/font-hack-nerd-font"]="font-hack-nerd-font"
+  ["$ZDOT_BREW_ROOT/Caskroom/font-dejavu-sans-mono-for-powerline"]="font-dejavu-sans-mono-for-powerline"
+  ["$ZDOT_BREW_ROOT/Caskroom/font-roboto"]="font-roboto"
+  ["$ZDOT_BREW_ROOT/Caskroom/font-roboto-mono"]="font-roboto-mono"
+)
+brew_formulas+=(${(kv)brew_formula_fonts})
+# Execute the tap
+brew tap homebrew/cask-fonts
 
 # ------------------------------------------------------------------------------
 logHeader "brew_formulas: ${#brew_formulas[@]}"
