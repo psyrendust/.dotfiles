@@ -20,6 +20,8 @@
 	writeCommitGraph = true
 [http]
   sslVerify = false
+[user]
+  name = Larry Gordon
 
 
 # Configure default Git settings for difftool and mergetool of choice.
