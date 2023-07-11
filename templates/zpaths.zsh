@@ -39,6 +39,8 @@ __path_pre+=("$HOME/.tmpbin")
 
 # Add homebrews bin
 [[ -z $(echo $PATH | grep "$ZDOT_BREW_ROOT/bin") ]] && __path_pre+=("$ZDOT_BREW_ROOT/bin")
+# Add coreutils bin
+[[ -z $(echo $PATH | grep "$ZDOT_BREW_ROOT/opt/coreutils/libexec/gnubin") ]] && __path_pre+=("$ZDOT_BREW_ROOT/opt/coreutils/libexec/gnubin")
 
 # Add manpath
 __manpath_pre+=("$ZDOT_BREW_ROOT/share/man")
