@@ -4,9 +4,9 @@
  */
 const prettierDefaults = {
   arrowParens: 'avoid',
+  bracketSameLine: false,
   bracketSpacing: true,
   insertPragma: false,
-  jsxBracketSameLine: false,
   jsxSingleQuote: false,
   printWidth: 80,
   quoteProps: 'as-needed',
