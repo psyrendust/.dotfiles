@@ -1,3 +1,9 @@
+## [0.19.0](https://github.com/psyrendust/.dotfiles/compare/v0.18.0...v0.19.0) (2023-08-12)
+
+### Features
+
+- **check-install:** add fkill-cli, trash-cli, alfred-fkill, alfred-npms, remove odiff-bin ([d0d924a](https://github.com/psyrendust/.dotfiles/commit/d0d924a06b1469c489f9d67d144906a667870ba4))
+
 ## [0.18.0](https://github.com/psyrendust/.dotfiles/compare/v0.17.0...v0.18.0) (2023-07-11)
 
 ### Features
