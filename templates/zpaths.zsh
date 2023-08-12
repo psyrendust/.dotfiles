@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 # Setup paths
 # ------------------------------------------------------------------------------
-typeset -a __path_pre __path_post __manpath_pre __manpath_post
+typeset -a __path_pre __path_post
 
 
 # Custom path locations for my plugins
@@ -37,28 +37,27 @@ __path_pre+=("$HOME/.tmpbin")
 [[ -d "$GOPATH" ]] && [[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
 [[ -d "$GOROOT" ]] && [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
 
-# Add homebrews bin
-[[ -z $(echo $PATH | grep "$ZDOT_BREW_ROOT/bin") ]] && __path_pre+=("$ZDOT_BREW_ROOT/bin")
 # Add coreutils bin
 [[ -z $(echo $PATH | grep "$ZDOT_BREW_ROOT/opt/coreutils/libexec/gnubin") ]] && __path_pre+=("$ZDOT_BREW_ROOT/opt/coreutils/libexec/gnubin")
 
-# Add manpath
-__manpath_pre+=("$ZDOT_BREW_ROOT/share/man")
+
+# ------------------------------------------------------------------------------
+# Add homebrews paths with `brew shellenv`, evals the following
+# ------------------------------------------------------------------------------
+#   export HOMEBREW_PREFIX="/opt/homebrew";
+#   export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
+#   export HOMEBREW_REPOSITORY="/opt/homebrew";
+#   export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
+#   export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:";
+#   export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
+# ------------------------------------------------------------------------------
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
 # ------------------------------------------------------------------------------
 # Apply PATHS
 # ------------------------------------------------------------------------------
-export MANPATH="$([[ ${#__manpath_pre} > 0 ]] && printf "%s:" "${__manpath_pre[@]}")$MANPATH$([[ ${#__manpath_post} > 0 ]] && printf ":%s" "${__manpath_post[@]}")"
 export PATH="$([[ ${#__path_pre} > 0 ]] && printf "%s:" "${__path_pre[@]}")$PATH$([[ ${#__path_post} > 0 ]] && printf ":%s" "${__path_post[@]}")"
 
 unset __path_pre
 unset __path_post
-unset __manpath_pre
-unset __manpath_post
-
-
-# ------------------------------------------------------------------------------
-# Load any private environment variables
-# ------------------------------------------------------------------------------
-zdot load "$ZDOT_DROPBOX_APPS/index.zsh"
