@@ -1,3 +1,9 @@
+## [0.21.0](https://github.com/psyrendust/.dotfiles/compare/v0.20.0...v0.21.0) (2023-08-12)
+
+### Features
+
+- **check-install:** remove graphviz ([2db5886](https://github.com/psyrendust/.dotfiles/commit/2db588651dd117e241cd638acbc822083b06c244))
+
 ## [0.20.0](https://github.com/psyrendust/.dotfiles/compare/v0.19.0...v0.20.0) (2023-08-12)
 
 ### Features
