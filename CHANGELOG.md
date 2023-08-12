@@ -1,3 +1,9 @@
+## [0.20.0](https://github.com/psyrendust/.dotfiles/compare/v0.19.0...v0.20.0) (2023-08-12)
+
+### Features
+
+- **templates:** update brew paths and exports ([6daae77](https://github.com/psyrendust/.dotfiles/commit/6daae777c46104fdbb2dfe5724ba597ff76d84da))
+
 ## [0.19.0](https://github.com/psyrendust/.dotfiles/compare/v0.18.0...v0.19.0) (2023-08-12)
 
 ### Features
