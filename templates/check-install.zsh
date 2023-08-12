@@ -63,10 +63,13 @@ logHr
 logTitle "npm package check"
 # --------------------------------------------------------------------------------------------------
 npm_global_packages=(
+  "alfred-fkill"
+  "alfred-npms"
   "chalk-cli"
+  "fkill-cli"
   "jest"
   "live-server"
-  "odiff-bin"     # image diff tool: https://github.com/dmtrKovalenko/odiff
+  "trash-cli"
 )
 
 # ------------------------------------------------------------------------------
