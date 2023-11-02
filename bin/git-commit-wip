@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#
+# git-commit-wip
+# Git commit with --wip-- message and --no-verify
+#-------------------------------------------------------------------------------
+
+set -e
+
+git commit --no-verify --no-gpg-sign -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"
+
