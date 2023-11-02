@@ -12,6 +12,10 @@
       "name": "Dropbox",
       "path": "../Dropbox/Apps",
     },
+    {
+      "name": "zplug",
+      "path": "../.zplug",
+    },
 	],
 	"settings": {
 		"files.watcherExclude": {
@@ -36,7 +40,7 @@
 			".vscode/": true,
 			".wakatime/": true,
 			".watchman/": true,
-			// ".zplug/": true,
+			".zplug/": true,
 			".zsh_sessions/": true,
 			".zsh_git_completion/": true,
 			"Applications/": true,
