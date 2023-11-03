@@ -28,7 +28,7 @@ alias la='l -A'
 # alias li='l -l'
 # alias ll='la -l'
 # Use https://github.com/ogham/exa
-alias li='exa -lgh --group-directories-first'
+alias li='eza -lgh --group-directories-first'
 alias ll='li -a'
 
 alias rmrf="rm -rf"
