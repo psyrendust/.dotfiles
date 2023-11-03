@@ -30,7 +30,8 @@ const options = new Set([
 ]);
 
 export function cli(args) {
-  const meowCli = meow(`
+  const meowCli = meow(
+    `
     Usage
       $ changecase [option] [input]
 
@@ -57,13 +58,15 @@ export function cli(args) {
     Examples
       $ changecase snake_case_string
       snakeCaseString
-  `, {
-    argv: args.slice(2),
-    flags: {
-      help: {type: 'boolean', alias: 'h'},
-      version: {type: 'boolean', alias: 'v'},
+  `,
+    {
+      argv: args.slice(2),
+      flags: {
+        help: { type: 'boolean', alias: 'h' },
+        version: { type: 'boolean', alias: 'v' },
+      },
     }
-  });
+  );
 
   if (meowCli.flags.help) {
     meowCli.showHelp();
