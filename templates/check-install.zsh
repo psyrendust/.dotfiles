@@ -167,6 +167,7 @@ brew_formulas+=(${(kv)brew_formula_quicklook})
 brew_formula_fonts=(
   ["$ZDOT_BREW_ROOT/Caskroom/font-hack-nerd-font"]="font-hack-nerd-font"
   ["$ZDOT_BREW_ROOT/Caskroom/font-dejavu-sans-mono-for-powerline"]="font-dejavu-sans-mono-for-powerline"
+  ["$ZDOT_BREW_ROOT/Caskroom/font-meslo-lg-nerd-font"]="font-meslo-lg-nerd-font"
   ["$ZDOT_BREW_ROOT/Caskroom/font-roboto"]="font-roboto"
   ["$ZDOT_BREW_ROOT/Caskroom/font-roboto-mono"]="font-roboto-mono"
 )
