@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+# rebaseauto
+# Git rebase with autosquash fixups
+#-------------------------------------------------------------------------------
+
+set -e
+
+git rebase --autosquash --interactive origin/$(git-main-branch)
