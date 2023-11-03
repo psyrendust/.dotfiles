@@ -1,3 +1,24 @@
+## [0.22.0](https://github.com/psyrendust/.dotfiles/compare/v0.21.0...v0.22.0) (2023-11-03)
+
+### Features
+
+- **bin:** add cleanup cli work-in-progress ([3fa1249](https://github.com/psyrendust/.dotfiles/commit/3fa1249f6d884fe748b570ba91590a6aac98d60b))
+- **bin:** add fixup cli ([4d891e2](https://github.com/psyrendust/.dotfiles/commit/4d891e2edd26b33f42648179f3cf4c93b53d7da9))
+- **bin:** add git-commit-wip cli ([fa53fae](https://github.com/psyrendust/.dotfiles/commit/fa53fae9b8e6cc624996d875949a75453bf4b696))
+- **bin:** add git-current-branch cli ([ac2207d](https://github.com/psyrendust/.dotfiles/commit/ac2207ddcfb23b42b6e238f623b51affd8d84e8d))
+- **bin:** add git-main-branch cli ([41f125b](https://github.com/psyrendust/.dotfiles/commit/41f125baca952084d11ac3f7269736acf5ee6f9f))
+- **bin:** add git-uncommit-wip cli ([e0ab918](https://github.com/psyrendust/.dotfiles/commit/e0ab918b2e7f171de52058d3def2193ae618461a))
+- **bin:** add rebaseauto cli ([743e9c1](https://github.com/psyrendust/.dotfiles/commit/743e9c1f17e88772b2dae5c1040e3a4747cc091b))
+- **bin:** add refresh cli ([b2f74a8](https://github.com/psyrendust/.dotfiles/commit/b2f74a83cc7d5a7b68842c0314cbced3b94dad36))
+- **bin:** refactor rebase cli to use git-main-branch ([d534ddc](https://github.com/psyrendust/.dotfiles/commit/d534ddccdb0f3d0613508c4771504f341e501a32))
+- **plugins:** add changecase plugin ([f24291c](https://github.com/psyrendust/.dotfiles/commit/f24291cf2d592dba95f1330eb9a9cd99fd64f594))
+- **templates:** add font-meslo-lg-nerd-font to check-install ([3c33a19](https://github.com/psyrendust/.dotfiles/commit/3c33a1995af9a40913628a3ad538db0103f781ae))
+- **themes:** add starship themes ([7120133](https://github.com/psyrendust/.dotfiles/commit/71201330e0d6672002554e6297d1f536900973ed))
+
+### Bug Fixes
+
+- **templates:** incorrect path used for ZDOT_THEME ([b2349fe](https://github.com/psyrendust/.dotfiles/commit/b2349fe686690965b92c4cdadd62c74cfcc8ac4f))
+
 ## [0.21.0](https://github.com/psyrendust/.dotfiles/compare/v0.20.0...v0.21.0) (2023-08-12)
 
 ### Features
