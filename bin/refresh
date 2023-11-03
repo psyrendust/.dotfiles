@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+#
+# refresh
+# Git pull rebase on the current branch without a checkout
+#-------------------------------------------------------------------------------
+
+set -e
+
+mainBranch=$(git-main-branch)
+
+if [[ "$(git-current-branch)" == "$mainBranch" ]]; then
+  # We are on main branch, just pull
+  git pull origin "$mainBranch";
+else
+  # Pull the latest on master without checkout
+  git fetch origin $mainBranch:$mainBranch
+  # Apply latest changes on current branch
+  git rebase $mainBranch
+fi
