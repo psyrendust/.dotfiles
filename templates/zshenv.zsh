@@ -50,7 +50,7 @@ export ZDOT_FUNCTIONS="$ZDOT/functions"
 export ZDOT_LIB="$ZDOT/lib"
 export ZDOT_PLUGINS="$ZDOT/plugins"
 export ZDOT_TEMPLATES="$ZDOT/templates"
-export ZDOT_THEME="$ZDOT/theme"
+export ZDOT_THEME="$ZDOT/themes"
 export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Apps"
 export ZDOT_DROPBOX_BIN="$ZDOT_DROPBOX_APPS/bin"
 
