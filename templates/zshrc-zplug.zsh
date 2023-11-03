@@ -80,7 +80,7 @@ zplug "zsh-users/zsh-history-substring-search", defer:3
 
 
 # ------------------------------------------------------------------------------
-# My theme
+# My prompt
 # ------------------------------------------------------------------------------
 # Prevents Pure from checking whether the current Git remote has been updated.
 export PURE_GIT_PULL=0
