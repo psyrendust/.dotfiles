@@ -1,0 +1,79 @@
+#!/usr/bin/env zsh
+#
+# cleanup
+# List all branches that have landed in master
+# Fuzzy git delete local branchs and optionally
+# delete the remote branch if it exists.
+#-------------------------------------------------------------------------------
+
+# set -e
+
+# ALLBRANCHES=$(gitbranches)
+BRANCHES=()
+checkmark="\033[0;32m\ue63f\033[0m"
+# echo "hello"
+# echo $ALLBRANCHES
+# echo "bye"
+# for branch in "${$(gitbranches)[@]}"; do
+#   echo "foo - ${branch}"
+# done
+# BRANCH=$(gitbranches | fzf | trimleading) &&
+# git branch -D ${BRANCH} &&
+# delremote "${BRANCH}"
+
+# git log --pretty='%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'
+
+# git log  --max-count=1
+
+# git for-each-ref --shell \
+#   --format='git log --oneline %(refname) ^origin/master' \
+#   refs/heads/
+# for branch in $(git for-each-ref --format='%(refname)' refs/heads/); do
+#     git log $branch --max-count=1
+# done
+
+# eval "$(git for-each-ref --shell --format='BRANCHES+=(%(refname))' refs/heads/)"
+# for branch in "${BRANCHES[@]}"; do
+#     echo "$branch " $(git log $branch --max-count=1 | grep "Change-Id:")
+# done
+
+echo hello
+# for branch in $(git for-each-ref refs/heads  | cut -d/ -f3-); do
+for branch in $(gitbranches); do
+  if [ "$branch" != "*" ] && [ "$branch" != "master" ]; then
+    echo "- $branch"
+    changeId=$(git log --max-count=1 $branch | grep "Change-Id:" | trimleading)
+    echo "    - changeId $changeId"
+    if [ -n $changeId ]; then
+      # echo "        - found $changeId"
+      foundInMaster=$(git log master | grep "${changeId}")
+      # echo "-- $foundInMaster"
+      if [ -n $foundInMaster ]; then
+        # echo "            - found in master"
+        BRANCHES+=("$(echo "$checkmark $branch" | trimleading)\n")
+      else
+        BRANCHES+=("$branch\n")
+      fi
+    else
+        BRANCHES+=("$branch\n")
+    fi
+  fi
+done
+echo "---------------------------------------"
+echo $BRANCHES
+echo "---------------------------------------"
+# echo $BRANCHES | fzf --ansi -m
+
+# echo '\ue63f' | chalk --stdin green
+# echo "foo  bar"
+
+# git log --grep="Change-Id: I91068b8edae0d9a915c0631d908111ed6ecd5a76" --pretty='%h%n%s%n%n%b'
+# d36c3870af
+# update observe-js.code-workspace gitlens remotes & remove deprecated setting
+
+# * Remove `eslint.packageManager` because the setting is deprecated. The
+# Package Manager is automatically detected now.
+# * Update gitlens remotes for better urls when wanting to view a file in
+# Gerrit
+
+# Change-Id: I91068b8edae0d9a915c0631d908111ed6ecd5a76
