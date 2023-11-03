@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+#
+# git-main-branch
+# Determine the main branch for a repo (i.e. main or master)
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Allow the main branch to be overridden by passing an argument
+mainBranch="$(basename $(git symbolic-ref refs/remotes/origin/HEAD --short))"
+
+# Determine the main branch (i.e. main or master)
+if [[ -z "$mainBranch" ]]; then
+  # See if we have a main branch
+  if [[ "$(git branch --list main)" ]]; then
+    mainBranch="main"
+  else
+    mainBranch="master"
+  fi
+fi
+
+echo "$mainBranch"
