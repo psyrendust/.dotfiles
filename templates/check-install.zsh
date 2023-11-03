@@ -63,6 +63,7 @@ logHr
 logTitle "npm package check"
 # --------------------------------------------------------------------------------------------------
 npm_global_packages=(
+  "@aventyret/change-case-cli"
   "alfred-fkill"
   "alfred-npms"
   "chalk-cli"

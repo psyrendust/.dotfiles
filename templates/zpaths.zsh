@@ -23,6 +23,7 @@ typeset -a __path_pre __path_post
 
 # Custom path locations for my plugins
 __path_pre+=("$ZDOT_PLUGINS/asciinema2gif/bin")
+__path_pre+=("$ZDOT_PLUGINS/changecase/bin")
 __path_pre+=("$ZDOT_PLUGINS/pretty-print/bin")
 __path_pre+=("$ZDOT_PLUGINS/npmlist/bin")
 __path_pre+=("$ZDOT_PLUGINS/textcleaner/bin")
