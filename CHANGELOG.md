@@ -1,3 +1,11 @@
+## [0.23.0](https://github.com/psyrendust/.dotfiles/compare/v0.22.0...v0.23.0) (2023-11-03)
+
+### Features
+
+- **plugins:** use eza instead of exa in aliases plugin ([fd65d05](https://github.com/psyrendust/.dotfiles/commit/fd65d05ec4741170fd7a8cd9371909ca1db8765b))
+- **templates:** remove unused gitconfig/diff-kaleidoscope.inc ([4151bfe](https://github.com/psyrendust/.dotfiles/commit/4151bfeb2b98fbdeb832be8b1ddbb89eb57fb0f9))
+- **templates:** use eza instead of unmaintained exa cli ([5073489](https://github.com/psyrendust/.dotfiles/commit/5073489e111e78c757328ae9ec42a34fd763009b))
+
 ## [0.22.0](https://github.com/psyrendust/.dotfiles/compare/v0.21.0...v0.22.0) (2023-11-03)
 
 ### Features
