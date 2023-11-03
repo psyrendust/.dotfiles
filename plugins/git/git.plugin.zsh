@@ -8,20 +8,15 @@
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
+
 function cdroot() {
   local root
   root=$(git root) || return 1
   cd "$root"
 }
 
-function _current_branch() {
-  ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
-  ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
-  echo "${ref#refs/heads/}"
-}
-
 function _git-branch-from-here() {
-  git checkout -b $@ $(current_branch)
+  git checkout -b $@ $(git-current-branch)
 }
 
 function _git-branch-delete-grep() {
@@ -60,13 +55,13 @@ function _git-clone-cd() {
 }
 
 function _git-rebase-origin() {
-  local branch_name=${1:-$(current_branch)}
+  local branch_name=${1:-$(git-current-branch)}
   git rebase origin/${branch_name}
 }
 
 # update target branch and merge it into current branch
 function _git-merge-from() {
-  current_branch=$(current_branch)
+  current_branch=$(git-current-branch)
   target_branch=$1
   echo "switching to branch $target_branch"
   gco -f $target_branch
@@ -82,7 +77,7 @@ function _git-merge-from() {
 
 # update branch from origin and merge it into current branch
 function _git-merge-from-origin() {
-  current_branch=$(current_branch)
+  current_branch=$(git-current-branch)
   echo "fetching from origin $1"
   gfo $1:$1
   echo "merging origin $1 into $current_branch"
@@ -91,7 +86,7 @@ function _git-merge-from-origin() {
 
 # update branch from upstream and merge it into current branch
 function _git-merge-from-upstream() {
-  current_branch=$(current_branch)
+  current_branch=$(git-current-branch)
   echo "fetching from upstream $1"
   gfu $1:$1
   echo "merging upstream $1 into $current_branch"
@@ -100,7 +95,7 @@ function _git-merge-from-upstream() {
 
 # update branch from root and merge it into current branch
 function _git-merge-from-root() {
-  current_branch=$(current_branch)
+  current_branch=$(git-current-branch)
   echo "fetching from upstream $1"
   gfr $1:$1
   echo "merging root $1 into $current_branch"
@@ -130,7 +125,7 @@ function _git-merge-clean() {
 # patchit-please = "!f() { curl -L $1.patch | git am -3 --whitespace=fix; }; f"
 
 function patchit() {
-  local currBranch="$(current_branch)";
+  local currBranch="$(git-current-branch)";
   local destBranch="develop";
   local tempBranch="staging";
   local patchFile=".git/patches/$currBranch.patch";
@@ -264,13 +259,13 @@ function gitfixtag() {
 }
 
 function _git-log-diff() {
-  local currBranch="$(current_branch)";
+  local currBranch="$(git-current-branch)";
   local targetBranch=${1:-develop};
   git log --format="%C(auto) %h %s" --date=relative $targetBranch..$currBranch
 }
 
 function _git-log-pr() {
-  local currBranch="$(current_branch)";
+  local currBranch="$(git-current-branch)";
   local targetBranch=${1:-develop};
   git log --format="* %s" --no-color --date=relative $targetBranch..$currBranch | pbcopy
 }
@@ -339,19 +334,19 @@ compdef _git gfu=git-fetch
 alias grbo='_git-rebase-origin'
 compdef _git grbo=git-rebase
 
-alias ggpullu='git pull upstream $(current_branch)'
+alias ggpullu='git pull upstream $(git-current-branch)'
 compdef _git ggpullu=git-pull
 
-alias ggpullr='git pull --rebase origin $(current_branch)'
+alias ggpullr='git pull --rebase origin $(git-current-branch)'
 compdef _git ggpullr=git-pull
 
-alias ggpullru='git pull --rebase upstream $(current_branch)'
+alias ggpullru='git pull --rebase upstream $(git-current-branch)'
 compdef _git ggpullru=git-pull
 
 alias ggpusha='git push origin master && git push origin develop && git push --tags'
 compdef _git ggpusha=git-push
 
-alias ggpushu='git push upstream $(current_branch)'
+alias ggpushu='git push upstream $(git-current-branch)'
 compdef _git ggpushu=git-push
 
 alias gl='_git-log-pretty-grep'
