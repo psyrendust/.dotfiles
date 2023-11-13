@@ -23,7 +23,6 @@
     pr-summary = !git log --reverse --format=\"- **%s** (%h)%n%n%w(74,2,2)%b\" \"${REVIEW_BASE:-origin/master}\"..HEAD
     # The SHA to compare diffs against
     review-base = !git merge-base HEAD \"${REVIEW_BASE:-origin/master}\"
-    root = "!f() { root=$(git rev-parse --git-dir) && root=$(cd \"$root\" && pwd)/ && echo \"${root%%/.git/*}\"; }; f"
     # Same as `git files`, but with a diff stat instead of just names (better for interactive use)
     stat = !git diff --stat $(git review-base)
     unassume = update-index --no-assume-unchanged
