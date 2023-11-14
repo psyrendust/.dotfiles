@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# git-root
+# Find the root of the git repo.
+#-------------------------------------------------------------------------------
+
+set -e
+
+root=$(git rev-parse --git-dir) &&
+root=$(cd "$root" && pwd) &&
+echo -n "${root%%/.git*}";
