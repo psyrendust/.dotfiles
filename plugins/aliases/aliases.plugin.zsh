@@ -31,6 +31,7 @@ alias la='l -A'
 alias li='eza -lgh --group-directories-first'
 alias ll='li -a'
 
+alias python="python3"
 alias rmrf="rm -rf"
 alias server="live-server"
 alias simpleserver="python -m SimpleHTTPServer"
