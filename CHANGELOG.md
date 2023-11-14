@@ -1,3 +1,13 @@
+## [0.24.0](https://github.com/psyrendust/.dotfiles/compare/v0.23.0...v0.24.0) (2023-11-14)
+
+### Features
+
+- **aliases:** add python alias to python3 ([52b9394](https://github.com/psyrendust/.dotfiles/commit/52b9394afca301e7f346327e7b8db490830baf91))
+- **bin:** add git cli wrapper for diff and show ([9b937e7](https://github.com/psyrendust/.dotfiles/commit/9b937e72906fac8671b25277c1b010c4cacf77f2))
+- **bin:** add git-diff-so-fancy-paths cli ([314f8d6](https://github.com/psyrendust/.dotfiles/commit/314f8d619dceb966354ed5c45788efbaa9121c38))
+- **bin:** add git-root cli ([1f3e0e2](https://github.com/psyrendust/.dotfiles/commit/1f3e0e24ab1f60076da4a1b899e22d56a424488e))
+- **templates:** prune unused git alias `root` ([fd5d7fc](https://github.com/psyrendust/.dotfiles/commit/fd5d7fc831d15f6b111763b5dd44d44da445426a))
+
 ## [0.23.0](https://github.com/psyrendust/.dotfiles/compare/v0.22.0...v0.23.0) (2023-11-03)
 
 ### Features
