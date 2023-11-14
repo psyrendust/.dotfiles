@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+#
+# git-diff-so-fancy-paths
+# Get the correct file paths for git diff-so-fancy
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Get the relative root path of the git repo
+root=$(git-root) &&
+
+# Get the relative path
+root="~/${root#$HOME/}/"
+
+# Execute git show with the correct paths
+echo "--src-prefix=$root --dst-prefix=$root"
