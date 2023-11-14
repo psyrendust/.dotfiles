@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# git
+# Execute git with custom commands for diff and show
+#-------------------------------------------------------------------------------
+
+if [[ "$1" == "show" ]]; then
+  shift 1
+  $ZDOT_BREW_ROOT/bin/git show $(git-diff-so-fancy-paths) "$@"
+elif [[ "$1" == "diff" ]]; then
+  shift 1
+  $ZDOT_BREW_ROOT/bin/git diff $(git-diff-so-fancy-paths) "$@"
+else
+  $ZDOT_BREW_ROOT/bin/git "$@"
+fi
