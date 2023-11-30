@@ -1,3 +1,9 @@
+## [0.24.1](https://github.com/psyrendust/.dotfiles/compare/v0.24.0...v0.24.1) (2023-11-30)
+
+### Bug Fixes
+
+- **gitconfig:** remove -a from plus alias ([2050abf](https://github.com/psyrendust/.dotfiles/commit/2050abf4f60d612f768c514121e0a0393ca19321))
+
 ## [0.24.0](https://github.com/psyrendust/.dotfiles/compare/v0.23.0...v0.24.0) (2023-11-14)
 
 ### Features
