@@ -56,6 +56,15 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
 # ------------------------------------------------------------------------------
+# Add pyenv path with `pyenv init -`
+# @see https://opensource.com/article/19/5/python-3-default-mac#what-we-should-do
+# ------------------------------------------------------------------------------
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+
+# ------------------------------------------------------------------------------
 # Apply PATHS
 # ------------------------------------------------------------------------------
 export PATH="$([[ ${#__path_pre} > 0 ]] && printf "%s:" "${__path_pre[@]}")$PATH$([[ ${#__path_post} > 0 ]] && printf ":%s" "${__path_post[@]}")"

@@ -143,6 +143,7 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
   ["$ZDOT_BREW_ROOT/bin/jq"]="jq"
+  ["$ZDOT_BREW_ROOT/bin/pyenv"]="pyenv"
   ["$ZDOT_BREW_ROOT/bin/pygmentize"]="pygments"
   ["$ZDOT_BREW_ROOT/bin/rg"]="ripgrep"
   ["$ZDOT_BREW_ROOT/bin/swda"]="swiftdefaultappsprefpane"
