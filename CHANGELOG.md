@@ -1,3 +1,10 @@
+## [0.24.2](https://github.com/psyrendust/.dotfiles/compare/v0.24.1...v0.24.2) (2023-11-30)
+
+### Bug Fixes
+
+- **npmlist:** use --location=global instead of -g ([b44f847](https://github.com/psyrendust/.dotfiles/commit/b44f84761afd0f6dba3135e2039f9720ba6b63cf))
+- **python:** use pyenv to manage python versions ([50390a7](https://github.com/psyrendust/.dotfiles/commit/50390a7dc0e9cd3cacf3b9ef8a4922f388e813e4))
+
 ## [0.24.1](https://github.com/psyrendust/.dotfiles/compare/v0.24.0...v0.24.1) (2023-11-30)
 
 ### Bug Fixes
