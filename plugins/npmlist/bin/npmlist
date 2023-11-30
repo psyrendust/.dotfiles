@@ -92,7 +92,7 @@ process.argv.slice(2).forEach(function (arg) {
   }
 });
 
-var args = ['install', '-g'];
+var args = ['install', '--location=global'];
 ${vars}
 
 if (isExact) {
@@ -135,7 +135,7 @@ if (isHelp) {
   }
   spawn('node', args, { stdio: [0, 1, 2] });
 } else {
-  if (isGlobal) cmd.push('-g');
+  if (isGlobal) cmd.push('--location=global');
   exec(cmd.join(' '), function (error, stdout) {
     if (error !== null) {
       throw new Error(error);

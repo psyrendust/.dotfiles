@@ -81,7 +81,7 @@ for pkg in ${npm_global_packages[@]}; do logInfo "$pkg"; done
 # ------------------------------------------------------------------------------
 logHeader "Check for missing npm packages"
 # ------------------------------------------------------------------------------
-installed_npm_global_packages="$(npm list -g --depth=0)"
+installed_npm_global_packages="$(npm list --location=global --depth=0)"
 for pkg in ${npm_global_packages[@]}; do
   logDecision "found npm package [ $pkg ]"
   if [[ -z "$(echo $installed_npm_global_packages | grep "$pkg")" ]]; then
