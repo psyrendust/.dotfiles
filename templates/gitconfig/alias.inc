@@ -18,7 +18,7 @@
     # Show just the subject and body of a particular commit (default: HEAD)
     message = log -n1 --format=\"%s%n%n%b\"
     # Amend a commit and reuse the previous commit message
-    plus = commit -a --amend --no-edit
+    plus = commit --amend --no-edit
     # Show a markdown-formatted summary of commits from {REVIEW_BASE:-origin/master} until HEAD
     pr-summary = !git log --reverse --format=\"- **%s** (%h)%n%n%w(74,2,2)%b\" \"${REVIEW_BASE:-origin/master}\"..HEAD
     # The SHA to compare diffs against
