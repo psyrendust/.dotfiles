@@ -3,9 +3,9 @@
 export NVM_DIR="$HOME/.nvm"
 
 # Find the correct nvm init script
-if [[ -s "/usr/local/opt/nvm/nvm.sh" ]]; then
+if [[ -s "$ZDOT_BREW_ROOT/opt/nvm/nvm.sh" ]]; then
   # Installed via homebrew
-  export NVM_INIT_SCRIPT_DIR="/usr/local/opt/nvm"
+  export NVM_INIT_SCRIPT_DIR="$ZDOT_BREW_ROOT/opt/nvm"
 
 elif [[ -s "$NVM_DIR/nvm.sh" ]]; then
   # Installed via https://github.com/creationix/nvm
@@ -30,12 +30,12 @@ __loadnvmrc() {
   if [ -n "$nvmrc_path" ]; then
     local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
     if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install &> /dev/null
+      nvm install &>/dev/null
     elif [ "$nvmrc_node_version" != "$node_version" ]; then
-      nvm use --delete-prefix $nvmrc_node_version &> /dev/null
+      nvm use --delete-prefix $nvmrc_node_version &>/dev/null
     fi
   elif [ $node_version != $node_default ]; then
-    nvm use --delete-prefix $node_default &> /dev/null
+    nvm use --delete-prefix $node_default &>/dev/null
   fi
 
   export node_path="$(nvm which $(nvm version))"

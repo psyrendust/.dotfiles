@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# opalrestart
+# Kill Opal Composer and restart it
+#-------------------------------------------------------------------------------
+
+set -e
+
+appname="Opal Composer"
+
+function wait_for() {
+  echo "running wait_for"
+  timeout=$1
+  shift 1
+  echo "timeout: $timeout"
+  echo "-------------------------"
+  echo "start until"
+  until [ $timeout -le 0 ] || (! "$@" &> /dev/null)
+  do
+    echo waiting for "$@"
+    sleep 0.001
+    timeout=$(( timeout - 1 ))
+  done
+  if [ $timeout -le 0 ]; then
+      echo "- wait_for timeout"
+      return 1
+  fi
+}
+
+function is_running() {
+  running_status=$(pgrep -n "$appname")
+  if [ -z "$running_status" ]; then
+  #   return 0;
+  # else
+    return 1;
+  fi
+}
+
+is_running && fkill "$appname"
+wait_for 5000 is_running
+sleep 0.2
+open "/Applications/$appname.app"

@@ -10,19 +10,20 @@
 [core]
 	commitGraph = true
   editor = gitcommiteditor
-  # editor = vi
   excludesfile = $HOME/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
   trustctime = false
   whitespace = fix
+[init]
+  defaultBranch = main
 [gc]
 	writeCommitGraph = true
 [http]
   sslVerify = false
 [user]
   name = Larry Gordon
-
+  email = psyrendust@gmail.com
 
 # Configure default Git settings for difftool and mergetool of choice.
 # ------------------------------------------------------------------------------
