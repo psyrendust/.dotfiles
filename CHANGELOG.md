@@ -1,3 +1,9 @@
+## [0.25.0](https://github.com/psyrendust/.dotfiles/compare/v0.24.2...v0.25.0) (2024-04-14)
+
+### Features
+
+- add opalrestart and overall updates ([eee0965](https://github.com/psyrendust/.dotfiles/commit/eee096512df64e5cbb70496f41485e9cd59c363d))
+
 ## [0.24.2](https://github.com/psyrendust/.dotfiles/compare/v0.24.1...v0.24.2) (2023-11-30)
 
 ### Bug Fixes
