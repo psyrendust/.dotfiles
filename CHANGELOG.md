@@ -1,3 +1,9 @@
+## [0.26.0](https://github.com/psyrendust/.dotfiles/compare/v0.25.0...v0.26.0) (2024-04-16)
+
+### Features
+
+- **templates:** migrate from Dropbox to iCould Drive ([d7f2692](https://github.com/psyrendust/.dotfiles/commit/d7f2692e0c4a3992ff44ba0e18ca25329f09920f))
+
 ## [0.25.0](https://github.com/psyrendust/.dotfiles/compare/v0.24.2...v0.25.0) (2024-04-14)
 
 ### Features
