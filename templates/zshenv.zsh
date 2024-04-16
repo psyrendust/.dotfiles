@@ -58,6 +58,10 @@ export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
 
+# ------------------------------------------------------------------------------
+# Zsh-z options https://github.com/agkozak/zsh-z?tab=readme-ov-file#settings
+# ------------------------------------------------------------------------------
+ZSHZ_CASE=ignore
 
 # ------------------------------------------------------------------------------
 # Setup options
