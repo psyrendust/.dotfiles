@@ -1,3 +1,15 @@
+## [0.27.0](https://github.com/psyrendust/.dotfiles/compare/v0.26.0...v0.27.0) (2024-04-16)
+
+### Features
+
+- **gitconfig:** add gitconfig bucket file ([cc15a35](https://github.com/psyrendust/.dotfiles/commit/cc15a35ba059cf0fc498e0ec47bbff316a379d8b))
+- **templates:** add zsh-z tool ([0fdcc7d](https://github.com/psyrendust/.dotfiles/commit/0fdcc7d9eadcd7191e096a747ffe171f7e025b93))
+
+### Bug Fixes
+
+- **check-install:** deprecate fasd ([9d52f38](https://github.com/psyrendust/.dotfiles/commit/9d52f380611d816fd80543c788626c7031dd086e))
+- **check-install:** no such file or directory ([52c702b](https://github.com/psyrendust/.dotfiles/commit/52c702b0a6d34095ba6c6a579be959df7ac7ca88))
+
 ## [0.26.0](https://github.com/psyrendust/.dotfiles/compare/v0.25.0...v0.26.0) (2024-04-16)
 
 ### Features
