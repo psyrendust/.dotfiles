@@ -138,7 +138,6 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
   ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
   ["$ZDOT_BREW_ROOT/bin/eza"]="eza"
-  ["$ZDOT_BREW_ROOT/bin/fasd"]="fasd"
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
   ["$ZDOT_BREW_ROOT/bin/fig"]="fig"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
