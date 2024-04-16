@@ -53,6 +53,7 @@ export ZDOT_TEMPLATES="$ZDOT/templates"
 export ZDOT_THEME="$ZDOT/themes"
 export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Apps"
 export ZDOT_DROPBOX_BIN="$ZDOT_DROPBOX_APPS/bin"
+export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
