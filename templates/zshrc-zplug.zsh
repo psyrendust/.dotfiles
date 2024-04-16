@@ -44,7 +44,6 @@ zplug "plugins/copypath", from:oh-my-zsh, defer:1
 zplug "plugins/cp", from:oh-my-zsh, defer:1
 zplug "plugins/encode64", from:oh-my-zsh, defer:1
 zplug "plugins/extract", from:oh-my-zsh, defer:1
-zplug "plugins/fasd", from:oh-my-zsh, defer:1
 zplug "plugins/fd", from:oh-my-zsh, defer:1
 zplug "plugins/git", from:oh-my-zsh, defer:1
 zplug "plugins/macos", from:oh-my-zsh, defer:1
