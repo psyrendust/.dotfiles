@@ -1,3 +1,9 @@
+## [0.27.1](https://github.com/psyrendust/.dotfiles/compare/v0.27.0...v0.27.1) (2024-04-16)
+
+### Bug Fixes
+
+- **zshrc:** remove fasd from zplug init ([4bea530](https://github.com/psyrendust/.dotfiles/commit/4bea53036a54c89aebdd37b8052fb2e654234b44))
+
 ## [0.27.0](https://github.com/psyrendust/.dotfiles/compare/v0.26.0...v0.27.0) (2024-04-16)
 
 ### Features
