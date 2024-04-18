@@ -5,7 +5,7 @@
 # Authors:
 #   Larry Gordon
 #
-# Usage: loaded by $ZDOT_TEMPLATES/zshrc.zsh
+# Usage: loaded by $ZDOT_TEMPLATES/zprofile.zsh
 #
 # Execution Order
 #   https://github.com/psyrendust/.dotfiles/blob/master/templates/README.md#for-zsh
