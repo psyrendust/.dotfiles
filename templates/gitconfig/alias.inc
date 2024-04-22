@@ -1,4 +1,4 @@
-# Git aliases
+# OS X Git aliases
 #
 # Author:
 #   Larry Gordon

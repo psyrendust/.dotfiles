@@ -1,4 +1,4 @@
-# Use diff-so-fancy for git and diff output
+# OS X Git configuration to use diff-so-fancy for git and diff output
 #
 # Author:
 #   Larry Gordon

@@ -1,4 +1,4 @@
-# Configure git to use vscode for diff and merges
+# OS X Git configuration to use vscode for diff and merges
 #
 # Author:
 #   Larry Gordon
