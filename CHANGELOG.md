@@ -1,3 +1,9 @@
+## [0.28.0](https://github.com/psyrendust/.dotfiles/compare/v0.27.1...v0.28.0) (2024-04-22)
+
+### Features
+
+- **gitconfig:** remove user info from core gitconfig ([e171711](https://github.com/psyrendust/.dotfiles/commit/e17171105bb506f046d012578be8fb6e0ad1001b))
+
 ## [0.27.1](https://github.com/psyrendust/.dotfiles/compare/v0.27.0...v0.27.1) (2024-04-16)
 
 ### Bug Fixes
