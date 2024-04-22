@@ -1,4 +1,4 @@
-# OS X Git configuration.
+# OS X Git configuration
 #
 # Author:
 #   Larry Gordon
@@ -21,9 +21,6 @@
 	writeCommitGraph = true
 [http]
   sslVerify = false
-[user]
-  name = Larry Gordon
-  email = psyrendust@gmail.com
 
 # Configure default Git settings for difftool and mergetool of choice.
 # ------------------------------------------------------------------------------
