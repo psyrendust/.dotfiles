@@ -9,10 +9,6 @@
 			"path": "../",
 		},
     {
-      "name": "Dropbox",
-      "path": "../Dropbox/Apps",
-    },
-    {
       "name": "zplug",
       "path": "../.zplug",
     },
@@ -47,7 +43,7 @@
 			"Desktop/": true,
 			"Documents/": true,
 			"Downloads/": true,
-			"Dropbox/": true,
+			"Dropbox/": false,
 			"Library/": true,
 			"Movies/": true,
 			"Music/": true,
@@ -106,7 +102,7 @@
       // Work specific stuff
       ".obs/": true,
       ".swiftpm/": true,
-      "observe/": true,
+      "tmp/": true,
 		}
 	}
 }
