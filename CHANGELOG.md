@@ -1,3 +1,10 @@
+## [0.29.0](https://github.com/psyrendust/.dotfiles/compare/v0.28.0...v0.29.0) (2024-04-26)
+
+### Features
+
+- **git:** reformat glog alias ([94df0f9](https://github.com/psyrendust/.dotfiles/commit/94df0f9246a4b53c5df62d257094b64b2cb12b72))
+- **workspace:** remove dropbox from vscode workspace ([ac3412e](https://github.com/psyrendust/.dotfiles/commit/ac3412ed5cc86bbeff5096559c8ff2141a7247e6))
+
 ## [0.28.0](https://github.com/psyrendust/.dotfiles/compare/v0.27.1...v0.28.0) (2024-04-22)
 
 ### Features
