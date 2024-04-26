@@ -73,7 +73,7 @@ Available commands:
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
   notes               Open notes folder in vscode
-  update              Update dotfiles
+  update              Update dotfiles using zplug
 
 EOF
 }
