@@ -42,6 +42,7 @@ function _zdot {
     'edit:Open dotfiles vscode workspace'
     'load:Source a file if it exists'
     'notes:Open notes folder in vscode'
+    'reload:Reload the current zsh session'
     'update:Update dotfiles'
   )
 
@@ -73,6 +74,7 @@ Available commands:
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
   notes               Open notes folder in vscode
+  reload              Reload the current zsh session
   update              Update dotfiles using zplug
 
 EOF
@@ -122,6 +124,17 @@ EOF
 function _zdot::notes() {
   [[ -d "$HOME/workspace/notes" ]] && code "$HOME/workspace/notes"
   [[ -d "$HOME/dev/notes" ]] && code "$HOME/dev/notes"
+}
+
+# Taken from OMZ
+function _zdot::reload {
+  # Delete current completion cache
+  command rm -f $_comp_dumpfile $ZSH_COMPDUMP
+
+  # Old zsh versions don't have ZSH_ARGZERO
+  local zsh="${ZSH_ARGZERO:-${functrace[-1]%:*}}"
+  # Check whether to run a login shell
+  [[ "$zsh" = -* || -o login ]] && exec -l "${zsh#-}" || exec "$zsh"
 }
 
 function _zdot::update() {
