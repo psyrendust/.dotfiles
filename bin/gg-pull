@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+#
+# ggpull
+# Update the current branch. Optionally update a different branch without
+# switching to it.
+#-------------------------------------------------------------------------------
+
+set -e
+
+BRANCH_FLAG=("-b" "--branch")
+UPDATE_FLAG=("-u" "--update" "-r" "--refresh")
+ALL_FLAGS=($BRANCH_FLAG $UPDATE_FLAG)
+targetBranch=""
+
+# Check if an arg has been passed and it matches one of our flags
+if (( $ALL_FLAGS[(Ie)$1] )); then
+  # Get the target branch from our local branches using fzf
+  targetBranch=$(gitbranches | fzf | trimleading)
+  if [[ -z "$targetBranch" ]]; then
+    exit;
+  fi
+
+  # Update a different branch without switching to it
+  git fetch origin ${targetBranch}:${targetBranch}
+
+  if (( $UPDATE_FLAG[(Ie)$1] )); then
+    # Rebase changes from targetBranch onto the current branch
+    git rebase $targetBranch
+  fi
+else
+  # Use the current branch as the target branch
+  targetBranch="$(git-current-branch)";
+  if [[ -z "$targetBranch" ]]; then
+    pperror "current branch not found"
+    exit;
+  fi
+
+  git pull origin ${targetBranch}
+fi

@@ -337,6 +337,9 @@ compdef _git grbo=git-rebase
 alias ggpullu='git pull upstream $(git-current-branch)'
 compdef _git ggpullu=git-pull
 
+alias ggpull='gg-pull'
+compdef _git ggpull=git-pull
+
 alias ggpullr='git pull --rebase origin $(git-current-branch)'
 compdef _git ggpullr=git-pull
 
