@@ -1,3 +1,10 @@
+## [0.30.0](https://github.com/psyrendust/.dotfiles/compare/v0.29.0...v0.30.0) (2024-05-10)
+
+### Features
+
+- **git:** add ggpull cli that can update branches without switching ([33c35c7](https://github.com/psyrendust/.dotfiles/commit/33c35c7279796eca96b071b355a5cf1fce306803))
+- **zdot:** add command to reload current zsh session ([cce03cb](https://github.com/psyrendust/.dotfiles/commit/cce03cb35a720897e41ee3251e60cfc94ef8e042))
+
 ## [0.29.0](https://github.com/psyrendust/.dotfiles/compare/v0.28.0...v0.29.0) (2024-04-26)
 
 ### Features
