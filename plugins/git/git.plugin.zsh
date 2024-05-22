@@ -368,7 +368,7 @@ alias gld='_git-log-diff'
 compdef _git gld=git-log
 
 # alias  glog='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
-alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>"'
+alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an> %C(auto,green)%G?"'
 compdef _git glog=git-log
 
 alias glogme='glog --author="$(git config --get user.name)"'
