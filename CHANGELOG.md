@@ -1,3 +1,11 @@
+## [0.31.0](https://github.com/psyrendust/.dotfiles/compare/v0.30.0...v0.31.0) (2024-05-22)
+
+### Features
+
+- **git:** add signed commit to glog output ([764ed2a](https://github.com/psyrendust/.dotfiles/commit/764ed2afd9e0d7c6746a89cbd5036a92fca07a6f))
+- **templates:** optimize zplug config ([b5a3375](https://github.com/psyrendust/.dotfiles/commit/b5a3375c543c5b042bda4f9dc888a11f38da831c))
+- **workspace:** view `.cache` in workspace ([60022cd](https://github.com/psyrendust/.dotfiles/commit/60022cd19fd6294f09e16ba0a9d59991b5943389))
+
 ## [0.30.0](https://github.com/psyrendust/.dotfiles/compare/v0.29.0...v0.30.0) (2024-05-10)
 
 ### Features
