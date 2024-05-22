@@ -19,7 +19,7 @@
 		},
 		"files.exclude": {
 			// folders
-			".cache/": true,
+			".cache/": false,
 			".config/": true,
       ".dotfiles/": true,
 			".dropbox/": true,
