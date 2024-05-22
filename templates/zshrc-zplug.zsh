@@ -31,7 +31,7 @@ fi
 # ------------------------------------------------------------------------------
 # om-my-zsh startup files
 # ------------------------------------------------------------------------------
-zplug "robbyrussell/oh-my-zsh", use:"oh-my-zsh.sh"
+zplug "robbyrussell/oh-my-zsh", use:"oh-my-zsh.sh" defer:0
 
 
 # ------------------------------------------------------------------------------
@@ -56,27 +56,27 @@ zplug "plugins/yarn", from:oh-my-zsh, defer:1
 # ------------------------------------------------------------------------------
 # misc plugins
 # ------------------------------------------------------------------------------
-zplug "$ZDOT_BREW_ROOT/opt/fzf", from:local, use:"shell/*.zsh", defer:2
-zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:2
-zplug "lukechilds/zsh-nvm", defer:2
+zplug "$ZDOT_BREW_ROOT/opt/fzf", from:local, use:"shell/*.zsh", defer:1
+zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:1
+zplug "lukechilds/zsh-nvm", defer:1
 zplug "agkozak/zsh-z", defer:1
 
 
 # ------------------------------------------------------------------------------
 # dotfiles plugins
 # ------------------------------------------------------------------------------
-zplug "$ZDOT_PLUGINS/aliases", from:local, defer:2
-zplug "$ZDOT_PLUGINS/colored-man-pages", from:local, defer:2
-zplug "$ZDOT_PLUGINS/fzf", from:local, defer:2
-zplug "$ZDOT_PLUGINS/git", from:local, defer:2
-zplug "$ZDOT_PLUGINS/git-fuzzy", from:local, defer:2
+zplug "$ZDOT_PLUGINS/aliases", from:local, defer:1
+zplug "$ZDOT_PLUGINS/colored-man-pages", from:local, defer:1
+zplug "$ZDOT_PLUGINS/fzf", from:local, defer:1
+zplug "$ZDOT_PLUGINS/git", from:local, defer:1
+zplug "$ZDOT_PLUGINS/git-fuzzy", from:local, defer:1
 
 
 # ------------------------------------------------------------------------------
 # zsh plugins
 # ------------------------------------------------------------------------------
-zplug "zsh-users/zsh-completions", defer:0
-zplug "zsh-users/zsh-syntax-highlighting", defer:0
+zplug "zsh-users/zsh-completions", defer:1
+zplug "zsh-users/zsh-syntax-highlighting", defer:2
 zplug "zsh-users/zsh-history-substring-search", defer:3
 
 
@@ -87,20 +87,19 @@ zplug "zsh-users/zsh-history-substring-search", defer:3
 export PURE_GIT_PULL=0
 # Do not include untracked files in dirtiness check. Mostly useful on large repos (like WebKit).
 export PURE_GIT_UNTRACKED_DIRTY=0
-
-zplug "mafredri/zsh-async", from:github, defer:2
-zplug "sindresorhus/pure", use:"pure.zsh", from:github, as:theme, defer:3
+zplug "mafredri/zsh-async", from:github, defer:0
+zplug "sindresorhus/pure", use:"pure.zsh", from:github, as:theme, defer:1
 
 
 # ------------------------------------------------------------------------------
 # Check for missing packages and install them if missing
 # ------------------------------------------------------------------------------
-if ! zplug check --verbose; then
-  printf "Install? [y/N]: "
-  if read -q; then
-    echo; zplug install
-  fi
-fi
+# if ! zplug check --verbose; then
+#   printf "Install? [y/N]: "
+#   if read -q; then
+#     echo; zplug install
+#   fi
+# fi
 
 
 # ------------------------------------------------------------------------------
