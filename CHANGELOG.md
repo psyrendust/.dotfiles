@@ -1,3 +1,9 @@
+## [0.32.0](https://github.com/psyrendust/.dotfiles/compare/v0.31.1...v0.32.0) (2024-05-23)
+
+### Features
+
+- **check:** add gpg and remove biomejs ([d725735](https://github.com/psyrendust/.dotfiles/commit/d72573572ea7ac26f19a78cc992271ac1f536597))
+
 ## [0.31.1](https://github.com/psyrendust/.dotfiles/compare/v0.31.0...v0.31.1) (2024-05-23)
 
 ### Bug Fixes
