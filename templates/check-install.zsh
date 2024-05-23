@@ -65,7 +65,6 @@ logTitle "npm package check"
 # --------------------------------------------------------------------------------------------------
 npm_global_packages=(
   "@aventyret/change-case-cli"
-  "@biomejs/biome@1.4.1"
   "alfred-fkill"
   "alfred-npms"
   "chalk-cli"
@@ -141,6 +140,7 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
   ["$ZDOT_BREW_ROOT/bin/fig"]="fig"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
+  ["$ZDOT_BREW_ROOT/bin/gpg"]="gpg"
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
   ["$ZDOT_BREW_ROOT/bin/jq"]="jq"
