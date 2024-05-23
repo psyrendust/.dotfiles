@@ -1,3 +1,9 @@
+## [0.31.1](https://github.com/psyrendust/.dotfiles/compare/v0.31.0...v0.31.1) (2024-05-23)
+
+### Bug Fixes
+
+- **templates:** revert some of the optimization changes to zplug config ([1a7478d](https://github.com/psyrendust/.dotfiles/commit/1a7478dc0a5e95c668f28becdbd9a9346d26a421))
+
 ## [0.31.0](https://github.com/psyrendust/.dotfiles/compare/v0.30.0...v0.31.0) (2024-05-22)
 
 ### Features
