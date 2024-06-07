@@ -28,8 +28,8 @@
     "test": "echo \"Warning: no test specified, so go write some!\""
   },
   "dependencies": {
-    "minimist": "^1.2.8",
-    "prompts": "^2.4.2"
+    "minimist": "1.2.8",
+    "prompts": "2.4.2"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "19.2.2",
