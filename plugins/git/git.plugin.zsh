@@ -281,7 +281,7 @@ compdef _git gaa=git-add
 alias gass='git update-index --assume-unchanged'
 compdef _git gass=git-update-index
 
-alias gb='gitbranches'
+alias gb='git branch'
 compdef _git gb=git-branch
 
 alias gbdel='git branch -D'
@@ -367,8 +367,11 @@ compdef _git gls=git-log
 alias gld='_git-log-diff'
 compdef _git gld=git-log
 
-# alias  glog='git log --pretty='\''%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
-alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an> %C(auto,green)%G?"'
+# alias  glog='git log --pretty="%C(auto)%h%Creset%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
+# with signed commits
+# alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an> %C(auto,green)%G?"'
+# without signed commits
+alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>"'
 compdef _git glog=git-log
 
 alias glogme='glog --author="$(git config --get user.name)"'
