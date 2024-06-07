@@ -4,16 +4,16 @@
   "private": true,
   "description": "Transform a string between camelCase, PascalCase, Capital Case, snake_case, param-case, CONSTANT_CASE and others with change-case npm package.",
   "license": "MIT",
-  "main": "./bin/changecase",
+  "type": "module",
   "bin": {
     "changecase": "./bin/changecase"
   },
   "files": [
-    "bin"
+    "bin",
+    "cli.js"
   ],
   "dependencies": {
-    "change-case": "^5.3.0",
-    "esm": "^3.2.25",
-    "meow": "^13.0.0"
+    "change-case": "5.4.4",
+    "meow": "13.2.0"
   }
 }
