@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#
+# git-stalebranches
+# Find stale branches in a git repository (ie branches that have been merged)
+#-------------------------------------------------------------------------------
+
+set -e
+
+# git branch -d $(git branch --merged | grep -vw $(git rev-parse --abbrev-ref HEAD))
+git branch --merged | grep -vw $(git rev-parse --abbrev-ref HEAD)
