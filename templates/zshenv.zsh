@@ -34,9 +34,6 @@ elif [[ $ZDOT_ARCH == "x86_64" ]]; then
 fi
 
 export BAT_PAGER="less -R"
-# vscode always saves to this location even on M1 macs
-export VISUAL='/usr/local/bin/code --wait'
-export EDITOR="$VISUAL"
 export FZF_PATH="$ZDOT_BREW_ROOT/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
 
@@ -54,6 +51,11 @@ export ZDOT_THEME="$ZDOT/themes"
 export ZDOT_DROPBOX_APPS="$HOME/Dropbox/Apps"
 export ZDOT_DROPBOX_BIN="$ZDOT_DROPBOX_APPS/bin"
 export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+
+# Use vscode as the default editor, but use the plugin version
+# export VISUAL='$/usr/local/bin/code --wait'
+export VISUAL="$ZDOT_PLUGINS/vscode/bin/code --wait"
+export EDITOR="$VISUAL"
 
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
