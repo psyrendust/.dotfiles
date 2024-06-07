@@ -13,6 +13,7 @@
   excludesfile = $HOME/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
+  pager = "diff-so-fancy | less --tabs=4 -RFX --mouse --wheel-lines=3"
   trustctime = false
   whitespace = fix
 [init]

@@ -26,9 +26,6 @@
   new = green bold
   whitespace = red reverse
 
-[core]
-  pager = "diff-so-fancy | less --tabs=4 -R"
-
 [interactive]
   diffFilter = "diff-so-fancy --patch"
 
