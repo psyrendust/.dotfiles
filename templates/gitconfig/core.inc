@@ -7,19 +7,37 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
+# less configuration
+# ------------------------------------------------------------------------------
+# -F:  Quit if entire file fits on first screen.
+# -R:  Output "raw" control characters.
+# -S:  Chop (truncate) long lines rather than wrapping.
+#
+# ------------------------------------------------------------------------------
+# Don't use these options if you want to be able to scroll and copy text.
+# This causes problems when using things like diff or log.
+# ------------------------------------------------------------------------------
+# Enabling -X prevents scrolling.
+# -X:  Don't clear the screen after quitting less
+# ------------------------------------------------------------------------------
+# Enabling mouse input prevents selection and copying in iTerm2.
+# --mouse:          Enable mouse input.
+# --wheel-lines=N:  Each click of the mouse wheel moves N lines.
+# ------------------------------------------------------------------------------
+
 [core]
-	commitGraph = true
+  commitGraph = true
   editor = gitcommiteditor
   excludesfile = $HOME/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
-  pager = "diff-so-fancy | less --tabs=4 -RFX --mouse --wheel-lines=3"
+  pager = "diff-so-fancy | less --tabs=4 -RF"
   trustctime = false
   whitespace = fix
 [init]
   defaultBranch = main
 [gc]
-	writeCommitGraph = true
+  writeCommitGraph = true
 [http]
   sslVerify = false
 

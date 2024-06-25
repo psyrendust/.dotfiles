@@ -17,6 +17,8 @@
     lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
     # Show just the subject and body of a particular commit (default: HEAD)
     message = log -n1 --format=\"%s%n%n%b\"
+    # Enable a 'normal' diff to save as a patch for emailing or later application
+    patch = !git --no-pager diff --no-color
     # Amend a commit and reuse the previous commit message
     plus = commit --amend --no-edit
     # Show a markdown-formatted summary of commits from {REVIEW_BASE:-origin/master} until HEAD
