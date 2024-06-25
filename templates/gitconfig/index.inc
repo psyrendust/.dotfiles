@@ -7,10 +7,10 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 [include]
-	path = alias.inc
+  path = alias.inc
 [include]
-	path = core.inc
+  path = core.inc
 [include]
-	path = diff.inc
+  path = diff.inc
 [include]
-	path = diff-vscode.inc
+  path = diff-vscode.inc

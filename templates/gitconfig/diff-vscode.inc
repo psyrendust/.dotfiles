@@ -7,9 +7,9 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 [diff]
-    tool = code
+  tool = code
 [merge]
-    tool = code
+  tool = code
 
 
 # Configure code to handle diff and merge
@@ -22,7 +22,7 @@
 #   -w --wait                                     Wait for the files to be closed before returning.
 # ------------------------------------------------------------------------------
 [difftool "code"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+  cmd = code --wait --diff $LOCAL $REMOTE
 [mergetool "code"]
-    # 3-way merge
-    cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
+  # 3-way merge
+  cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
