@@ -6,6 +6,7 @@
 
 set -e
 
+cd $(git root)
 # Process deleted files
 typeset -a files=(`git ls-files --exclude-standard --deleted`)
 for file in ${files[@]}; do
