@@ -37,6 +37,46 @@ checkmark="\033[0;32m\ue63f\033[0m"
 #     echo "$branch " $(git log $branch --max-count=1 | grep "Change-Id:")
 # done
 
+#-------------------------------------------------------------------------------
+# Using github cli to find my prs that are closed
+# Limit the results to 10 instead of the default 30
+#
+# ❯ gh pr list --state closed --author "@me" --search $(git rev-parse lgordon/janus-fix-spacing)
+# Showing 1 of 1 pull request in ee/AppleSchoolManagerUI that matches your search
+#
+# ID      TITLE                                 BRANCH                     CREATED AT
+# #16625  Fix Step content inheriting flex gap  lgordon/janus-fix-spacing  about 1 day ago
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Using github cli to find my prs that are closed
+# Limit the results to 10 instead of the default 30
+#
+# ❯ gh pr list --state merged --author "@me"
+#
+# ID      TITLE                                                                            BRANCH                                      CREATED AT
+# #16625  Fix Step content inheriting flex gap                                             lgordon/janus-fix-spacing                   about 1 day ago
+# #16601  Add block prop to Atomic Tabs component                                          lgordon/tabs-update                         about 8 days ago
+# #16594  Fix broken Tabs styling and match APL design                                     lgordon/2420Beta                            about 9 days ago
+# #16592  Fix broken Tabs styling and match APL design                                     lgordon/2420                                about 9 days ago
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Using github cli to find my prs that are closed
+# Limit the results to 10 instead of the default 30
+#
+# ❯ gh pr list --state merged --author "@me" --search "$(git rev-parse lgordon/janus-fix-spacing)"
+# Showing 1 of 1 pull request in ee/AppleSchoolManagerUI that matches your search
+#
+# ID      TITLE                                 BRANCH                     CREATED AT
+# #16625  Fix Step content inheriting flex gap  lgordon/janus-fix-spacing  about 1 day ago
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# https://cli.github.com/manual/gh_pr_list
+# ❯ gh pr list --state merged --author "@me" --search "4d1b560daddeb1a0cbc32efe4b08ae294f201d1"
+# no pull requests match your search in ee/AppleSchoolManagerUI
+#-------------------------------------------------------------------------------
+
 # for branch in $(git for-each-ref refs/heads  | cut -d/ -f3-); do
 echo hello
 allBranches=( $(git for-each-ref refs/heads  | cut -d/ -f3-) );
