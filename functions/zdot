@@ -96,7 +96,7 @@ function _zdot::alias() {
 }
 
 function _zdot::check() {
-  _zdot::load "$ZDOT_TEMPLATES/check-install.zsh"
+  _zdot::load "$ZDOT_BIN/check-install"
 }
 
 function _zdot::clear() {

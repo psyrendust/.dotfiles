@@ -7,10 +7,10 @@
 #
 # Usage: save to ~/.zshrc
 #   #!/usr/bin/env zsh
-#   zdot load "$ZDOT_TEMPLATES/zshrc.zsh"
+#   zdot load "$ZDOT_SHELL/zshrc.zsh"
 #
 # Execution Order
-#   https://github.com/psyrendust/.dotfiles/blob/master/templates/README.md#for-zsh
+#   https://github.com/psyrendust/.dotfiles/blob/master/shell/README.md#for-zsh
 #
 # License:
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
