@@ -23,8 +23,11 @@
   plus = commit --amend --no-edit
   # Show a markdown-formatted summary of commits from {REVIEW_BASE:-origin/master} until HEAD
   pr-summary = !git log --reverse --format=\"- **%s** (%h)%n%n%w(74,2,2)%b\" \"${REVIEW_BASE:-origin/master}\"..HEAD
+  # Commit with your last commit message from a failed commit
+  recommit = !git commit -e -F $(git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG
   # The SHA to compare diffs against
   review-base = !git merge-base HEAD \"${REVIEW_BASE:-origin/master}\"
   # Same as `git files`, but with a diff stat instead of just names (better for interactive use)
   stat = !git diff --stat $(git review-base)
   unassume = update-index --no-assume-unchanged
+  wt = worktree
