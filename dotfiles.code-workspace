@@ -102,7 +102,7 @@
       // Work specific stuff
       ".obs/": true,
       ".swiftpm/": true,
-      "tmp/": true,
+      "work/": true,
 		}
 	}
 }
