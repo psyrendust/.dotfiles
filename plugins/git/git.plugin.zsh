@@ -270,6 +270,12 @@ function _git-log-pr() {
   git log --format="* %s" --no-color --date=relative $targetBranch..$currBranch | pbcopy
 }
 
+alias gd='git diff'
+compdef _git gd=git-diff
+
+alias gds='git diff --staged'
+compdef _git gds=git-diff
+
 alias gcp='git cherry-pick'
 compdef _git gcp=git-cherry-pick
 
@@ -445,6 +451,9 @@ compdef _git gunadd=git-reset
 
 alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
+
+alias gwt='git worktree'
+compdef _git gwt=git-worktree
 
 # Modified version of OMZ gwip
 # - adds timestamp to commit message.
