@@ -133,6 +133,7 @@ logHr; logTitle "homebrew formulas check"
 brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
   ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
+  ["$ZDOT_BREW_ROOT/bin/bfs"]="bfs"
   ["$ZDOT_BREW_ROOT/bin/batman"]="eth-p/software/bat-extras"
   ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
   ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
