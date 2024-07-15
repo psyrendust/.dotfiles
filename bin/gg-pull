@@ -15,7 +15,7 @@ targetBranch=""
 # Check if an arg has been passed and it matches one of our flags
 if (( $ALL_FLAGS[(Ie)$1] )); then
   # Get the target branch from our local branches using fzf
-  targetBranch=$(gitbranches | fzf | trimleading)
+  targetBranch=$(getgitbranch)
   if [[ -z "$targetBranch" ]]; then
     exit;
   fi

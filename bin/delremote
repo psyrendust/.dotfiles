@@ -9,12 +9,12 @@ set -e
 if [ -n "$1" ]; then
   BRANCH="$1"
 else
-  BRANCH=$(gitbranches | fzf) &&
+  BRANCH=$(getgitbranch) &&
 fi
 
 # echo "BRANCH: ${BRANCH}"
 BRANCHES=$(git ls-remote --heads origin ${BRANCH})
-# echo "BRANCHS: ${BRANCHS}"
+# echo "BRANCHES: ${BRANCHES}"
 
 RESULT=$(echo "$BRANCHES" | grep "$BRANCH" | wc -l)
 COUNT=$(echo ${RESULT//[[:blank:]]/})
@@ -24,7 +24,7 @@ if [[ "$COUNT" != "0" ]]; then
   # echo "CUT_BRANCHES: ${CUT_BRANCHES}"
   BRANCH_NAMES=$(echo $CUT_BRANCHES | sed 's/^refs\/heads\///g')
   # echo "BRANCH_NAMES: ${BRANCH_NAMES}"
-  deleteBranch=$(echo $BRANCH_NAMES | fzf --header 'Also delete remote branch (Press ESC to cancel)?') &&
+  deleteBranch=$(echo $BRANCH_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
   echo "Deleting remote branch $deleteBranch" &&
   git push origin --delete ${deleteBranch}
 else
