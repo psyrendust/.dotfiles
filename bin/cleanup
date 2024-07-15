@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+# cleanup
+# List all local branches with upstream status of "gone".
+# Fuzzy select branches for deletion.
+#-------------------------------------------------------------------------------
+
+set -e
+
+BRANCHES=( $(git-upstream-gone | fzf -m --reverse | trimleading) ) &&
+
+for branch in $BRANCHES[@]; do
+  git branch -D ${branch}
+done
+
