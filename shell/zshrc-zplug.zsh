@@ -55,7 +55,6 @@ zplug "plugins/urltools", from:oh-my-zsh, defer:1
 # ------------------------------------------------------------------------------
 # misc plugins
 # ------------------------------------------------------------------------------
-zplug "$ZDOT_BREW_ROOT/opt/fzf", from:local, use:"shell/*.zsh", defer:1
 zplug "bigH/git-fuzzy", as:command, use:"bin/git-fuzzy", defer:1
 zplug "lukechilds/zsh-nvm", defer:1
 zplug "agkozak/zsh-z", defer:1
