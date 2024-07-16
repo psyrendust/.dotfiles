@@ -42,8 +42,9 @@ function _zdot {
     'edit:Open dotfiles vscode workspace'
     'load:Source a file if it exists'
     'notes:Open notes folder in vscode'
-    'purge:Purge antidote cache and zsh_plugins.zsh'
+    'purge:Purge antidote cache and zshrc-antidote-plugins.zsh'
     'reload:Reload the current zsh session'
+    'reset:Purge zshrc-antidote-plugins.zsh'
     'update:Update dotfiles'
   )
 
@@ -75,8 +76,9 @@ Available commands:
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
   notes               Open notes folder in vscode
-  purge               Purge antidote cache and zsh_plugins.zsh
+  purge               Purge antidote cache and zshrc-antidote-plugins.zsh
   reload              Reload the current zsh session
+  reset               Purge zshrc-antidote-plugins.zsh
   update              Update dotfiles using zplug
 
 EOF
@@ -132,23 +134,28 @@ function _zdot::purge() {
   [[ -d "$(antidote home)" ]] &&
     echo "[zdot] Remove antidote cache" &&
     rm -rf "$(antidote home)"
-  [[ -f "$ZDOT_ANTIDOTE_PLUGIN_CACHE" ]] &&
-    echo "[zdot] Remove $ZDOT_ANTIDOTE_PLUGIN_CACHE cache file" &&
-    rm "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
 
-  echo "[zdot] reloading zsh"
+  zdot reset
   zdot reload
 }
 
 # Taken from OMZ
 function _zdot::reload {
+  echo "[zdot] removing completion cache"
   # Delete current completion cache
   command rm -f $_comp_dumpfile $ZSH_COMPDUMP
 
+  echo "[zdot] reloading zsh"
   # Old zsh versions don't have ZSH_ARGZERO
   local zsh="${ZSH_ARGZERO:-${functrace[-1]%:*}}"
   # Check whether to run a login shell
   [[ "$zsh" = -* || -o login ]] && exec -l "${zsh#-}" || exec "$zsh"
+}
+
+function _zdot::reset() {
+  [[ -f "$ZDOT_ANTIDOTE_PLUGIN_CACHE" ]] &&
+    echo "[zdot] Remove $ZDOT_ANTIDOTE_PLUGIN_CACHE cache file" &&
+    rm "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
 }
 
 function _zdot::update() {
