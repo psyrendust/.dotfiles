@@ -139,7 +139,6 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/diff-so-fancy"]="diff-so-fancy"
   ["$ZDOT_BREW_ROOT/bin/eza"]="eza"
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
-  ["$ZDOT_BREW_ROOT/bin/fig"]="fig"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
   ["$ZDOT_BREW_ROOT/bin/gpg"]="gpg"
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
@@ -176,8 +175,6 @@ brew_formula_fonts=(
   ["$ZDOT_BREW_ROOT/Caskroom/font-roboto-mono"]="font-roboto-mono"
 )
 brew_formulas+=(${(kv)brew_formula_fonts})
-# Execute the tap
-brew tap homebrew/cask-fonts
 
 # ------------------------------------------------------------------------------
 logHeader "brew_formulas: ${#brew_formulas[@]}"
