@@ -42,6 +42,7 @@ function _zdot {
     'edit:Open dotfiles vscode workspace'
     'load:Source a file if it exists'
     'notes:Open notes folder in vscode'
+    'purge:Purge antidote cache and zsh_plugins.zsh'
     'reload:Reload the current zsh session'
     'update:Update dotfiles'
   )
@@ -74,6 +75,7 @@ Available commands:
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
   notes               Open notes folder in vscode
+  purge               Purge antidote cache and zsh_plugins.zsh
   reload              Reload the current zsh session
   update              Update dotfiles using zplug
 
@@ -124,6 +126,18 @@ EOF
 function _zdot::notes() {
   [[ -d "$HOME/workspace/notes" ]] && code "$HOME/workspace/notes"
   [[ -d "$HOME/dev/notes" ]] && code "$HOME/dev/notes"
+}
+
+function _zdot::purge() {
+  [[ -d "$(antidote home)" ]] &&
+    echo "[zdot] Remove antidote cache" &&
+    rm -rf "$(antidote home)"
+  [[ -f "$ZDOT_ANTIDOTE_PLUGIN_CACHE" ]] &&
+    echo "[zdot] Remove $ZDOT_ANTIDOTE_PLUGIN_CACHE cache file" &&
+    rm "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
+
+  echo "[zdot] reloading zsh"
+  zdot reload
 }
 
 # Taken from OMZ
