@@ -17,12 +17,13 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Load framework
+# Configure nvm via lukechilds/zsh-nvm
 # ------------------------------------------------------------------------------
-# zdot load "$ZDOT_SHELL/zshrc-zinit.zsh"
-zdot load "$ZDOT_SHELL/zshrc-zplug.zsh"
+zdot load "$ZDOT_SHELL/init-nvm.zsh"
+
 
 # ------------------------------------------------------------------------------
-# Load nvm
+# Load framework
 # ------------------------------------------------------------------------------
-zdot load "$ZDOT_SHELL/init_nvm"
+zdot load "$ZDOT_SHELL/zshrc-antidote.zsh"
+
