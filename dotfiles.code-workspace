@@ -8,10 +8,6 @@
 			"name": "home",
 			"path": "../",
 		},
-    {
-      "name": "zplug",
-      "path": "../.zplug",
-    },
 	],
 	"settings": {
 		"files.watcherExclude": {
@@ -19,7 +15,9 @@
 		},
 		"files.exclude": {
 			// folders
+			".antidote": true,
 			".cache/": false,
+			".cache/antidote": true,
 			".config/": true,
       ".dotfiles/": true,
 			".dropbox/": true,
@@ -30,7 +28,6 @@
 			".npm-global/": true,
 			".npm/": true,
 			".nvm/": true,
-			// ".oh-my-zsh/": true,
 			".ssh/": false,
 			".Trash/": true,
 			".vscode/": true,
