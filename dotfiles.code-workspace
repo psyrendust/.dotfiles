@@ -8,6 +8,10 @@
 			"name": "home",
 			"path": "../",
 		},
+    {
+			"name": "antidote",
+			"path": "../.cache/antidote",
+		},
 	],
 	"settings": {
 		"files.watcherExclude": {
