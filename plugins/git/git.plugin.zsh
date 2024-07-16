@@ -352,7 +352,7 @@ compdef _git ggpullr=git-pull
 alias ggpullru='git pull --rebase upstream $(git-current-branch)'
 compdef _git ggpullru=git-pull
 
-alias ggpush='git push -u origin "$(git_current_branch)"'
+alias ggpush='git push -u origin "$(git-current-branch)"'
 compdef _git ggpusha=git-push
 
 alias gl='_git-log-pretty-grep'
