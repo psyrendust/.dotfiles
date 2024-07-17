@@ -9,4 +9,5 @@ set -e
 # HASH=`ghash` &&
 # git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
 # git rebase -i $(ghash)^
-git rebase -i origin/$(git-main-branch)
+branch=$(getgitbranch)
+git rebase -i origin/$branch "$@"
