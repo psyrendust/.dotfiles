@@ -6,8 +6,20 @@
 
 set -e
 
-# HASH=`ghash` &&
-# git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
-# git rebase -i $(ghash)^
-branch=$(getgitbranch)
+didWip=
+# Get the target branch for the rebase so we only grab the commits we need
+branch=$(getgitbranch) &&
+
+{
+  # Check if there are pending changes still
+  git diff --quiet --exit-code --ignore-submodules HEAD || {
+    # If we have pending changes gc wip them
+    git-add-all && git-commit-wip && didWip=1 && echo "----- wip";
+  }
+} &&
+
+# Rebase interactively
 git rebase --interactive origin/$branch "$@"
+
+# Pop off any changes we might have had
+[[ -n $didWip ]] && git-uncommit-wip
