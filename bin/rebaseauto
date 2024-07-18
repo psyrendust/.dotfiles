@@ -6,4 +6,4 @@
 
 set -e
 
-git rebase --autosquash --interactive origin/$(git-main-branch)
+rebase --autosquash "$@"
