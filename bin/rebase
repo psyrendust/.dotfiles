@@ -10,4 +10,4 @@ set -e
 # git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
 # git rebase -i $(ghash)^
 branch=$(getgitbranch)
-git rebase ---interactive origin/$branch "$@"
+git rebase --interactive origin/$branch "$@"
