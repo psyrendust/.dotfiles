@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# git-mm
+# Execute a manual merge from a target branch to the current branch.
+#-------------------------------------------------------------------------------
+
+set -e
+
+targetBranch=""
+currBranch="$(git-current-branch)";
+
+# Get the target branch from our local branches using fzf
+targetBranch=$(getgitbranch)
+if [[ -z "$targetBranch" ]]; then
+  exit;
+fi
+
+# Update our target branch without switching to it
+chalk -t "[ {blue GIT-MM} ] updating branch {cyan $targetBranch}"
+git fetch origin ${targetBranch}:${targetBranch}
+
+chalk -t "[ {blue GIT-MM} ] merging {green.bold $targetBranch} onto {blue.bold $currBranch}"
+git merge --no-verify --ff $targetBranch
