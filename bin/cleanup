@@ -7,9 +7,12 @@
 
 set -e
 
-BRANCHES=( $(git-upstream-gone | fzf -m --reverse | trimleading) ) &&
+git remote update -p &&
+if [[ -n "$(git-upstream-gone)" ]]; then
+  BRANCHES=( $(git-upstream-gone | fzf -m --reverse | trimleading) ) &&
 
-for branch in $BRANCHES[@]; do
-  git branch -D ${branch}
-done
+  for branch in $BRANCHES[@]; do
+    git branch -D ${branch}
+  done
+fi
 
