@@ -1,0 +1,118 @@
+#!/usr/bin/env zsh
+#
+# hb
+# Compress a video file to a smaller size using HandBrakeCLI.
+#-------------------------------------------------------------------------------
+
+set -e
+
+function main() {
+  local flagHelp flagLog
+  local argInputFilePath argOutputFilePath argOutputDirectory
+  local inputFileName inputDirectory outputFilePath outputDirectory
+
+  local usage=(
+    "Compress a video file to a smaller size using HandBrakeCLI."
+    " "
+    "USAGE:"
+    "    hb [OPTIONS]"
+    "    hb [OPTIONS] -- <handbrake-options>"
+    "    hb -i <input-file>"
+    "    hb -i <input-file> -o <output-file>"
+    "    hb -i <input-file> -o <output-file> -- <handbrake-options>"
+    " "
+    "OPTIONS:"
+    "    -i <input-file>, --input <input-file>"
+    "        Set input file."
+    " "
+    "    -d <output-directory>, --dir <output-directory>"
+    "        Set destination directory."
+    " "
+    "    -o <output-file>, --output <output-file>"
+    "        Set destination file name."
+    " "
+    "    -l, --log"
+    "        Trace debug output to a log file in the output directory."
+    " "
+    "    -h, --help"
+    "        Show this help message."
+  )
+
+  # Parse the command line arguments
+  # @see https://johnlindquist.com/parsing-arguments-with-zparseopts-in-zsh-functions
+  # @see https://www.reddit.com/r/zsh/comments/s09vot/using_zparseopts/
+  # - @see https://xpmo.gitlab.io/post/using-zparseopts/
+  # - @see https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53
+  zmodload zsh/zutil
+  zparseopts -D -F -K -- \
+    {h,-help}=flagHelp \
+    {l,-log}=flagLog \
+    {i,-input}:=argInputFilePath \
+    {d,-dir}:=argOutputDirectory \
+    {o,-output}:=argOutputFilePath || return 1;
+
+  [[ -n "$flagHelp" ]] && { print -l $usage && return }
+
+  if [[ -z "$argInputFilePath" ]]; then
+    chalk -t "[ {red HANDBRAKE} ] {red Error: Missing required arguments}"
+    print -l $usage
+    return 1
+  fi
+
+  inputFilePath="$(realpath $argInputFilePath[-1])"
+  # Get the file name without the extension
+  # @see https://til.hashrocket.com/posts/nthvpgx7hh-zsh-file-name-without-the-extension
+  inputFileName="${inputFilePath:t:r}"
+  inputDirectory="$(dirname $inputFilePath)"
+
+  # Get the output file path
+  if [[ -n "$argOutputFilePath[-1]" ]]; then
+    # Use the output file path provided
+    outputFilePath="$(realpath $argOutputFilePath[-1])"
+  elif [[ -n "$argOutputDirectory" ]]; then
+    # Use the output directory provided
+    outputFilePath="$(realpath $argOutputDirectory[-1])/${inputFileName}.mp4"
+  else
+    # Fallback option to use the input file path and append '-handbrake.mp4'
+    outputFilePath="${inputDirectory}/${inputFileName}-handbrake.mp4"
+  fi
+
+  # Check if the output file is the same as the input file
+  if [[ "$inputFilePath" == "$outputFilePath" ]]; then
+    # Append '-handbrake' to the input file name
+    outputFilePath="${inputDirectory}/${inputFileName}-handbrake.mp4"
+  fi
+
+
+  outputDirectory="$(dirname $outputFilePath)"
+
+  function logger() {
+    if [[ -n "$flagLog" ]]; then
+      local logFile="$outputDirectory/hb.log"
+      local message="$@"
+      echo "$@"
+      echo "$@" >> "$logFile"
+      return
+    fi
+  }
+
+  logger "---------------------------------------------------------"
+  logger "$(date '+%Y-%m-%d %H:%M:%S')"
+  logger ""
+  logger "  which realpath: $(which realpath)"
+  logger "  which HandBrakeCLI: $(which HandBrakeCLI)"
+  logger ""
+  logger "  inputFileName:   [$inputFileName]"
+  logger "  inputDirectory:  [$inputDirectory]"
+  logger "  outputDirectory: [$outputDirectory]"
+  logger ""
+  logger "  inputFilePath:   [$inputFilePath]"
+  logger "  outputFilePath:  [$outputFilePath]"
+  logger ""
+  logger "  positionals:     [$@]"
+  logger ""
+
+  HandBrakeCLI --input "$inputFilePath" --output "$outputFilePath" --preset "Very Fast 1080p30" --optimize $@ && logger "Success" || logger "Failed"
+}
+
+main $@
