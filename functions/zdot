@@ -45,7 +45,7 @@ function _zdot {
     'purge:Purge antidote cache and zshrc-antidote-plugins.zsh'
     'reload:Reload the current zsh session'
     'reset:Purge zshrc-antidote-plugins.zsh'
-    'update:Update dotfiles'
+    'update:Update dotfiles using antidote'
   )
 
   if (( CURRENT == 2 )); then
@@ -79,7 +79,7 @@ Available commands:
   purge               Purge antidote cache and zshrc-antidote-plugins.zsh
   reload              Reload the current zsh session
   reset               Purge zshrc-antidote-plugins.zsh
-  update              Update dotfiles using zplug
+  update              Update dotfiles using antidote
 
 EOF
 }
@@ -159,20 +159,15 @@ function _zdot::reset() {
 }
 
 function _zdot::update() {
-  # zplug refresh
-  # 1. clean    -- Remove repositories which are no longer managed
-  # 2. clear    -- Remove the cache file
-  # 3. update   -- Update installed packages in parallel
-  # 4. load     -- Source installed plugins and add installed commands to $PATH
-  echo "[zdot] Remove repositories which are no longer managed" &&
-  zplug clean --force &&
+  echo "[zdot] Purge antidote cache and zshrc-antidote-plugins.zsh" &&
+  zdot reset &&
   sleep 2 &&
-  echo "[zdot] Remove the cache file" &&
-  zplug clear &&
+  echo "[zdot] Check install" &&
+  zdot check &&
   sleep 2 &&
-  echo "[zdot] Update installed packages in parallel" &&
-  zplug update --force &&
+  echo "[zdot] Update antidote and installed packages" &&
+  antidote update &&
   sleep 2 &&
-  echo "[zdot] Source installed plugins and add installed commands to \$PATH" &&
-  zplug load --verbose
+  echo "[zdot] Reload zsh" &&
+  zdot reload
 }
