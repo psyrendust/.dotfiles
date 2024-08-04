@@ -53,6 +53,7 @@ export ZDOT_ANTIDOTE_PLUGIN_CONFIG="$ZDOT_SHELL/$ZDOT_ANTIDOTE_PLUGINS_NAME.conf
 # ------------------------------------------------------------------------------
 ### Override default settings
 # ------------------------------------------------------------------------------
+zstyle ':omz:update' mode disabled
 zstyle ':antidote:bundle' use-friendly-names 'yes'
 zstyle ':antidote:static' file "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
 
