@@ -16,7 +16,6 @@ destinationBranch="$(git-current-branch)";
 # Check if an arg has been passed and it matches one of our flags
 if (( $ALL_FLAGS[(Ie)$1] )); then
   # Get the target branch from our local branches using fzf
-  targetBranch=$(getgitbranch)
   targetBranch=$(getgitbranch --header="Select a target branch to rebase onto ${destinationBranch}")
   if [[ -z "$targetBranch" ]]; then
     exit;
