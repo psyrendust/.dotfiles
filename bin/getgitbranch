@@ -6,4 +6,4 @@
 
 set -e
 
-gitbranches | fzf | sed -e 's/^[[*]]*//' | trimleading
+gitbranches | fzf $@ | sed -e 's/^[[*]]*//' | trimleading

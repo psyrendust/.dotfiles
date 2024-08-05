@@ -7,6 +7,6 @@
 
 set -e
 
-BRANCH=$(getgitbranch) &&
+BRANCH=$(getgitbranch --header="Select a branch to delete") &&
 git branch -D ${BRANCH} &&
 delremote "${BRANCH}"

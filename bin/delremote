@@ -9,7 +9,7 @@ set -e
 if [ -n "$1" ]; then
   BRANCH="$1"
 else
-  BRANCH=$(getgitbranch) &&
+  BRANCH=$(getgitbranch --header="Select a branch to delete") &&
 fi
 
 # echo "BRANCH: ${BRANCH}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 #
 # ghash
-# Fuzzy git rebase
+# Fuzzy get short git sha.
 #-------------------------------------------------------------------------------
 
 set -e
@@ -9,6 +9,6 @@ set -e
 # For short sha
 # commits=$(git log --color=always --pretty=oneline --abbrev-commit --reverse) &&
 commits=$(git log --color=always --oneline --decorate --reverse --max-count 50) &&
-commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse) &&
+commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse --header="Select a commit to retrieve its sha") &&
 # echo -n $(echo "$commit" | sed "s/ .*//")
 echo ${commit} | awk '{ print $1 }'

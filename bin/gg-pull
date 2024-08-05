@@ -11,12 +11,13 @@ BRANCH_FLAG=("-b" "--branch")
 UPDATE_FLAG=("-u" "--update" "-r" "--refresh")
 ALL_FLAGS=($BRANCH_FLAG $UPDATE_FLAG)
 targetBranch=""
-currBranch="$(git-current-branch)";
+destinationBranch="$(git-current-branch)";
 
 # Check if an arg has been passed and it matches one of our flags
 if (( $ALL_FLAGS[(Ie)$1] )); then
   # Get the target branch from our local branches using fzf
   targetBranch=$(getgitbranch)
+  targetBranch=$(getgitbranch --header="Select a target branch to rebase onto ${destinationBranch}")
   if [[ -z "$targetBranch" ]]; then
     exit;
   fi
@@ -26,16 +27,16 @@ if (( $ALL_FLAGS[(Ie)$1] )); then
   git fetch origin ${targetBranch}:${targetBranch}
 
   if (( $UPDATE_FLAG[(Ie)$1] )); then
-    chalk -t "[ {blue GGPULL} ] rebasing {green.bold $targetBranch} onto {blue.bold $currBranch}"
+    chalk -t "[ {blue GGPULL} ] rebasing {green.bold $targetBranch} onto {blue.bold $destinationBranch}"
     # Rebase changes from targetBranch onto the current branch
     git rebase $targetBranch
   fi
 else
   # Use the current branch as the target branch
-  if [[ -z "$currBranch" ]]; then
-    chalk -t "[ {red GGPULL} ] {red branch not found} {cyan $currBranch}"
+  if [[ -z "$destinationBranch" ]]; then
+    chalk -t "[ {red GGPULL} ] {red branch not found} {cyan $destinationBranch}"
     exit;
   fi
 
-  git pull origin ${currBranch}
+  git pull origin ${destinationBranch}
 fi

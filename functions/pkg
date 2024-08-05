@@ -102,7 +102,7 @@ function _pkg::has() {
 function _pkg::run() {
   local pkg="$(pkg path $@)"
   echo "$pkg"
-  local choice=$(cat "$pkg" | jq '.scripts | keys[]' | fzf --tac | tr -d '"') &&
+  local choice=$(cat "$pkg" | jq '.scripts | keys[]' | fzf --tac --header="Select a script to run" | tr -d '"') &&
   yarn $choice
 }
 

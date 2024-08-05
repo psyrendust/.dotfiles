@@ -8,7 +8,7 @@ set -e
 
 didWip=
 # Get the target branch for the rebase so we only grab the commits we need
-branch=$(getgitbranch) &&
+branch=$(getgitbranch --header="Select a branch used to determine the common base") &&
 
 {
   # Check if there are pending changes still

@@ -7,10 +7,10 @@
 set -e
 
 targetBranch=""
-currBranch="$(git-current-branch)";
+destinationBranch="$(git-current-branch)";
 
 # Get the target branch from our local branches using fzf
-targetBranch=$(getgitbranch)
+targetBranch=$(getgitbranch --header="Select a target branch to merge onto ${destinationBranch}")
 if [[ -z "$targetBranch" ]]; then
   exit;
 fi
@@ -19,5 +19,5 @@ fi
 chalk -t "[ {blue GIT-MM} ] updating branch {cyan $targetBranch}"
 git fetch origin ${targetBranch}:${targetBranch}
 
-chalk -t "[ {blue GIT-MM} ] merging {green.bold $targetBranch} onto {blue.bold $currBranch}"
+chalk -t "[ {blue GIT-MM} ] merging {green.bold $targetBranch} onto {blue.bold $destinationBranch}"
 git merge --no-verify --ff $targetBranch

@@ -9,7 +9,7 @@ set -e
 
 git remote update -p &&
 if [[ -n "$(git-upstream-gone)" ]]; then
-  BRANCHES=( $(git-upstream-gone | fzf -m --reverse | trimleading) ) &&
+  BRANCHES=( $(git-upstream-gone | fzf -m --reverse --header="Select branches to cleanup" | trimleading) ) &&
 
   for branch in $BRANCHES[@]; do
     git branch -D ${branch}
