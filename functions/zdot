@@ -38,13 +38,11 @@ function _zdot {
     'help:Usage information'
     'alias:Get the value of an alias'
     'check:Check install'
-    'clear:Clear the cache directory'
+    'clear:Run clear subcommand'
     'edit:Open dotfiles vscode workspace'
     'load:Source a file if it exists'
     'notes:Open notes folder in vscode'
-    'purge:Purge antidote cache and zshrc-antidote-plugins.zsh'
     'reload:Reload the current zsh session'
-    'reset:Purge zshrc-antidote-plugins.zsh'
     'update:Update dotfiles using antidote'
   )
 
@@ -61,6 +59,14 @@ if (( ! $+functions[compinit] )); then
 fi
 compdef _zdot zdot
 
+function _zdot::log() {
+  chalk -t "[{yellow zdot}] $*"
+}
+
+function _zdot::logsuccess() {
+  _zdot::log "{green $* ✔}"
+}
+
 function _zdot::noop() {}
 
 function _zdot::help() {
@@ -72,13 +78,11 @@ Available commands:
   help                Print this help message
   alias  <alias>      Get the value of an alias
   check               Check install
-  clear               Clear the cache directory
+  clear               Run clear subcommand
   edit                Open dotfiles vscode workspace
   load   <script>     Source a file if it exists
   notes               Open notes folder in vscode
-  purge               Purge antidote cache and zshrc-antidote-plugins.zsh
   reload              Reload the current zsh session
-  reset               Purge zshrc-antidote-plugins.zsh
   update              Update dotfiles using antidote
 
 EOF
@@ -100,11 +104,9 @@ function _zdot::alias() {
 }
 
 function _zdot::check() {
-  _zdot::load "$ZDOT_BIN/check-install"
-}
-
-function _zdot::clear() {
-  rm -rf "$ZDOT_CACHE"
+  _zdot::log "check install"
+  _zdot::load "$ZDOT_BIN/check-install" &&
+  _zdot::logsuccess "check install"
 }
 
 function _zdot::edit() {
@@ -130,44 +132,90 @@ function _zdot::notes() {
   [[ -d "$HOME/dev/notes" ]] && code "$HOME/dev/notes"
 }
 
-function _zdot::purge() {
-  [[ -d "$(antidote home)" ]] &&
-    echo "[zdot] Remove antidote cache" &&
-    rm -rf "$(antidote home)"
-
-  zdot reset
-  zdot reload
-}
-
 # Taken from OMZ
 function _zdot::reload {
-  echo "[zdot] removing completion cache"
-  # Delete current completion cache
-  command rm -f $_comp_dumpfile $ZSH_COMPDUMP
+  _zdot::log "reloading zsh"
 
-  echo "[zdot] reloading zsh"
+  # Delete current completion cache
+  _zdot::log "removing completion cache"
+  command rm -f $_comp_dumpfile $ZSH_COMPDUMP
+  _zdot::logsuccess "removing completion cache"
+
   # Old zsh versions don't have ZSH_ARGZERO
   local zsh="${ZSH_ARGZERO:-${functrace[-1]%:*}}"
+
+  _zdot::logsuccess "reloading zsh"
   # Check whether to run a login shell
   [[ "$zsh" = -* || -o login ]] && exec -l "${zsh#-}" || exec "$zsh"
 }
 
-function _zdot::reset() {
-  [[ -f "$ZDOT_ANTIDOTE_PLUGIN_CACHE" ]] &&
-    echo "[zdot] Remove $ZDOT_ANTIDOTE_PLUGIN_CACHE cache file" &&
-    rm "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
+function _zdot::update() {
+  zdot check && sleep 2 &&
+  zdot clear config && sleep 2 &&
+  _zdot::update::antidote && sleep 2 &&
+  zdot reload
 }
 
-function _zdot::update() {
-  echo "[zdot] Purge antidote cache and zshrc-antidote-plugins.zsh" &&
-  zdot reset &&
-  sleep 2 &&
-  echo "[zdot] Check install" &&
-  zdot check &&
-  sleep 2 &&
-  echo "[zdot] Update antidote and installed packages" &&
+function _zdot::update::antidote() {
+  _zdot::log "update antidote and installed packages"
   antidote update &&
-  sleep 2 &&
-  echo "[zdot] Reload zsh" &&
+  _zdot::logsuccess "update antidote and installed packages"
+}
+
+function _zdot::clear() {
+  [[ $# -gt 0 ]] || {
+    _zdot::clear::help
+    return 1
+  }
+
+  local command="$1"
+  shift
+
+  # Subcommand functions start with _ so that they don't
+  # appear as completion entries when looking for `zdot`
+  (( $+functions[_zdot::clear::$command] )) || {
+    _zdot::clear::help
+    return 1
+  }
+
+  _zdot::clear::$command "$@"
+}
+
+function _zdot::clear::help() {
+  cat <<EOF
+Usage: zdot clear <command> [options]
+
+Available commands:
+
+  help                Print this help message
+  antidote            Clear antidote cache and config
+  cache               Clear the zdot cache directory
+  config              Clear cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file
+
+EOF
+}
+
+function _zdot::clear::antidote() {
+  [[ -d "$(antidote home)" ]] && (
+    _zdot::log "clear antidote cache"
+    rm -rf "$(antidote home)"
+    _zdot::logsuccess "clear antidote cache"
+  )
+
+  zdot clear config
   zdot reload
+}
+
+function _zdot::clear::cache() {
+  _zdot::log "clear zdot cache directory"
+  rm -rf "$ZDOT_CACHE" &&
+  _zdot::logsuccess "clear zdot cache directory"
+}
+
+function _zdot::clear::config() {
+  [[ -f "$ZDOT_ANTIDOTE_PLUGIN_CACHE" ]] && (
+    _zdot::log "remove cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file"
+    rm "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
+    _zdot::logsuccess "remove cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file"
+  )
 }
