@@ -25,13 +25,15 @@
 # --wheel-lines=N:  Each click of the mouse wheel moves N lines.
 # ------------------------------------------------------------------------------
 
+[color]
+  ui = true
 [core]
   commitGraph = true
   editor = gitcommiteditor
   excludesfile = $HOME/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
-  pager = "diff-so-fancy | less --tabs=4 -RF"
+  pager = delta
   trustctime = false
   whitespace = fix
 [init]
@@ -41,9 +43,11 @@
 [http]
   sslVerify = false
 
+
 # Configure default Git settings for difftool and mergetool of choice.
 # ------------------------------------------------------------------------------
 [diff]
+  colorMoved = default
   renames = true
 [difftool]
   keepBackup = false

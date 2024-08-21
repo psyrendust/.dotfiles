@@ -2,6 +2,7 @@
 #
 # git
 # Execute git with custom commands for diff and show
+# Note: To use rename this file to `git`
 #-------------------------------------------------------------------------------
 
 if [[ "$1" == "show" ]]; then

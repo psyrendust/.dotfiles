@@ -11,6 +11,6 @@
 [include]
   path = core.inc
 [include]
-  path = diff.inc
-[include]
   path = diff-vscode.inc
+[include]
+  path = diff-delta.inc
