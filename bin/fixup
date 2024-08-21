@@ -6,11 +6,25 @@
 
 set -e
 
+didWip=
+
 # Grab the hash that we want to fixup to
 HASH=$(ghash) &&
 
 # Commit to that hash
 git commit --fixup ${HASH} &&
 
+
+{
+  # Check if there are pending changes still
+  git diff --quiet --exit-code --ignore-submodules HEAD || {
+    # If we have pending changes gc wip them
+    git-add-all && git-commit-wip && didWip=1 && echo "----- wip";
+  }
+} &&
+
 # Rebase and autosquash the fixup
-rebaseauto
+git rebase --interactive --autosquash ${HASH}~1
+
+# Pop off any changes we might have had
+[[ -n $didWip ]] && git-uncommit-wip
