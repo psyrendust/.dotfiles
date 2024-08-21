@@ -6,4 +6,15 @@
 
 set -e
 
-bat --list-themes | fzf --preview='MANPAGER="col -bx | bat --theme={} --color=always --language=man --plain" /usr/bin/man fzf'
+# Check if there are arguments
+if [[ $# -gt 0 ]]; then
+  # Preview themes with the file passed as argument
+  echo "$0"
+  echo "$1"
+  echo "$@"
+  # bat --list-themes | fzf --preview='bat --theme={} --color=always --plain $@'
+  bat --list-themes | fzf --preview="bat --theme={} --color=always $1"
+else
+  # Preview themes with man pages
+  bat --list-themes | fzf --preview='MANPAGER="col -bx | bat --theme={} --color=always --language=man --plain" /usr/bin/man fzf'
+fi
