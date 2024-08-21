@@ -25,5 +25,4 @@ zdot load "$ZDOT_SHELL/init-nvm.zsh"
 # ------------------------------------------------------------------------------
 # Load framework
 # ------------------------------------------------------------------------------
-# zdot load "$ZDOT_SHELL/zshrc-zplug.zsh"
 zdot load "$ZDOT_SHELL/zshrc-antidote.zsh"

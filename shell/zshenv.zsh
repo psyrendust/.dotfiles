@@ -17,13 +17,10 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
 # ------------------------------------------------------------------------------
 
-# Initialize Zdot's hash definitions
-# declare -A ZDOTHASH
-# ZDOTHASH[BIN]="$HOME/.dotfiles/bin"
-# A variable as a starting point of zplug
-# typeset -gx ZDOT_ROOT="${${(%):-%N}:A:h}"
 
-# What architecture are we using
+# ------------------------------------------------------------------------------
+### What architecture are we using
+# ------------------------------------------------------------------------------
 export ZDOT_ARCH=$(uname -m)
 if [[ $ZDOT_ARCH == "arm64" ]]; then
   export ZDOT_M1=1
@@ -34,11 +31,12 @@ elif [[ $ZDOT_ARCH == "x86_64" ]]; then
 fi
 
 export BAT_PAGER="less -R"
-export FZF_PATH="$ZDOT_BREW_ROOT/opt/fzf"
 export ZSH_CUSTOM="$HOME/.dotfiles"
 
-export ZPLUG_THREADS=1
 
+# ------------------------------------------------------------------------------
+### Zdot paths
+# ------------------------------------------------------------------------------
 export ZDOT="$HOME/.dotfiles"
 export ZDOT_BIN="$ZDOT/bin"
 export ZDOT_CACHE="$ZDOT/cache"
@@ -54,27 +52,45 @@ export ZDOT_DROPBOX_APPS="$ZDOT_DROPBOX/Apps"
 export ZDOT_DROPBOX_BIN="$ZDOT_DROPBOX_APPS/bin"
 export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 
-# Use vscode as the default editor, but use the plugin version
-# export VISUAL='$/usr/local/bin/code --wait'
+
+# ------------------------------------------------------------------------------
+### Use vscode as the default editor, but use my plugin version
+# ------------------------------------------------------------------------------
 export VISUAL="$ZDOT_PLUGINS/vscode/bin/code --wait"
 export EDITOR="$VISUAL"
 
+
+# ------------------------------------------------------------------------------
+### Add Go paths if they exist
+# ------------------------------------------------------------------------------
 [[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
 
+
 # ------------------------------------------------------------------------------
-# Zsh-z options https://github.com/agkozak/zsh-z?tab=readme-ov-file#settings
+### Zsh-z options https://github.com/agkozak/zsh-z?tab=readme-ov-file#settings
 # ------------------------------------------------------------------------------
 ZSHZ_CASE=ignore
 
+
 # ------------------------------------------------------------------------------
-# Setup options
+### Config for lukechilds/zsh-nvm
+# ------------------------------------------------------------------------------
+export NVM_DIR="$HOME/.nvm"
+export NVM_COMPLETION=true
+export NVM_LAZY_LOAD=false
+export NVM_NO_USE=false
+export NVM_AUTO_USE=false
+
+
+# ------------------------------------------------------------------------------
+### Setup options
 # ------------------------------------------------------------------------------
 setopt EXTENDED_GLOB
 
 
 # ------------------------------------------------------------------------------
-# Add a function path & load them
+### Add Zdot function paths & load them
 # ------------------------------------------------------------------------------
 fpath=(
   "$ZDOT_FUNCTIONS"(N-/)
