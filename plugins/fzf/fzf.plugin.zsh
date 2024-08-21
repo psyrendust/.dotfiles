@@ -11,6 +11,12 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
 # ------------------------------------------------------------------------------
 
+
+# ------------------------------------------------------------------------------
+# Initialize fzf path
+export FZF_PATH="$ZDOT_BREW_ROOT/opt/fzf"
+export FZF_BIN="$FZF_PATH/bin"
+
 # Use ** as the trigger sequence instead: default **
 export FZF_COMPLETION_TRIGGER='**'
 
@@ -60,8 +66,8 @@ _fzf_compgen_dir() {
 
 # ------------------------------------------------------------------------------
 # Add fzf to the PATH
-if [[ ! "$PATH" == *$ZDOT_BREW_ROOT/opt/fzf/bin* ]]; then
-  export PATH="${PATH:+${PATH}:}${FZF_PATH}/bin"
+if [[ ! "$PATH" == *$FZF_BIN* ]]; then
+  export PATH="${PATH:+${PATH}:}${FZF_BIN}"
 fi
 
 # ------------------------------------------------------------------------------
@@ -72,14 +78,49 @@ zdot load "$FZF_PATH/shell/completion.zsh" 2> /dev/null
 # Key bindings
 zdot load "$FZF_PATH/shell/key-bindings.zsh"
 
+
 # ------------------------------------------------------------------------------
-# Default color options
-# fg:#8e99ad
+# Customize fzf theme
+# https://vitormv.github.io/fzf-themes#eyJib3JkZXJTdHlsZSI6InJvdW5kZWQiLCJib3JkZXJMYWJlbCI6IiIsImJvcmRlckxhYmVsUG9zaXRpb24iOjAsInByZXZpZXdCb3JkZXJTdHlsZSI6ImJvbGQiLCJwYWRkaW5nIjoiMCIsIm1hcmdpbiI6IjAiLCJwcm9tcHQiOiLina8gIiwibWFya2VyIjoi4p2vICIsInBvaW50ZXIiOiLilowiLCJzZXBhcmF0b3IiOiLilIAiLCJzY3JvbGxiYXIiOiLilIIiLCJsYXlvdXQiOiJkZWZhdWx0IiwiaW5mbyI6ImRlZmF1bHQiLCJjb2xvcnMiOiJmZzojYjJjMGRiLGZnKzojZWJlZGU0LGJnKzojMjYyNjI2LGhsOiM1ZmZmODcsaGwrOiM1ZmQ3ZmYsaW5mbzojNzNkMGZmLG1hcmtlcjojNWZmZjg3LHByb21wdDojZDcwMDVmLHNwaW5uZXI6IzczZDBmZixwb2ludGVyOiNhZjVmZmYsaGVhZGVyOiNhZjg3ZmYsYm9yZGVyOiMyNjI2MjYsbGFiZWw6I2FlYWVhZSxxdWVyeTojZDlkOWQ5In0=
+#
+#
+# ------------------------------------------------------------------------------
+# Custom color options
+# ------------------------------------------------------------------------------
+# fg:#b2c0db
 # fg+:#ebede4
-# hl+:#ff87d7
+# bg:-1
+# bg+:-1
+# hl:#5fff87
+# hl+:#5fd7ff
+# info:#73d0ff
+# marker:#5fff87
+# prompt:#d7005f
+# spinner:#73d0ff
+# pointer:#af5fff
+# header:#af87ff
+# border:#262626
+# label:#aeaeae
+# query:#d9d9d9
+
+# ------------------------------------------------------------------------------
+# Theme options
+# ------------------------------------------------------------------------------
+# --border="rounded"
+# --border-label=""
+# --preview-window="border-bold"
+# --prompt="❯ "
+# --marker="❯ "
+# --pointer="▌"
+# --separator="─"
+# --scrollbar="│"
+
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
-  --color=fg:#b2c0db,bg:-1,hl:#5fff87
-  --color=fg+:#ebede4,bg+:-1,hl+:#5fff87
-  --color=info:#73d0ff,prompt:#5fff87,pointer:#ff87d7
-  --color=marker:#5fff87,spinner:#73d0ff,header:#af87ff
+  --color=fg:#b2c0db,fg+:#ebede4,bg:-1,bg+:-1
+  --color=hl:#5fff87,hl+:#5fd7ff,info:#73d0ff,marker:#5fff87
+  --color=prompt:#d7005f,spinner:#73d0ff,pointer:#af5fff,header:#af87ff
+  --color=border:#262626,label:#aeaeae,query:#d9d9d9
+  --border="rounded" --border-label="" --preview-window="border-bold" --prompt="❯ "
+  --marker="❯ " --pointer="▌" --separator="─" --scrollbar="│"
 '
+
