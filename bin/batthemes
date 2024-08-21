@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#
+# batthemes
+# Preview Bat themes with fzf
+#-------------------------------------------------------------------------------
+
+set -e
+
+bat --list-themes | fzf --preview='MANPAGER="col -bx | bat --theme={} --color=always --language=man --plain" /usr/bin/man fzf'
