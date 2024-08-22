@@ -42,6 +42,8 @@
   writeCommitGraph = true
 [http]
   sslVerify = false
+[push]
+  default = current
 
 
 # Configure default Git settings for difftool and mergetool of choice.
@@ -61,9 +63,13 @@
 
 # User configuration stuff
 # ------------------------------------------------------------------------------
-[credential]
-  helper = osxkeychain
 [help]
   autocorrect = 1
-[push]
-  default = current
+
+
+# Sign commits with GPG
+# ------------------------------------------------------------------------------
+[credential]
+  helper = osxkeychain
+[gpg "ssh"]
+	allowedSignersFile = ~/.ssh/allowed_signers
