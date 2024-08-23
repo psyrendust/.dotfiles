@@ -14,17 +14,24 @@
 # ------------------------------------------------------------------------------
 
 function zdot() {
-  [[ $# -gt 0 ]] || {
-    _zdot::help
-    return 1
-  }
+  # [[ $# -gt 0 ]] || {
+  #   _zdot::help
+  #   return 1
+  # }
 
   local command="$1"
-  shift
 
+  case "$command" in
+    ""|-h|--help)
+      _zdot::help
+      return 0;;
+  esac
+
+  shift
   # Subcommand functions start with _ so that they don't
   # appear as completion entries when looking for `zdot`
   (( $+functions[_zdot::$command] )) || {
+    _zdot::log "Unknown command: $command"
     _zdot::help
     return 1
   }
@@ -35,7 +42,6 @@ function zdot() {
 function _zdot {
   local -a cmds subcmds
   cmds=(
-    'help:Usage information'
     'alias:Get the value of an alias'
     'check:Check install'
     'clear:Run clear subcommand'
@@ -45,10 +51,22 @@ function _zdot {
     'paths:Output PATH, MANPATH and INFOPATH into distinct lines'
     'reload:Reload the current zsh session'
     'update:Update dotfiles using antidote'
+    'help:Usage information'
   )
 
   if (( CURRENT == 2 )); then
     _describe 'command' cmds
+  elif (( CURRENT == 3 )); then
+    case "$words[2]" in
+      clear)
+        subcmds=(
+          'antidote:Clear antidote cache and config'
+          'cache:Clear the zdot cache directory'
+          'config:Clear cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file'
+          'help:Usage information'
+        )
+        _describe 'command' subcmds;;
+    esac
   fi
 
   return 0
@@ -76,7 +94,6 @@ Usage: zdot <command> [options]
 
 Available commands:
 
-  help                Print this help message
   alias  <alias>      Get the value of an alias
   check               Check install
   clear               Run clear subcommand
@@ -86,6 +103,7 @@ Available commands:
   paths               Output PATH, MANPATH and INFOPATH into distinct lines
   reload              Reload the current zsh session
   update              Update dotfiles using antidote
+  help, -h, --help    Usage information
 
 EOF
 }
@@ -176,17 +194,19 @@ function _zdot::update::antidote() {
 }
 
 function _zdot::clear() {
-  [[ $# -gt 0 ]] || {
-    _zdot::clear::help
-    return 1
-  }
-
   local command="$1"
-  shift
 
+  case "$command" in
+    ""|-h|--help)
+      _zdot::clear::help
+      return 0;;
+  esac
+
+  shift
   # Subcommand functions start with _ so that they don't
   # appear as completion entries when looking for `zdot`
   (( $+functions[_zdot::clear::$command] )) || {
+    _zdot::log "Unknown command: $command"
     _zdot::clear::help
     return 1
   }
@@ -200,10 +220,10 @@ Usage: zdot clear <command> [options]
 
 Available commands:
 
-  help                Print this help message
   antidote            Clear antidote cache and config
   cache               Clear the zdot cache directory
   config              Clear cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file
+  help, -h, --help    Usage information
 
 EOF
 }
