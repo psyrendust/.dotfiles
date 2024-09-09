@@ -142,6 +142,7 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/gpg"]="gpg"
   ["$ZDOT_BREW_ROOT/bin/git"]="git"
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
+  ["$ZDOT_BREW_ROOT/bin/HandBrakeCLI"]="handbrake"
   ["$ZDOT_BREW_ROOT/bin/jq"]="jq"
   ["$ZDOT_BREW_ROOT/bin/op"]="1password-cli"
   ["$ZDOT_BREW_ROOT/bin/pyenv"]="pyenv"
