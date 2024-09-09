@@ -8,8 +8,8 @@ set -e
 
 function main() {
   local flagHelp flagLog
-  local argInputFilePath argOutputFilePath argOutputDirectory
-  local inputFileName inputDirectory outputFilePath outputDirectory
+  local argInputFilePath argOutputFilePath argOutputDirectory argPreset argSetTags
+  local inputFileName inputDirectory outputFilePath outputDirectory preset
 
   local usage=(
     "Compress a video file to a smaller size using HandBrakeCLI."
@@ -34,6 +34,12 @@ function main() {
     "    -l, --log"
     "        Trace debug output to a log file in the output directory."
     " "
+    "    -p, --preset"
+    "        Change the handbrake preset that is used. Defaults to 'Very Fast 1080p30'."
+    " "
+    "    -s, --set"
+    "        Set OSX Tags on the output file."
+    " "
     "    -h, --help"
     "        Show this help message."
   )
@@ -49,7 +55,9 @@ function main() {
     {l,-log}=flagLog \
     {i,-input}:=argInputFilePath \
     {d,-dir}:=argOutputDirectory \
-    {o,-output}:=argOutputFilePath || return 1;
+    {p,-preset}:=argPreset \
+    {o,-output}:=argOutputFilePath \
+    {s,-set}:=argSetTags || return 1;
 
   [[ -n "$flagHelp" ]] && { print -l $usage && return }
 
@@ -112,7 +120,23 @@ function main() {
   logger "  positionals:     [$@]"
   logger ""
 
-  HandBrakeCLI --input "$inputFilePath" --output "$outputFilePath" --preset "Very Fast 1080p30" --optimize $@ && logger "Success" || logger "Failed"
+
+  if [[ -n "$argPreset" ]]; then
+    preset="$argPreset[-1]"
+  else
+    preset="Very Fast 1080p30"
+  fi
+  logger ""
+  logger "  Using HandBrakeCLI preset: [$preset]"
+
+  HandBrakeCLI --input "$inputFilePath" --output "$outputFilePath" --preset "$preset" --optimize $@ && logger "Success" || logger "Failed"
+
+  if [[ -n "$argSetTags" ]]; then
+    logger ""
+    logger "$(which tag)"
+    logger "  Adding tags to the output file: [$argSetTags[-1]]"
+    tag -s "$argSetTags[-1]" "$outputFilePath" && logger "Tags added" || logger "Failed to add tags"
+  fi
 }
 
 main $@
