@@ -148,6 +148,7 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/pygmentize"]="pygments"
   ["$ZDOT_BREW_ROOT/bin/rg"]="ripgrep"
   ["$ZDOT_BREW_ROOT/bin/swda"]="swiftdefaultappsprefpane"
+  ["$ZDOT_BREW_ROOT/bin/tag"]="tag"
   ["$ZDOT_BREW_ROOT/bin/tree"]="tree"
   ["$ZDOT_BREW_ROOT/bin/zsh"]="zsh"
 )
