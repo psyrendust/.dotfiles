@@ -1,0 +1,51 @@
+#!/usr/bin/env zsh
+#
+# git-latest-tag
+# Get the latest tag from the current branch or remote.
+#-------------------------------------------------------------------------------
+
+set -e
+
+REMOTE_FLAG=("-r" "--remote")
+COMPARE_FLAG=("-c" "--compare")
+ALL_FLAGS=($COMPARE_FLAG $REMOTE_FLAG)
+
+# Get the latest tag from the remote
+function getLatestRemoteTag() {
+  git ls-remote --tags --refs --sort="v:refname" origin | grep -o 'v.*' | tail -1
+}
+
+# Get the latest tag from the current branch
+function getLatestLocalTag() {
+  git describe --tags --abbrev=0
+}
+
+# Check if an arg has been passed and it matches one of our flags
+if (( $ALL_FLAGS[(Ie)$1] )); then
+  if (( $COMPARE_FLAG[(Ie)$1] )); then
+    autoload is-at-least
+    remotetag=$(getLatestRemoteTag)
+    localtag=$(getLatestLocalTag)
+    if is-at-least "${remotetag//v}" "${localtag//v}"; then
+      echo "[1] $remotetag <= $localtag"
+    else
+      echo "[2] $remotetag > $localtag"
+    fi
+    if is-at-least $remotetag "v1.15.0"; then
+      echo "[3] $remotetag <= $localtag"
+    else
+      echo "[4] $remotetag > $localtag"
+    fi
+    # Compare the latest tag from the current branch with the latest tag from the remote
+
+    return 0
+  fi
+
+  if (( $REMOTE_FLAG[(Ie)$1] )); then
+    getLatestRemoteTag
+    return 0
+  fi
+fi
+
+# Get the latest tag from the current branch
+getLatestLocalTag
