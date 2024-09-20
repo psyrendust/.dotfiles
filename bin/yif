@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+#
+# yif
+# Install dependencies using yarn with the correct flags based on the version.
+#-------------------------------------------------------------------------------
+
+set -e
+
+function run() {
+  local major minor patch yarnversion
+  yarnversion="$(yarn --version)"
+
+  # Extract the major, minor, and patch versions
+  major="$(cut -d '.' -f 1 <<< "$yarnversion")"
+  minor="$(cut -d '.' -f 2 <<< "$yarnversion")"
+  patch="$(cut -d '.' -f 3 <<< "$yarnversion")"
+
+  # Check if the major version is less than 2 use --frozen-lockfile
+  if [[ "$major" -lt 2 ]]; then
+    yarn install --frozen-lockfile;
+  # Check if the major version is greater than or equal to 2 use --immutable
+  elif [[ "$major" -ge 2 ]]; then
+    yarn install --immutable;
+  fi
+}
+
+run

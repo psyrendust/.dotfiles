@@ -34,7 +34,6 @@ alias ll='li -a'
 alias rmrf="rm -rf"
 alias server="live-server"
 alias version="cat package.json | jq '.version'"
-alias yif="yarn install --frozen-lockfile"
 
 # Removing ANSI color codes from text stream
 # https://superuser.com/a/561105
