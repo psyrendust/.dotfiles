@@ -15,11 +15,21 @@ function main() {
     "Compress a video file to a smaller size using HandBrakeCLI."
     " "
     "USAGE:"
-    "    hb [OPTIONS]"
-    "    hb [OPTIONS] -- <handbrake-options>"
+    "    hb [FLAGS] [OPTIONS]"
+    "    hb [FLAGS] [OPTIONS] -- <handbrake-options>"
     "    hb -i <input-file>"
     "    hb -i <input-file> -o <output-file>"
     "    hb -i <input-file> -o <output-file> -- <handbrake-options>"
+    " "
+    "FLAGS:"
+    "    -l, --log"
+    "        Trace debug output to a log file in the output directory."
+    " "
+    "    -m, --meta"
+    "        Attempt to copy metadata from the input file to the output file using our exifcopy util."
+    " "
+    "    -h, --help"
+    "        Show this help message."
     " "
     "OPTIONS:"
     "    -i <input-file>, --input <input-file>"
@@ -31,17 +41,11 @@ function main() {
     "    -o <output-file>, --output <output-file>"
     "        Set destination file name."
     " "
-    "    -l, --log"
-    "        Trace debug output to a log file in the output directory."
-    " "
-    "    -p, --preset"
+    "    -p \"<preset>\", --preset \"<preset>\""
     "        Change the handbrake preset that is used. Defaults to 'Very Fast 1080p30'."
     " "
-    "    -s, --set"
-    "        Set OSX Tags on the output file."
-    " "
-    "    -h, --help"
-    "        Show this help message."
+    "    -s \"<tag>\", --set \"<tag>\""
+    "        Set OSX Tags on the output file. Use commas to separate multiple tags."
   )
 
   # Parse the command line arguments
@@ -53,6 +57,7 @@ function main() {
   zparseopts -D -F -K -- \
     {h,-help}=flagHelp \
     {l,-log}=flagLog \
+    {m,-meta}=flagMeta \
     {i,-input}:=argInputFilePath \
     {d,-dir}:=argOutputDirectory \
     {p,-preset}:=argPreset \
@@ -129,7 +134,7 @@ function main() {
   logger ""
   logger "  Using HandBrakeCLI preset: [$preset]"
 
-  HandBrakeCLI --input "$inputFilePath" --output "$outputFilePath" --preset "$preset" --optimize $@ && logger "Success" || logger "Failed"
+  HandBrakeCLI --input "$inputFilePath" --output "$outputFilePath" --preset-import-gui --preset "$preset" --optimize $@ && logger "Success" || logger "Failed"
 
   if [[ -n "$argSetTags" ]]; then
     logger ""
@@ -137,6 +142,15 @@ function main() {
     logger "  Adding tags to the output file: [$argSetTags[-1]]"
     tag -s "$argSetTags[-1]" "$outputFilePath" && logger "Tags added" || logger "Failed to add tags"
   fi
+
+  if [[ -n "$flagMeta" ]]; then
+    logger ""
+    logger "  which exifcopy $(which exifcopy)"
+    logger "  Copying metadata from the input file to the output file"
+    exifcopy "$inputFilePath" "$outputFilePath" && logger "Metadata copied" || logger "Failed to copy metadata"
+  fi
+
+  logger "Completed at $(date '+%Y-%m-%d %H:%M:%S')"
 }
 
 main $@
