@@ -37,5 +37,5 @@ else
     exit;
   fi
 
-  git pull origin ${destinationBranch}
+  git pull --rebase origin ${destinationBranch}
 fi
