@@ -68,10 +68,13 @@ npm_global_packages=(
   "alfred-fkill"
   "alfred-npms"
   "chalk-cli"
+  "degit"
   "fkill-cli"
   "jest"
   "live-server"
+  "npkill"
   "trash-cli"
+  "yarn"
 )
 
 # ------------------------------------------------------------------------------
