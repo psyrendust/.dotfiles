@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+# gwip
+# Modified version of OMZ gwip
+# - Replaces `git add -a` with faster implementation that is optimized for large repos.
+# - Adds timestamp to commit message.
+# - Accepts a message as an argument.
+#-------------------------------------------------------------------------------
+
+set -e
+
+echo "gwip [$@]"
+git-add-all;
+gcwip "$*";

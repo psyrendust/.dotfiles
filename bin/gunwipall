@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+# gunwipall
+# Git uncommit all --wip-- message
+#-------------------------------------------------------------------------------
+
+set -e
+
+local _commit=$(git log --grep='--wip--' --invert-grep --max-count=1 --format=format:%H)
+if [[ "$_commit" != "$(git rev-parse HEAD)" ]]
+then
+  git reset $_commit || return 1
+fi

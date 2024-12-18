@@ -452,9 +452,8 @@ compdef _git gun=git-reset
 alias gwt='git worktree'
 compdef _git gwt=git-worktree
 
-# Modified version of OMZ gwip
-# - adds timestamp to commit message.
-# - Replaces `git add -a` with faster implementation
-#   that is optimized for large repos.
-alias gwip='git-add-all; git rm $(git ls-files --deleted) 2> /dev/null; gcwip'
-alias gcwip='git commit --no-verify --no-gpg-sign -m "--wip-- [$(date "+%Y-%m-%d %H:%M:%S")] [skip ci]"'
+# Remove previously defined aliases. Look for replacements in <root>/bin
+unalias gwip
+unalias gcwip
+unalias gunwip
+unset -f gunwipall
