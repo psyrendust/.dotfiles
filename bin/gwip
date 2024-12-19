@@ -9,6 +9,5 @@
 
 set -e
 
-echo "gwip [$@]"
 git-add-all;
 gcwip "$*";
