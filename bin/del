@@ -7,6 +7,9 @@
 
 set -e
 
-BRANCH=$(getgitbranch --header="Select a branch to delete") &&
-git branch -D ${BRANCH} &&
-delremote "${BRANCH}"
+BRANCHES=($(getgitbranch --header="Select a branch to delete" --multi --tac --reverse)) &&
+for BRANCH in ${BRANCHES}; do
+  echo "Deleting local branch ${BRANCH}..."
+  git branch -D ${BRANCH} &&
+  delremote "${BRANCH}"
+done
