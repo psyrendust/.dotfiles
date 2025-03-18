@@ -32,15 +32,15 @@
     "prompts": "2.4.2"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "19.5.0",
-    "prettier": "3.3.3",
-    "prettier-plugin-packagejson": "2.5.3",
-    "semantic-release": "24.1.2"
+    "@commitlint/config-conventional": "19.8.0",
+    "prettier": "3.5.3",
+    "prettier-plugin-packagejson": "2.5.10",
+    "semantic-release": "24.2.3"
   },
   "engines": {
     "node": ">=22"
   },
-  "overrides": {
+  "resolutions": {
     "conventional-changelog-conventionalcommits": ">=8.0.0"
   }
 }

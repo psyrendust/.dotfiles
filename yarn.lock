@@ -41,23 +41,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:19.5.0":
-  version: 19.5.0
-  resolution: "@commitlint/config-conventional@npm:19.5.0"
+"@commitlint/config-conventional@npm:19.8.0":
+  version: 19.8.0
+  resolution: "@commitlint/config-conventional@npm:19.8.0"
   dependencies:
-    "@commitlint/types": "npm:^19.5.0"
+    "@commitlint/types": "npm:^19.8.0"
     conventional-changelog-conventionalcommits: "npm:^7.0.2"
-  checksum: 10c0/a7dc6c0d23a8bc521c8f1083a4a04d605de35485786c9d0953610f85d23411f672676d1c77b4a1bb7c86a974f915df31ac0c95f2bcb02f5efa3a5b897a77a897
+  checksum: 10c0/c0e2ad4ee8b793ad08ce8f0fd242d8111c71c81eba53b652431b7852e02d3eef0a383e234b7574429f5d1876b712a915921f6ff61fdaccdf708cbbaf3fa1f2f0
   languageName: node
   linkType: hard
 
-"@commitlint/types@npm:^19.5.0":
-  version: 19.5.0
-  resolution: "@commitlint/types@npm:19.5.0"
+"@commitlint/types@npm:^19.8.0":
+  version: 19.8.0
+  resolution: "@commitlint/types@npm:19.8.0"
   dependencies:
     "@types/conventional-commits-parser": "npm:^5.0.0"
     chalk: "npm:^5.3.0"
-  checksum: 10c0/f4a93992f43b23cd5af200c69bb73227fdc0f78a6f7ebcda73dad10d558c1ac66ff164aa6dc3c2ddb322c9ed8b1a89b05f458e40d7c440a0358f435d2d71c2df
+  checksum: 10c0/634a5db20110675da8ddf226f200c33f262c6e99d06853fd4a2f6d543e6cc7dfe48b045f7ae76bcce2e39595099bfebe6a5dd6da37ff2968733c1263b8d46644
   languageName: node
   linkType: hard
 
@@ -1200,12 +1200,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"conventional-changelog-conventionalcommits@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "conventional-changelog-conventionalcommits@npm:7.0.2"
+"conventional-changelog-conventionalcommits@npm:>=8.0.0":
+  version: 8.0.0
+  resolution: "conventional-changelog-conventionalcommits@npm:8.0.0"
   dependencies:
     compare-func: "npm:^2.0.0"
-  checksum: 10c0/3cb1eab35e37fc973cfb3aed0e159f54414e49b222988da1c2aa86cc8a87fe7531491bbb7657fe5fc4dc0e25f5b50e2065ba8ac71cc4c08eed9189102a2b81bd
+  checksum: 10c0/368ee2245094579b38e1beac110577f75d82ab341d1bc6943052d5243f8bacc9ea08222a91a595a17f5f4ccc321b926211da00dd25b43877a3c51d8218bc76f0
   languageName: node
   linkType: hard
 
@@ -1419,12 +1419,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dotfiles@workspace:."
   dependencies:
-    "@commitlint/config-conventional": "npm:19.5.0"
+    "@commitlint/config-conventional": "npm:19.8.0"
     minimist: "npm:1.2.8"
-    prettier: "npm:3.3.3"
-    prettier-plugin-packagejson: "npm:2.5.3"
+    prettier: "npm:3.5.3"
+    prettier-plugin-packagejson: "npm:2.5.10"
     prompts: "npm:2.4.2"
-    semantic-release: "npm:24.1.2"
+    semantic-release: "npm:24.2.3"
   languageName: unknown
   linkType: soft
 
@@ -1673,7 +1673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.3.0, fast-glob@npm:^3.3.2":
+"fast-glob@npm:^3.3.2":
   version: 3.3.2
   resolution: "fast-glob@npm:3.3.2"
   dependencies:
@@ -1699,6 +1699,18 @@ __metadata:
   dependencies:
     reusify: "npm:^1.0.4"
   checksum: 10c0/1095f16cea45fb3beff558bb3afa74ca7a9250f5a670b65db7ed585f92b4b48381445cd328b3d87323da81e43232b5d5978a8201bde84e0cd514310f1ea6da34
+  languageName: node
+  linkType: hard
+
+"fdir@npm:^6.4.3":
+  version: 6.4.3
+  resolution: "fdir@npm:6.4.3"
+  peerDependencies:
+    picomatch: ^3 || ^4
+  peerDependenciesMeta:
+    picomatch:
+      optional: true
+  checksum: 10c0/d13c10120e9625adf21d8d80481586200759928c19405a816b77dd28eaeb80e7c59c5def3e2941508045eb06d34eb47fad865ccc8bf98e6ab988bb0ed160fb6f
   languageName: node
   linkType: hard
 
@@ -1970,19 +1982,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globby@npm:^13.1.2":
-  version: 13.2.2
-  resolution: "globby@npm:13.2.2"
-  dependencies:
-    dir-glob: "npm:^3.0.1"
-    fast-glob: "npm:^3.3.0"
-    ignore: "npm:^5.2.4"
-    merge2: "npm:^1.4.1"
-    slash: "npm:^4.0.0"
-  checksum: 10c0/a8d7cc7cbe5e1b2d0f81d467bbc5bc2eac35f74eaded3a6c85fc26d7acc8e6de22d396159db8a2fc340b8a342e74cac58de8f4aee74146d3d146921a76062664
-  languageName: node
-  linkType: hard
-
 "globby@npm:^14.0.0":
   version: 14.0.1
   resolution: "globby@npm:14.0.1"
@@ -2208,13 +2207,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"import-from-esm@npm:^1.0.3, import-from-esm@npm:^1.3.1":
+"import-from-esm@npm:^1.0.3":
   version: 1.3.4
   resolution: "import-from-esm@npm:1.3.4"
   dependencies:
     debug: "npm:^4.3.4"
     import-meta-resolve: "npm:^4.0.0"
   checksum: 10c0/fcd42ead421892e1d9dbc90e510f45c7d3b58887c35077cf2318e4aa39b52c07c06e2b54efd16dfe8e712421439c23794d18a5e8956cca237fc90790ed8e2241
+  languageName: node
+  linkType: hard
+
+"import-from-esm@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "import-from-esm@npm:2.0.0"
+  dependencies:
+    debug: "npm:^4.3.4"
+    import-meta-resolve: "npm:^4.0.0"
+  checksum: 10c0/6ee85521a1b540927c50f9f16c4f1fc25fa0383c16740483b5ba838d8deea8f5e7a30b6a9f6dff28292589317e679a07da8fa63890a0fd2e549a51e9d28a66fd
   languageName: node
   linkType: hard
 
@@ -2974,7 +2983,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"merge2@npm:^1.3.0, merge2@npm:^1.4.1":
+"merge2@npm:^1.3.0":
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 10c0/254a8a4605b58f450308fc474c82ac9a094848081bf4c06778200207820e5193726dc563a0d2c16468810516a5c97d9d3ea0ca6585d23c58ccfff2403e8dbbeb
@@ -3709,6 +3718,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"picomatch@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "picomatch@npm:4.0.2"
+  checksum: 10c0/7c51f3ad2bb42c776f49ebf964c644958158be30d0a510efd5a395e8d49cb5acfed5b82c0c5b365523ce18e6ab85013c9ebe574f60305892ec3fa8eee8304ccc
+  languageName: node
+  linkType: hard
+
 "pify@npm:^3.0.0":
   version: 3.0.0
   resolution: "pify@npm:3.0.0"
@@ -3743,27 +3759,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-packagejson@npm:2.5.3":
-  version: 2.5.3
-  resolution: "prettier-plugin-packagejson@npm:2.5.3"
+"prettier-plugin-packagejson@npm:2.5.10":
+  version: 2.5.10
+  resolution: "prettier-plugin-packagejson@npm:2.5.10"
   dependencies:
-    sort-package-json: "npm:2.10.1"
+    sort-package-json: "npm:2.15.1"
     synckit: "npm:0.9.2"
   peerDependencies:
     prettier: ">= 1.16.0"
   peerDependenciesMeta:
     prettier:
       optional: true
-  checksum: 10c0/3db9066f732a741a8417006c2bf6f9a55f02618864fb13d0c5453c5fcb03273ed8ce7be79de60f3026ba9ae22648d142cd268cf6c21223b958acc8e641f40acb
+  checksum: 10c0/2bd772fe95a7633fe72cc852c499da6a8279c20e69d7ec71bc7c3cb58442a243aa80ca861dbc3b091210a9c155171afebe7ec92701c26da6edf991c1afeb699c
   languageName: node
   linkType: hard
 
-"prettier@npm:3.3.3":
-  version: 3.3.3
-  resolution: "prettier@npm:3.3.3"
+"prettier@npm:3.5.3":
+  version: 3.5.3
+  resolution: "prettier@npm:3.5.3"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/b85828b08e7505716324e4245549b9205c0cacb25342a030ba8885aba2039a115dbcf75a0b7ca3b37bc9d101ee61fab8113fc69ca3359f2a226f1ecc07ad2e26
+  checksum: 10c0/3880cb90b9dc0635819ab52ff571518c35bd7f15a6e80a2054c05dbc8a3aa6e74f135519e91197de63705bcb38388ded7e7230e2178432a1468005406238b877
   languageName: node
   linkType: hard
 
@@ -4058,9 +4074,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semantic-release@npm:24.1.2":
-  version: 24.1.2
-  resolution: "semantic-release@npm:24.1.2"
+"semantic-release@npm:24.2.3":
+  version: 24.2.3
+  resolution: "semantic-release@npm:24.2.3"
   dependencies:
     "@semantic-release/commit-analyzer": "npm:^13.0.0-beta.1"
     "@semantic-release/error": "npm:^4.0.0"
@@ -4078,7 +4094,7 @@ __metadata:
     git-log-parser: "npm:^1.2.0"
     hook-std: "npm:^3.0.0"
     hosted-git-info: "npm:^8.0.0"
-    import-from-esm: "npm:^1.3.1"
+    import-from-esm: "npm:^2.0.0"
     lodash-es: "npm:^4.17.21"
     marked: "npm:^12.0.0"
     marked-terminal: "npm:^7.0.0"
@@ -4093,7 +4109,7 @@ __metadata:
     yargs: "npm:^17.5.1"
   bin:
     semantic-release: bin/semantic-release.js
-  checksum: 10c0/ff277e3fab5368f699e43132c25a198d54e5101e8c850705d856fb2353dc43d41bc56b2b78f5add8811ab59025880a424382e1859262fc017d9f88fdd9ca9a75
+  checksum: 10c0/75c6657429bbd31c60e2a4982a9081de0d840dce7d0910b5f93e45bf717c921847d1cbc1f1c9e40a10ae20b6b8a61e9fc6d837623832f113c05468eb15ebb8f8
   languageName: node
   linkType: hard
 
@@ -4224,13 +4240,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slash@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "slash@npm:4.0.0"
-  checksum: 10c0/b522ca75d80d107fd30d29df0549a7b2537c83c4c4ecd12cd7d4ea6c8aaca2ab17ada002e7a1d78a9d736a0261509f26ea5b489082ee443a3a810586ef8eff18
-  languageName: node
-  linkType: hard
-
 "slash@npm:^5.1.0":
   version: 5.1.0
   resolution: "slash@npm:5.1.0"
@@ -4273,21 +4282,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sort-package-json@npm:2.10.1":
-  version: 2.10.1
-  resolution: "sort-package-json@npm:2.10.1"
+"sort-package-json@npm:2.15.1":
+  version: 2.15.1
+  resolution: "sort-package-json@npm:2.15.1"
   dependencies:
     detect-indent: "npm:^7.0.1"
     detect-newline: "npm:^4.0.0"
     get-stdin: "npm:^9.0.0"
     git-hooks-list: "npm:^3.0.0"
-    globby: "npm:^13.1.2"
     is-plain-obj: "npm:^4.1.0"
     semver: "npm:^7.6.0"
     sort-object-keys: "npm:^1.1.3"
+    tinyglobby: "npm:^0.2.9"
   bin:
     sort-package-json: cli.js
-  checksum: 10c0/7511c57e4661be222bce68522fb90f72e77a2a4694d05df0e55e70e72736944371a4be82a7cb1be4402455bbfd23857b0fabae3bbe9a1ae1351ff7caac64a468
+  checksum: 10c0/a5dcbafde6f4629c34be9e750687b7c5566c5225dad0e887c558e6a794f7fe1d360003eec0bb4875fa74633e648260819623871e79ff64c1749acead3f2bb3c1
   languageName: node
   linkType: hard
 
@@ -4631,6 +4640,16 @@ __metadata:
   version: 1.3.0
   resolution: "tiny-relative-date@npm:1.3.0"
   checksum: 10c0/70a0818793bd00345771a4ddfa9e339c102f891766c5ebce6a011905a1a20e30212851c9ffb11b52b79e2445be32bc21d164c4c6d317aef730766b2a61008f30
+  languageName: node
+  linkType: hard
+
+"tinyglobby@npm:^0.2.9":
+  version: 0.2.12
+  resolution: "tinyglobby@npm:0.2.12"
+  dependencies:
+    fdir: "npm:^6.4.3"
+    picomatch: "npm:^4.0.2"
+  checksum: 10c0/7c9be4fd3625630e262dcb19015302aad3b4ba7fc620f269313e688f2161ea8724d6cb4444baab5ef2826eb6bed72647b169a33ec8eea37501832a2526ff540f
   languageName: node
   linkType: hard
 
