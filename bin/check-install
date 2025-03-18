@@ -196,7 +196,7 @@ for key value in ${(kv)brew_formulas}; do
     logNo
     brew_formulas_missing+=("$value")
     logDecision "is missing formula a quicklook plugin $value"
-    if [[ -n $(echo "${(v)brew_formula_quicklook}" | grep "$value") ]]; then
+    if [[ -n $(echo "${(v)brew_formula_quicklook}" | grep -- "$value") ]]; then
       logYes
       cleanup_quarantine_attributes+=("$key")
     else
@@ -228,7 +228,14 @@ if [[ ! ${#brew_formulas_missing[@]} -eq 0 ]]; then
     logYes
     echo;
     logDecision "installing missing formulas"
-    brew install ${brew_formulas_missing[@]} && logYes || logNo
+    # Check if the formula contains `--cask` and install accordingly
+    for formula in ${brew_formulas_missing[@]}; do
+      if [[ $formula == *"--cask"* ]]; then
+        brew install --cask ${formula/--cask /} && logYes || logNo
+      else
+        brew install $formula && logYes || logNo
+      fi
+    done
   else
     logNo
   fi
