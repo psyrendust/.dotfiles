@@ -160,6 +160,7 @@ brew_formulas=(
 # Apps
 brew_formula_apps=(
   ["$ZDOT_BREW_ROOT/Caskroom/bleunlock"]="bleunlock"
+  ["$ZDOT_BREW_ROOT/bin/ghostty"]="--cask ghostty"
   ["$ZDOT_BREW_ROOT/Caskroom/rectangle"]="rectangle"
 )
 brew_formulas+=(${(kv)brew_formula_apps})
