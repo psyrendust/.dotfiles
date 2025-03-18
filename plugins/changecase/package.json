@@ -5,9 +5,7 @@
   "description": "Transform a string between camelCase, PascalCase, Capital Case, snake_case, param-case, CONSTANT_CASE and others with change-case npm package.",
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "changecase": "./bin/changecase"
-  },
+  "bin": "./bin/changecase",
   "files": [
     "bin",
     "cli.js"

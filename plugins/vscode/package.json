@@ -5,11 +5,8 @@
   "description": "Dotfiles vscode plugin",
   "license": "MIT",
   "main": "./bin/vscode",
-  "bin": {
-    "vscode": "./bin/vscode"
-  },
+  "bin": "./bin/vscode",
   "files": [
     "bin"
-  ],
-  "dependencies": {}
+  ]
 }
