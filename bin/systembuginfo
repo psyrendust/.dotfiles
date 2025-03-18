@@ -38,6 +38,7 @@ read -r -d '' extra << EOM
       Zsh Version:  `zsh --version | grep "zsh" | cut -f 2 -d " "`
       Git Version:  `git --version | grep "git" | cut -f 3 -d " "`
       Node Version: `node --version | cut -d "v" -f 2`
+      Yarn Version: `yarn --version`
       NPM Version:  `npm --version`
 EOM
 
