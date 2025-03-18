@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+# ghash
+# Fuzzy list all files in a commit.
+#-------------------------------------------------------------------------------
+
+set -e
+
+# For short sha
+# commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>" --color=always --reverse --max-count 50) &&
+# commits=$(git log --color=always --oneline --decorate --reverse --max-count 50) &&
+# commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse --header="Select a commit to retrieve its list of changed files") &&
+commit=$(ghash)
+git diff-tree --no-commit-id --name-only $commit -r
