@@ -16,7 +16,7 @@ jobs:
         cache: 'yarn'
 
     - name: Install dependencies
-      run: yarn --frozen-lockfile
+      run: yarn --immutable
 
     - name: Lint
       run: yarn lint
@@ -33,7 +33,7 @@ jobs:
         cache: 'yarn'
 
     - name: Install dependencies
-      run: yarn --frozen-lockfile
+      run: yarn --immutable
 
     - name: Semantic release
       run: yarn release
