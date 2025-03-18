@@ -9,7 +9,13 @@ set -e
 
 BRANCHES=($(getgitbranch --header="Select a branch to delete" --multi --tac --reverse)) &&
 for BRANCH in ${BRANCHES}; do
-  echo "Deleting local branch ${BRANCH}..."
-  git branch -D ${BRANCH} &&
-  delremote "${BRANCH}"
+  chalk -t "{blue  info } => Deleting local branch {blueBright ${BRANCH}}"
+  set -o pipefail
+  if output=$(git branch -D ${BRANCH} 2>&1); then
+    chalk -t "{blue  info } => Attempting to delete remote branch {blueBright ${BRANCH}}"
+    delremote "${BRANCH}"
+  else
+    chalk -t "{red  error }=> {redBright ${output}}"
+  fi
+  echo ""
 done
