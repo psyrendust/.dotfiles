@@ -137,15 +137,13 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
   ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
   ["$ZDOT_BREW_ROOT/bin/bfs"]="bfs"
-  ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
   ["$ZDOT_BREW_ROOT/bin/delta"]="git-delta"
-  ["$ZDOT_BREW_ROOT/bin/unbuffer"]="expect"
   ["$ZDOT_BREW_ROOT/bin/eza"]="eza"
   ["$ZDOT_BREW_ROOT/bin/fd"]="fd"
   ["$ZDOT_BREW_ROOT/bin/fzf"]="fzf"
-  ["$ZDOT_BREW_ROOT/bin/gpg"]="gpg"
-  ["$ZDOT_BREW_ROOT/bin/git"]="git"
   ["$ZDOT_BREW_ROOT/bin/git-recent"]="git-recent"
+  ["$ZDOT_BREW_ROOT/bin/git"]="git"
+  ["$ZDOT_BREW_ROOT/bin/gpg"]="gpg"
   ["$ZDOT_BREW_ROOT/bin/HandBrakeCLI"]="handbrake"
   ["$ZDOT_BREW_ROOT/bin/jq"]="jq"
   ["$ZDOT_BREW_ROOT/bin/op"]="1password-cli"
@@ -155,7 +153,9 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/swda"]="swiftdefaultappsprefpane"
   ["$ZDOT_BREW_ROOT/bin/tag"]="tag"
   ["$ZDOT_BREW_ROOT/bin/tree"]="tree"
+  ["$ZDOT_BREW_ROOT/bin/unbuffer"]="expect"
   ["$ZDOT_BREW_ROOT/bin/zsh"]="zsh"
+  ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
 )
 # Apps
 brew_formula_apps=(
