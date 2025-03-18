@@ -25,8 +25,8 @@ if [[ "$COUNT" != "0" ]]; then
   BRANCH_NAMES=$(echo $CUT_BRANCHES | sed 's/^refs\/heads\///g')
   # echo "BRANCH_NAMES: ${BRANCH_NAMES}"
   deleteBranch=$(echo $BRANCH_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
-  echo "Deleting remote branch $deleteBranch" &&
+  chalk -t "{blue  info } => Deleting remote branch {redBright ${deleteBranch}}" &&
   git push origin --delete ${deleteBranch}
 else
-  echo "No remote branches matching $BRANCH"
+  chalk -t "{blue  info } => No remote branches matching {blueBright ${BRANCH}}"
 fi
