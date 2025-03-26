@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+# gls
+# - Git log new commits that are unique to the current branch
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Git log new commits that are unique to the current branch with author info
+git log $(git-main-branch)..$(git-current-branch) --pretty=format:"%C(auto,blue)%<(13,trunc)%an %C(auto,reset)%s"
+echo ""
+# Git log new commits that are unique to the current branch in a list format without author info
+git log $(git-main-branch)..$(git-current-branch) --pretty=format:"* %C(auto,reset)%s"
