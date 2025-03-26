@@ -209,15 +209,11 @@ function _git-log-pretty-full() {
 }
 
 function _git-log-pretty-grep() {
-  git log --pretty=format:'%s' -i --grep='$(1)'
+  git log --pretty=format:'%s' -i --grep="$1"
 }
 
 function _git-log-pretty-grep-begin() {
-  git log --pretty=format:'%s' -i --grep='^$1'
-}
-
-function _git-log-pretty-grep-begin-sublime() {
-  git log --pretty=format:'%s' -i --grep='^$1'
+  git log --pretty=format:'%s' -i --grep="^$1"
 }
 
 # Workaround for fmt-merge-msg issue on Mavericks w/SMB repo
@@ -364,9 +360,6 @@ compdef _git glb=git-log
 alias glf='_git-log-pretty-full'
 compdef _git glf=git-log
 
-alias gls='_git-log-pretty-grep-begin-sublime'
-compdef _git gls=git-log
-
 alias gld='_git-log-diff'
 compdef _git gld=git-log
 
@@ -385,9 +378,6 @@ compdef _git glol=git-log
 
 alias glpr='_git-log-pr'
 compdef _git glpr=git-log
-
-alias gls='glo -n 10'
-compdef _git gls=git-log
 
 alias gm='git merge'
 compdef _git gm=git-merge
