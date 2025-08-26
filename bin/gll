@@ -1,14 +1,67 @@
 #!/usr/bin/env zsh
 #
-# ghash
+# gll
 # Fuzzy list all files in a commit.
 #-------------------------------------------------------------------------------
 
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
-# For short sha
-# commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>" --color=always --reverse --max-count 50) &&
-# commits=$(git log --color=always --oneline --decorate --reverse --max-count 50) &&
-# commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse --header="Select a commit to retrieve its list of changed files") &&
-commit=$(ghash)
-git diff-tree --no-commit-id --name-only $commit -r
+# Get a commit hash interactively using the associated 'ghash' script.
+commit_hash=$(ghash)
+
+# Exit if no commit was selected from the fuzzy finder.
+if [[ -z "$commit_hash" ]]; then
+  echo "No commit selected. Aborting." >&2
+  exit 1
+fi
+
+# List the files changed in the selected commit.
+# --no-commit-id: Suppresses the commit ID output.
+# --name-status:  Shows only the names and status of changed files.
+#
+# The '-r' flag is redundant for commits and has been removed.
+# Quoting "$commit_hash" is a best practice to prevent word splitting.
+diff_output=$(git diff-tree --no-commit-id --name-status "$commit_hash" -r)
+
+# Define ANSI color codes
+COLOR_YELLOW='\033[0;33m'
+COLOR_GREEN='\033[0;32m'
+COLOR_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+# Initialize arrays to hold file paths
+modified=()
+added=()
+deleted=()
+
+# Iterate over each line of the diff output
+for line in ${(f)diff_output}; do
+  # Extract the status and the file path using zsh parameter expansion
+  file_status=${line[1]}
+  file_path=${line:2}
+
+  # Categorize the file based on its status
+  case "$file_status" in
+    M)
+      modified+=("$file_path")
+      ;;
+    A)
+      added+=("$file_path")
+      ;;
+    D)
+      deleted+=("$file_path")
+      ;;
+  esac
+done
+
+# Optional: Print the contents of the arrays for verification
+echo "${COLOR_YELLOW}Modified files:"
+printf "  %s\n" "${modified[@]}"
+echo "${COLOR_RESET}"
+echo "${COLOR_GREEN}Added files:"
+printf "  %s\n" "${added[@]}"
+echo "${COLOR_RESET}"
+echo "${COLOR_RED}Deleted files:"
+printf "  %s\n" "${deleted[@]}"
+echo "${COLOR_RESET}"
