@@ -36,21 +36,14 @@
   pager = delta
   trustctime = false
   whitespace = fix
-[init]
-  defaultBranch = main
 [gc]
   writeCommitGraph = true
 [http]
   sslVerify = false
-[push]
-  default = current
 
 
 # Configure default Git settings for difftool and mergetool of choice.
 # ------------------------------------------------------------------------------
-[diff]
-  colorMoved = default
-  renames = true
 [difftool]
   keepBackup = false
   prompt = false
@@ -61,15 +54,62 @@
   trustExitCode = true
 
 
-# User configuration stuff
-# ------------------------------------------------------------------------------
-[help]
-  autocorrect = 1
-
-
 # Sign commits with GPG
 # ------------------------------------------------------------------------------
 [credential]
   helper = osxkeychain
 [gpg "ssh"]
 	allowedSignersFile = ~/.ssh/allowed_signers
+
+
+# How Core Git Developers Configure Git
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/
+# Makes git better
+# ------------------------------------------------------------------------------
+[branch]
+  sort = -committerdate
+[tag]
+  sort = version:refname
+[init]
+  defaultBranch = main
+[diff]
+  algorithm = histogram
+  colorMoved = plain
+  mnemonicPrefix = true
+  renames = true
+[push]
+  default = simple
+  autoSetupRemote = true
+  followTags = true
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+
+
+# How Core Git Developers Configure Git
+# Why the hell not?
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/#why-the-hell-not
+# ------------------------------------------------------------------------------
+[help]
+  autocorrect = prompt
+[commit]
+  verbose = true
+[rerere]
+  enable = true
+  autoUpdate = true
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+
+
+# How Core Git Developers Configure Git
+# A matter of taste
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/#a-matter-of-taste
+# ------------------------------------------------------------------------------
+[core]
+  fsmonitor = true
+  untrackedCache = true
+[pull]
+  rebase = true
