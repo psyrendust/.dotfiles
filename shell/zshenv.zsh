@@ -54,6 +54,14 @@ export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 
 
 # ------------------------------------------------------------------------------
+### Zdot work paths
+# ------------------------------------------------------------------------------
+export ZDOT_WORK="$HOME/work"
+export ZDOT_WORK_BIN="$ZDOT_WORK/.bin"
+export ZDOT_WORK_CODE="$ZDOT_WORK/code"
+
+
+# ------------------------------------------------------------------------------
 ### Use vscode as the default editor, but use my plugin version
 # ------------------------------------------------------------------------------
 export VISUAL="$ZDOT_PLUGINS/vscode/bin/code --wait"

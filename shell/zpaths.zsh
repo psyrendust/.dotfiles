@@ -34,6 +34,10 @@ __path_pre+=("$ZDOT_BIN")
 __path_pre+=("$HOME/.tmpbin")
 
 
+# Custom path locations for my work plugins
+__path_pre+=("$ZDOT_WORK_BIN")
+
+
 # Add GOPATH and GOROOT
 [[ -d "$GOPATH" ]] && [[ -d "$GOPATH/bin" ]] && __path_pre+=("$GOPATH/bin")
 [[ -d "$GOROOT" ]] && [[ -d "$GOROOT/bin" ]] && __path_pre+=("$GOROOT/bin")
