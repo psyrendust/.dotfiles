@@ -2,17 +2,17 @@
   "folders": [
     {
       "name": "Dotfiles",
-      "path": "../.dotfiles",
+      "path": "."
     },
     {
-			"name": "home",
-			"path": "../",
-		},
-    // {
-		// 	"name": "antidote cache",
-		// 	"path": "../.cache/antidote",
-		// },
-	],
+      "name": "home",
+      "path": ".."
+    },
+    {
+      "name": "work/bin",
+      "path": "../work/.bin"
+    }
+  ],
 	"settings": {
 		"files.watcherExclude": {
 			"**/target": true
