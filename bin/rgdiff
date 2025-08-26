@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+#
+# rgdiff
+# Ripgrep for git diffs
+#-------------------------------------------------------------------------------
+
+set -e
+
+cd $(git root)
+
+# Process modified files
+typeset -a files=(`git ls-files --exclude-standard --modified`)
+for file in ${files[@]}; do
+  result=$(git diff "$file" | rg $@ || true)
+  if [[ -n "$result" ]]; then
+    echo "$file"
+    echo "$result"
+    echo ""
+  fi
+  unset result
+done
+unset files
+
+# Process untracked files
+typeset -a files=(`git ls-files --exclude-standard --others`)
+for file in ${files[@]}; do
+  result=$(git diff "$file" | rg $@ || true)
+  if [[ -n "$result" ]]; then
+    echo "$file"
+    echo "$result"
+    echo ""
+  fi
+done
+unset files
