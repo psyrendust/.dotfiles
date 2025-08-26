@@ -26,3 +26,15 @@ zdot load "$ZDOT_SHELL/init-nvm.zsh"
 # Load framework
 # ------------------------------------------------------------------------------
 zdot load "$ZDOT_SHELL/zshrc-antidote.zsh"
+
+
+# ------------------------------------------------------------------------------
+# Source anything in zshrc.d.
+# ------------------------------------------------------------------------------
+for _rc in ${ZDOT_SHELL}/zshrc.d/*.zsh; do
+  # Ignore tilde files.
+  if [[ $_rc:t != '~'* ]]; then
+    source "$_rc"
+  fi
+done
+unset _rc
