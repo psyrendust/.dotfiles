@@ -134,6 +134,7 @@ logHr; logTitle "homebrew formulas check"
 # val: formula name
 # Regular bash executables
 brew_formulas=(
+  ["$ZDOT_BREW_ROOT/bin/ast-grep"]="ast-grep"
   ["$ZDOT_BREW_ROOT/bin/bash"]="bash"
   ["$ZDOT_BREW_ROOT/bin/bat"]="bat"
   ["$ZDOT_BREW_ROOT/bin/bfs"]="bfs"
