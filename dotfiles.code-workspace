@@ -11,6 +11,10 @@
     {
       "name": "work/bin",
       "path": "../work/.bin"
+    },
+    {
+      "name": "CloudDocs/shell",
+      "path": "../Library/Mobile Documents/com~apple~CloudDocs/shell"
     }
   ],
 	"settings": {
