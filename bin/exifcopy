@@ -76,3 +76,4 @@ exiftool -overwrite_original -@ $tempOutputFile $outputFile
 # -TextFace \
 # -TextFont \
 # -TextSize \
+# -TimeScale \
