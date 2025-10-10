@@ -1,0 +1,59 @@
+#!/usr/bin/env zsh
+#
+# git-clean-untracked
+# Interactively clean files and folders that are not tracked by git.
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Get list of untracked files (excluding .DS_Store and anything that starts with a dot (.))
+untracked_files=$(git ls-files --others --ignored --directory --exclude-standard | grep -v '\.DS_Store$' | grep -v '^\.')
+
+# Check if there are any untracked files
+if [[ -z "$untracked_files" ]]; then
+    echo "No untracked files found."
+    exit 0
+fi
+
+# Use fzf to let user select files to clean
+selected_files=$(echo "$untracked_files" | fzf --multi --bind "space:toggle-out" --bind "tab:toggle-all" --tac --ansi --reverse --header="Select files to clean (use SPACE to select multiple, ENTER to confirm)")
+
+# Check if user selected any files
+if [[ -z "$selected_files" ]]; then
+    echo "No files selected. Exiting."
+    exit 0
+fi
+
+# Present selected files to user
+echo
+echo "You have selected the following files/folders for deletion:"
+echo "============================================================"
+echo "$selected_files"
+echo "============================================================"
+echo
+
+# Ask for confirmation
+echo -n "Do you want to proceed with deleting these files? (y/N): "
+read -r response
+
+case "$response" in
+    [yY]|[yY][eE][sS])
+        echo
+        echo "Cleaning selected files..."
+
+        # Convert selected files to array and clean each one
+        while IFS= read -r file; do
+            if [[ -n "$file" ]]; then
+                echo "Removing: $file"
+                git clean -f "$file"
+            fi
+        done <<< "$selected_files"
+
+        echo
+        echo "Cleanup completed!"
+        ;;
+    *)
+        echo "Operation cancelled."
+        exit 0
+        ;;
+esac
