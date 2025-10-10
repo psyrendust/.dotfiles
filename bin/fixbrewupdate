@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+#
+# Fixes homebrew lock issue
+#
+# # Example Error
+# ```
+# lockf: 200: already locked
+# Error: Another `brew update` process is already running.
+# Please wait for it to finish or terminate it to continue.
+# ```
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # fixbrewupdate
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+set -e
+
+main() {
+  local brewlock="$(brew --prefix)/var/homebrew/locks"
+  if [[ -d "$brewlock" ]]; then
+    rm -rf "$brewlock"
+    echo "Brew locks removed"
+  fi
+}
+main
