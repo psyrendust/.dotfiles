@@ -65,6 +65,21 @@ _fzf_compgen_dir() {
 
 
 # ------------------------------------------------------------------------------
+# Preview directories with tree (https://pragmaticpineapple.com/four-useful-fzf-tricks-for-your-terminal/#4-preview-files-before-selecting-them)
+# Usage:
+#     `cd **<tab>`
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)  fzf "$@" --preview 'tree -C {} | head -200' ;;
+    *)   fzf "$@" ;;
+  esac
+}
+
+
+# ------------------------------------------------------------------------------
 # Add fzf to the PATH
 if [[ ! "$PATH" == *$FZF_BIN* ]]; then
   export PATH="${PATH:+${PATH}:}${FZF_BIN}"
