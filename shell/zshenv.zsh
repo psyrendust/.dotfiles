@@ -71,7 +71,7 @@ export EDITOR="$VISUAL"
 # ------------------------------------------------------------------------------
 ### Add Go paths if they exist
 # ------------------------------------------------------------------------------
-[[ -d "$HOME/.go" ]] && export GOPATH="$HOME/.go"
+[[ -d "$HOME/go" ]] && export GOPATH="$HOME/go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
 
 
