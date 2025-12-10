@@ -72,6 +72,7 @@ npm_global_packages=(
   "fkill-cli"
   "jest"
   "live-server"
+  "lorem-ipsum"
   "npkill"
   "trash-cli"
   "yarn"
