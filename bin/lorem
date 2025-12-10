@@ -1,0 +1,70 @@
+#!/usr/bin/env zsh
+#
+# lorem
+# Generate passages of lorem ipsum text using `lorem-ipsum`
+#-------------------------------------------------------------------------------
+
+set -e
+
+function main() {
+  local flagHelp flagVersion
+  local flagW
+  local flagS
+  local flagP
+  local flagL
+  local argFormat=("-f" "plain")
+  local units="words"
+
+  local usage=(
+    "Usage: lorem 3 [options]"
+    " "
+    "Generates one or more words|sentences|paragraphs"
+    " "
+    "Arguments:"
+    "  count                 The number of units (default: 3)"
+    " "
+    "Options:"
+    "  -V, --version         output the version number"
+    "  -h, --help            display help for command"
+    "  -w, --words           Generate words"
+    "  -s, --sentences       Generate sentences"
+    "  -p, --paragraphs      Generate paragraphs"
+    "  -l, --lower           Lower case the results"
+    "  -f, --format          Format (choices: "html", "plain", default: "plain")"
+  )
+
+  # Parse the command line arguments
+  # @see https://johnlindquist.com/parsing-arguments-with-zparseopts-in-zsh-functions
+  # @see https://www.reddit.com/r/zsh/comments/s09vot/using_zparseopts/
+  # - @see https://xpmo.gitlab.io/post/using-zparseopts/
+  # - @see https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53
+  zmodload zsh/zutil
+  zparseopts -D -E -F -K -- \
+    {v,-version}=flagVersion \
+    {h,-help}=flagHelp \
+    {w,-words}=flagW \
+    {s,-sentences}=flagS \
+    {p,-paragraphs}=flagP \
+    {l,-lower}=flagL \
+    {f,-format}:=argFormat \
+    || return 1;
+
+  [[ -z "$flagHelp" ]] || { print -l $usage && return }
+  [[ -z "$flagVersion" ]] || { lorem-ipsum --version && return }
+
+  local count="${1:-3}"
+  if [[ -n "$flagS" ]]; then units="sentences";
+  elif [[ -n "$flagP" ]]; then units="paragraphs";
+  else
+    units="words";
+  fi
+
+  local str="$(lorem-ipsum $count $units --format $argFormat[-1])"
+  if [[ -n $flagL ]]; then
+    str="${(L)str}"
+  fi
+  echo -n $str | pbcopy
+  echo "$str"
+}
+
+main $@
