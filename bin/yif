@@ -6,7 +6,7 @@
 
 set -e
 
-function run() {
+function runYarn() {
   local major minor patch yarnversion
   yarnversion="$(yarn --version)"
 
@@ -21,6 +21,43 @@ function run() {
   # Check if the major version is greater than or equal to 2 use --immutable
   elif [[ "$major" -ge 2 ]]; then
     yarn install --immutable;
+  fi
+}
+
+function runBun() {
+  local major minor patch bunversion
+  bunversion="$(bun --version)"
+
+  # Extract the major, minor, and patch versions
+  major="$(cut -d '.' -f 1 <<< "$bunversion")"
+  minor="$(cut -d '.' -f 2 <<< "$bunversion")"
+  patch="$(cut -d '.' -f 3 <<< "$bunversion")"
+
+  # Check if the major version is less than 2 use --frozen-lockfile
+  if [[ "$major" -lt 2 ]]; then
+    yarn install --frozen-lockfile;
+  # Check if the major version is greater than or equal to 2 use --immutable
+  elif [[ "$major" -ge 2 ]]; then
+    yarn install --immutable;
+  fi
+}
+
+function run() {
+  # Check for yarn
+  if [[ -n "$(upfind -r yarn.lock)" ]]; then
+    runYarn
+  # Check for npm
+  elif [[ -n "$(upfind -r package-lock.json)" ]]; then
+    npm install --ci
+  # Check for pnpm
+  elif [[ -n "$(upfind -r pnpm-lock.yaml)" ]]; then
+    pnpm install --frozen-lockfile
+  # Check for bun 1.2 or newer
+  elif [[ -n "$(upfind -r bun.lock)" ]]; then
+    bun install --frozen-lockfile
+  # Check for older bun installs
+  elif [[ -n "$(upfind -r bun.lockb)" ]]; then
+    bun install --frozen-lockfile
   fi
 }
 
