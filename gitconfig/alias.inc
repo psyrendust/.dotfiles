@@ -11,6 +11,11 @@
   assumed = "!git ls-files -v | grep ^h | cut -c 3-"
   authors = !git log --all --format='%aN <%aE>' | sort -u
   cp = cherry-pick
+  # Difftastic aliases, so `git dlog -p` is `git log -p`
+  # with difftastic and likewise for the other subcommands.
+  dlog = -c diff.external=difft log --ext-diff
+  dshow = -c diff.external=difft show --ext-diff
+  ddiff = -c diff.external=difft diff
   # List files which have changed since REVIEW_BASE
   files = !git diff --name-only $(git review-base)
   head = "!git rev-parse HEAD | cut -b -7"
