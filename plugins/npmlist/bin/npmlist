@@ -72,8 +72,9 @@ ${packages.map(line => `  '${line.replace(regLineReplace, '$2$3')}'`).join(',\n'
     return ` * ${line}`;
   }).join('\n');
 
-  return `#!/usr/bin/env bash
+  return `#!/usr/bin/env node
 var spawn = require('child_process').spawn;
+var spawnSync = require('child_process').spawnSync;
 
 /**
  * ${new Date()}
@@ -95,6 +96,12 @@ process.argv.slice(2).forEach(function (arg) {
 var args = ['install', '--location=global'];
 ${vars}
 
+const cwd = process.cwd();
+// Switch between "work" and "default" npmrc profiles based on cwd before
+// running "npm" commands
+const npmrcTarget = cwd.includes('/work') ? 'work' : 'default';
+spawnSync('npmrc', [npmrcTarget], { stdio: [0, 1, 2], cwd });
+
 if (isExact) {
   console.log('install exact...');
   args.push(...installExact);
@@ -103,7 +110,7 @@ if (isExact) {
   args.push(...install);
 }
 
-spawn('npm', args, { stdio: [0, 1, 2] });
+spawn('npm', args, { stdio: [0, 1, 2], cwd: process.cwd() });
 `;
 }
 
