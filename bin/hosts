@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh
+#
+# hosts
+# Lets you sudo-edit /etc/hosts in VS Code without having to type your sudo
+# password in a VS Code prompt (if you open /etc/hosts in VS Code directly and
+# try to save, it will tell you to "Retry as Sudo", but the resulting dialog
+# will make you type your password and doesn't support Touch ID).
+#
+# Once you save and close the temp hosts file this will auto-apply the changes.
+#-------------------------------------------------------------------------------
+
+set -e
+
+hosts() {
+  local tmp="/tmp/hosts"
+
+  # copy out + make editable
+  sudo cp /etc/hosts "$tmp" || return 1
+  sudo chown "$USER" "$tmp" || return 1
+  sudo chmod 0644 "$tmp" || return 1
+
+  # open in VS Code and WAIT until you close it
+  code --wait "$tmp" || return 1
+
+  # refuse to install if file is empty
+  if [[ ! -s "$tmp" ]]; then
+    echo "Refusing to install empty hosts file" >&2
+    return 1
+  fi
+
+  # optional: backup current hosts
+  sudo cp /etc/hosts "/etc/hosts.bak.$(date +%Y%m%d-%H%M%S)" || return 1
+
+  # install back with correct ownership/permissions
+  sudo cp "$tmp" /etc/hosts || return 1
+  sudo chown root:wheel /etc/hosts || return 1
+  sudo chmod 0644 /etc/hosts || return 1
+
+  # flush caches
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder 2>/dev/null || true
+
+  echo "Updated /etc/hosts"
+}
+hosts
