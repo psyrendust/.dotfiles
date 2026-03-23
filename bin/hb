@@ -112,6 +112,7 @@ function main() {
   logger "---------------------------------------------------------"
   logger "$(date '+%Y-%m-%d %H:%M:%S')"
   logger ""
+  logger "  which chalk: $(which chalk)"
   logger "  which realpath: $(which realpath)"
   logger "  which HandBrakeCLI: $(which HandBrakeCLI)"
   logger ""
@@ -124,7 +125,6 @@ function main() {
   logger ""
   logger "  positionals:     [$@]"
   logger ""
-
 
   if [[ -n "$argPreset" ]]; then
     preset="$argPreset[-1]"
