@@ -1,14 +1,68 @@
 #!/usr/bin/env zsh
 #
 # upfind
-# Walk directory tree upwards and search for a file.
+# Find a file or directory by walking up parent directories.
 #-------------------------------------------------------------------------------
 
 set -e
 
-while [[ $PWD != / ]] && [[ -z "$result" ]]; do
-  result=$(fd --glob --hidden "$@" --max-depth 1 "$PWD"/)
-  cd ..
-done
+function main() {
+  local flagHelp
+  local flagR
 
-echo "$result"
+  local usage=(
+    "Usage: upfind [options] [pattern]"
+    " "
+    "Find a file or directory by walking up parent directories"
+    " "
+    "Arguments:"
+    "  [pattern]    The search pattern to pass to fd"
+    "Options:"
+    "  -h, --help   Display help for command"
+    "  -r, --root   Continue searching until the root result is found"
+  )
+
+  # Parse the command line arguments
+  # @see https://johnlindquist.com/parsing-arguments-with-zparseopts-in-zsh-functions
+  # @see https://www.reddit.com/r/zsh/comments/s09vot/using_zparseopts/
+  # - @see https://xpmo.gitlab.io/post/using-zparseopts/
+  # - @see https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53
+  zmodload zsh/zutil
+  zparseopts -D -E -F -K -- \
+    {h,-help}=flagHelp \
+    {r,-root}=flagR \
+    || return 1;
+
+  [[ -z "$flagHelp" ]] || { print -l $usage && return }
+
+  local result
+  local lastResult
+
+  # Continue if we are not in the root dir and we have no results
+  while [[ $PWD != / ]] && [[ -z "$result" ]]; do
+    # Search for our pattern in the current directory
+    result=$(fd --glob --hidden "$@" --max-depth 1 "$PWD"/)
+
+    # If we are searching for a root result
+    if [[ -n "$flagR" ]]; then
+      # Check if we have a result
+      if [[ -n "$result" ]]; then
+        # Save the result and reset to keep searching
+        lastResult="$result"
+        result=""
+      fi
+    fi
+    # Change to parent directory
+    cd ..
+  done
+
+  if [[ -n "$flagR" ]]; then
+    # If we are searching for a root result, return the last round result
+    echo -n "$lastResult"
+  else
+    # Otherwise return whatever we found
+    echo -n "$result"
+  fi
+}
+
+main "$@"
