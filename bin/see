@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#
+# see
+# cat a script or alias
+#-------------------------------------------------------------------------------
+
+set -e
+
+cat $(builtin which $1)
