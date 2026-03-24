@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+# run
+# Use the correct package manager to execute a run command.
+#-------------------------------------------------------------------------------
+
+set -e
+
+pm="$(ywhich)"
+
+if [[ -n "$pm" ]]; then
+  $pm run $@
+fi
