@@ -12,6 +12,6 @@
   ],
   "dependencies": {
     "change-case": "5.4.4",
-    "meow": "13.2.0"
+    "meow": "14.1.0"
   }
 }
