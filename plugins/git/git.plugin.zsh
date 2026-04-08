@@ -16,7 +16,7 @@ function cdroot() {
 }
 
 function _git-branch-from-here() {
-  git checkout -b $@ $(git-current-branch)
+  HUSKY=0 git checkout -b $@ $(git-current-branch)
 }
 
 function _git-branch-delete-grep() {
@@ -35,6 +35,7 @@ function _git-branch-delete-grep() {
 
 # git checkout remote branch and track it
 function _git-checkout-branch() {
+  HUSKY=0
   if [[ "$#" -ne 2 ]]; then
     git checkout -b $1 origin/$1
   else
@@ -301,7 +302,7 @@ compdef _git gcd=git-clone
 alias gcleanindex='_git-clean-index'
 compdef _git gcleanindex=git-rm
 
-alias gco='git checkout'
+alias gco='HUSKY=0 git checkout'
 compdef _git gco=git-checkout
 
 alias gcob='_git-checkout-branch'
