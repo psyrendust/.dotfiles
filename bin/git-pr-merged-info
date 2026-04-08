@@ -1,0 +1,195 @@
+#!/usr/bin/env zsh
+#
+# git-pr-merged-info
+# List all branches from prs that have been merged in the last 30 days with
+# more info.
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Parse command line arguments
+NO_COLOR=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -n|--no-color)
+      NO_COLOR=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: git-pr-merged-info [-n|--no-color]"
+      exit 1
+      ;;
+  esac
+done
+
+# ANSI color codes (will be empty if NO_COLOR is true)
+if [[ "$NO_COLOR" == true ]]; then
+  GREY=''
+  MAGENTA=''
+  WHITE=''
+  CYAN=''
+  GREEN=''
+  RESET=''
+else
+  GREY='\033[90m'
+  MAGENTA='\033[35m'
+  WHITE='\033[97m'
+  CYAN='\033[36m'
+  GREEN='\033[32m'
+  RESET='\033[0m'
+fi
+
+gh pr list \
+  --author "@me" \
+  --state merged \
+  --state closed \
+  --search "created:>$(date -d '30 days ago' '+%Y-%m-%d')" \
+  --json headRefName,mergedAt,number,title,url \
+  --jq 'sort_by(.mergedAt) | reverse' | \
+  jq -r '
+    # Convert ISO8601 timestamp to relative time string
+    def relativeTime:
+      . as $timestamp |
+      (now - ($timestamp | fromdateiso8601)) as $diff |
+      if $diff < 60 then
+        "\(($diff | floor)) seconds ago"
+      elif $diff < 3600 then
+        "\(($diff / 60 | floor)) minutes ago"
+      elif $diff < 7200 then
+        "1 hour ago"
+      elif $diff < 86400 then
+        "\(($diff / 3600 | floor)) hours ago"
+      elif $diff < 172800 then
+        "1 day ago"
+      elif $diff < 604800 then
+        "\(($diff / 86400 | floor)) days ago"
+      elif $diff < 1209600 then
+        "1 week ago"
+      elif $diff < 2592000 then
+        "\(($diff / 604800 | floor)) weeks ago"
+      elif $diff < 5184000 then
+        "1 month ago"
+      else
+        "\(($diff / 2592000 | floor)) months ago"
+      end;
+
+    # Process each PR and format output
+    .[] |
+    {
+      branch: .headRefName,
+      mergedAt: (.mergedAt | relativeTime),
+      id: (.number | tostring),
+      title: (if (.title | length) > 50 then (.title[0:50]) else .title end),
+      url: .url
+    } |
+    [.branch, .mergedAt, .id, .title, .url] |
+    @tsv
+  ' | \
+  column -t -s $'\t' | \
+  awk -v grey="$GREY" -v magenta="$MAGENTA" -v white="$WHITE" -v cyan="$CYAN" -v green="$GREEN" -v reset="$RESET" '
+    BEGIN {
+      # Initialize flag to track if header has been printed
+      header_printed = 0
+    }
+    {
+      # On first line, parse column boundaries and print header
+      if (!header_printed) {
+        line = $0
+
+        # Find positions where columns start (after 2+ spaces)
+        # Column 1: BRANCH
+        match(line, /^[^ ]+/)
+        col1_len = RLENGTH
+        col1_end = RSTART + RLENGTH
+
+        # Find next column start
+        rest = substr(line, col1_end)
+        match(rest, /^ +/)
+        spaces1 = RLENGTH
+        col2_start = col1_end + spaces1
+
+        # Column 2: MERGED AT
+        rest = substr(line, col2_start)
+        match(rest, /^[^ ]+( [^ ]+)*/)
+        col2_len = RLENGTH
+        col2_end = col2_start + RLENGTH
+
+        # Find next column start
+        rest = substr(line, col2_end)
+        match(rest, /^ +/)
+        spaces2 = RLENGTH
+        col3_start = col2_end + spaces2
+
+        # Column 3: ID
+        rest = substr(line, col3_start)
+        match(rest, /^[^ ]+( [^ ]+)*/)
+        col3_len = RLENGTH
+        col3_end = col3_start + RLENGTH
+
+        # Find next column start
+        rest = substr(line, col3_end)
+        match(rest, /^ +/)
+        spaces3 = RLENGTH
+        col4_start = col3_end + spaces3
+
+        # Column 4: TITLE
+        rest = substr(line, col4_start)
+        match(rest, /^[^ ]+( [^ ]+)*/)
+        col4_len = RLENGTH
+        col4_end = col4_start + RLENGTH
+
+        # Find next column start
+        rest = substr(line, col4_end)
+        match(rest, /^ +/)
+        spaces4 = RLENGTH
+        col5_start = col4_end + spaces4
+
+        # Column 5: URL (rest of line)
+        col5_len = length(line) - col5_start + 1
+
+        # Reduce spacing between columns
+        if(spaces1 > 2) spaces1 = 2
+        if(spaces3 > 2) spaces3 = 2
+        if(spaces4 > 2) spaces4 = 2
+
+        # Print colored header
+        printf "%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s\n",
+          grey, col1_len, "BRANCH", reset, spaces1, "",
+          grey, col2_len, "MERGED AT", reset, spaces2, "",
+          grey, col3_len, "ID", reset, spaces3, "",
+          grey, col4_len, "TITLE", reset, spaces4, "",
+          grey, col5_len, "URL", reset
+
+        # Print underlines
+        printf "%s", grey
+        for(i=0; i<col1_len; i++) printf "-"
+        printf "%*s", spaces1, ""
+        for(i=0; i<col2_len; i++) printf "-"
+        printf "%*s", spaces2, ""
+        for(i=0; i<col3_len; i++) printf "-"
+        printf "%*s", spaces3, ""
+        for(i=0; i<col4_len; i++) printf "-"
+        printf "%*s", spaces4, ""
+        for(i=0; i<col5_len; i++) printf "-"
+        printf "%s\n", reset
+
+        header_printed = 1
+      }
+
+      # For all data rows (including the first), extract columns using same positions
+      col1 = substr($0, 1, col1_len)
+      col2 = substr($0, col2_start, col2_len)
+      col3 = substr($0, col3_start, col3_len)
+      col4 = substr($0, col4_start, col4_len)
+      col5 = substr($0, col5_start)
+
+      # Print colored data
+      printf "%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%s%s\n",
+        cyan, col1_len, col1, reset, spaces1, "",
+        green, col2_len, col2, reset, spaces2, "",
+        magenta, col3_len, col3, reset, spaces3, "",
+        white, col4_len, col4, reset, spaces4, "",
+        grey, col5, reset
+    }
+  '
