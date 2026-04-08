@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+#
+# git-branch-info
+# List all local branches with upstream status sorted by oldest commit date
+#-------------------------------------------------------------------------------
+
+set -e
+
+curr_branch=$(git log --pretty=format:%h -1)
+
+format="%(if)%(is-base:$curr_branch)%(then)%(color:green)%(refname:short)%(else)%(color:white)%(refname:short)%(end)|%(color:green)%(committerdate:relative)|%(color:blue)%(upstream)"
+git for-each-ref --color --sort="-committerdate" --format $format refs/heads | sed 's/refs\/remotes\/origin\///g' | column -s '|' -t
