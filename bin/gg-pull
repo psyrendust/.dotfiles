@@ -14,6 +14,11 @@ ALL_FLAGS=($BRANCH_FLAG $UPDATE_FLAG)
 
 targetBranch=""
 destinationBranch="$(git-current-branch)";
+isWorktree=""
+
+if [[ "$(git rev-parse --git-dir)" != "$(git rev-parse --git-common-dir)" ]]; then
+  isWorktree="yes"
+fi
 
 # Check if an arg has been passed and it matches one of our flags
 if (( $ALL_FLAGS[(Ie)$1] )); then
@@ -23,9 +28,15 @@ if (( $ALL_FLAGS[(Ie)$1] )); then
     exit;
   fi
 
-  # Update a different branch without switching to it
-  chalk -t "[ {blue GGPULL} ] updating branch {cyan $targetBranch}"
-  git fetch origin ${targetBranch}:${targetBranch}
+  if [[ -z "$isWorktree" ]]; then
+    # Update a different branch without switching to it
+    chalk -t "[ {blue GGPULL} ] updating branch {cyan $targetBranch}"
+    git fetch origin ${targetBranch}:${targetBranch}
+  else
+    # Fetch the latest changes from the remote
+    chalk -t "[ {blue GGPULL} ] fetching changes from remote {cyan $targetBranch}"
+    git fetch origin ${targetBranch}
+  fi
 
   if (( $UPDATE_FLAG[(Ie)$1] )); then
     chalk -t "[ {blue GGPULL} ] rebasing {green.bold $targetBranch} onto {blue.bold $destinationBranch}"
