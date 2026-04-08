@@ -7,4 +7,4 @@
 set -e
 
 BRANCH=$(getgitbranch --header="Select a branch to checkout") &&
-git checkout ${BRANCH}
+HUSKY=0 git checkout ${BRANCH}
