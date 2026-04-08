@@ -6,8 +6,18 @@
 
 set -e
 
-if [ -n "$1" ]; then
-  BRANCH="$1"
+# Parse flags
+FORCE=false
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    -f|--force) FORCE=true ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+
+if [ -n "${ARGS[1]}" ]; then
+  BRANCH="${ARGS[1]}"
 else
   BRANCH=$(getgitbranch --header="Select a branch to delete") &&
 fi
@@ -44,10 +54,37 @@ if [[ "$COUNT" != "0" ]]; then
     done <<< "$PROTECTED_REGEX"
   fi
 
-  if [[ -z "$FILTERED_NAMES" ]]; then
+  is_protected() {
+    local branch="$1"
+    if [[ -n "$PROTECTED_EXACT" ]]; then
+      while IFS= read -r pattern; do
+        [[ -z "$pattern" ]] && continue
+        [[ "$branch" == "$pattern" ]] && return 0
+      done <<< "$PROTECTED_EXACT"
+    fi
+    if [[ -n "$PROTECTED_REGEX" ]]; then
+      while IFS= read -r pattern; do
+        [[ -z "$pattern" ]] && continue
+        echo "$branch" | grep -qE "$pattern" && return 0
+      done <<< "$PROTECTED_REGEX"
+    fi
+    return 1
+  }
+
+  DISPLAY_NAMES=$([[ "$FORCE" == true ]] && echo "$BRANCH_NAMES" || echo "$FILTERED_NAMES")
+
+  if [[ -z "$DISPLAY_NAMES" ]]; then
     chalk -t "{blue  info } => No deletable branches matching {blueBright ${BRANCH}} (all matches are protected)"
   else
-    deleteBranch=$(echo $FILTERED_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
+    deleteBranch=$(echo $DISPLAY_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
+    if is_protected "$deleteBranch"; then
+      chalk -t "{yellow  warn } => {redBright ${deleteBranch}} is a protected branch. Are you sure you want to delete it? [y/N] \c"
+      read -q CONFIRM || {
+        chalk -t "\n{blue  info } => Aborted"
+        exit 0
+      }
+      echo
+    fi
     chalk -t "{blue  info } => Deleting remote branch {redBright ${deleteBranch}}" &&
     git push origin --delete ${deleteBranch}
   fi
