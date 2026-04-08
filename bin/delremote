@@ -24,9 +24,33 @@ if [[ "$COUNT" != "0" ]]; then
   # echo "CUT_BRANCHES: ${CUT_BRANCHES}"
   BRANCH_NAMES=$(echo $CUT_BRANCHES | sed 's/^refs\/heads\///g')
   # echo "BRANCH_NAMES: ${BRANCH_NAMES}"
-  deleteBranch=$(echo $BRANCH_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
-  chalk -t "{blue  info } => Deleting remote branch {redBright ${deleteBranch}}" &&
-  git push origin --delete ${deleteBranch}
+
+  # Filter out protected branches from git config
+  PROTECTED_EXACT=$(git config --get-all zdot-git.delremote.protected 2>/dev/null || true)
+  PROTECTED_REGEX=$(git config --get-all zdot-git.delremote.protected-regex 2>/dev/null || true)
+  FILTERED_NAMES="$BRANCH_NAMES"
+
+  if [[ -n "$PROTECTED_EXACT" ]]; then
+    while IFS= read -r pattern; do
+      [[ -z "$pattern" ]] && continue
+      FILTERED_NAMES=$(echo "$FILTERED_NAMES" | grep -vxF "$pattern" || true)
+    done <<< "$PROTECTED_EXACT"
+  fi
+
+  if [[ -n "$PROTECTED_REGEX" ]]; then
+    while IFS= read -r pattern; do
+      [[ -z "$pattern" ]] && continue
+      FILTERED_NAMES=$(echo "$FILTERED_NAMES" | grep -vE "$pattern" || true)
+    done <<< "$PROTECTED_REGEX"
+  fi
+
+  if [[ -z "$FILTERED_NAMES" ]]; then
+    chalk -t "{blue  info } => No deletable branches matching {blueBright ${BRANCH}} (all matches are protected)"
+  else
+    deleteBranch=$(echo $FILTERED_NAMES | fzf --header 'Delete remote branch (Press ESC to cancel)?') &&
+    chalk -t "{blue  info } => Deleting remote branch {redBright ${deleteBranch}}" &&
+    git push origin --delete ${deleteBranch}
+  fi
 else
   chalk -t "{blue  info } => No remote branches matching {blueBright ${BRANCH}}"
 fi
