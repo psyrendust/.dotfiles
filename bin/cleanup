@@ -1,18 +1,114 @@
 #!/usr/bin/env zsh
 #
 # cleanup
-# List all local branches with upstream status of "gone".
+# List all merged PRs whose branches still exist locally.
 # Fuzzy select branches for deletion.
 #-------------------------------------------------------------------------------
 
 set -e
 
-git remote update -p &&
-if [[ -n "$(git-upstream-gone)" ]]; then
-  BRANCHES=( $(git-upstream-gone | fzf -m --reverse --header="Select branches to cleanup" | trimleading) ) &&
+# Parse command line arguments
+DRY_RUN=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -n|--dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: cleanup [-n|--dry-run]"
+      exit 1
+      ;;
+  esac
+done
 
-  for branch in $BRANCHES[@]; do
-    git branch -D ${branch}
-  done
+# Create a temporary file for local branches
+TEMP_BRANCHES=$(mktemp)
+trap "rm -f $TEMP_BRANCHES" EXIT
+
+# Get list of local branches
+git for-each-ref --format='%(refname:short)' refs/heads > "$TEMP_BRANCHES"
+
+# Get PR merged info and filter to only show branches that exist locally
+FILTERED_OUTPUT=$(git-pr-merged-info | awk -v branches_file="$TEMP_BRANCHES" '
+  BEGIN {
+    # Read local branches into an array
+    while ((getline branch < branches_file) > 0) {
+      local[branch] = 1
+    }
+    close(branches_file)
+  }
+  NR <= 2 {
+    # Print header and separator lines
+    print
+    next
+  }
+  {
+    # Extract branch name (1st column in new format: BRANCH, MERGED AT, ID, TITLE)
+    line = $0
+
+    # Strip ANSI color codes
+    gsub(/\033\[[0-9;]*m/, "", line)
+
+    # Branch is now the first column
+    match(line, /^[^ ]+/)  # BRANCH column
+    branch = substr(line, RSTART, RLENGTH)
+
+    # Only print if branch exists locally
+    if (branch in local) {
+      print
+    }
+  }
+')
+
+# Only proceed if there are branches to clean up
+if [[ -n "$FILTERED_OUTPUT" ]] && echo "$FILTERED_OUTPUT" | tail -n +3 | grep -q .; then
+  # Use fzf to select branches, extract branch name (3rd column), and delete
+  SELECTED=$(echo "$FILTERED_OUTPUT" | fzf -m --reverse --ansi --header-lines=2 --header="Select merged PR branches to delete")
+
+  if [[ -n "$SELECTED" ]]; then
+    # Extract branch names from selected lines (1st column in new format)
+    BRANCHES=( $(echo "$SELECTED" | awk '{
+      # Strip ANSI color codes
+      line = $0
+      gsub(/\033\[[0-9;]*m/, "", line)
+      # Branch is now the first column
+      match(line, /^[^ ]+/)
+      print substr(line, RSTART, RLENGTH)
+    }') )
+
+    for branch in $BRANCHES[@]; do
+      # Check if the branch is connected with a worktree
+      WORKTREE_PATH=$(git worktree list --porcelain | awk -v branch="$branch" '
+        /^worktree / { path = substr($0, 10) }
+        /^branch / {
+          if (substr($0, 8) == "refs/heads/" branch) {
+            print path
+            exit
+          }
+        }
+      ')
+
+      # If worktree exists, remove it first
+      if [[ -n "$WORKTREE_PATH" ]]; then
+        echo "Removing worktree: $WORKTREE_PATH"
+        if [[ "$DRY_RUN" == true ]]; then
+          echo "[dry-run] git worktree remove \"$WORKTREE_PATH\""
+        else
+          git worktree remove "$WORKTREE_PATH"
+        fi
+      fi
+
+      # Delete the branch
+      if [[ "$DRY_RUN" == true ]]; then
+        echo "[dry-run] git branch -D ${branch}"
+      else
+        git branch -D ${branch}
+      fi
+    done
+  fi
+else
+  echo "No local branches found with merged PRs"
 fi
 
