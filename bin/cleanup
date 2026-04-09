@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 #
 # cleanup
-# List all merged PRs whose branches still exist locally.
+# List all closed PRs whose branches still exist locally.
 # Fuzzy select branches for deletion.
 #-------------------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ trap "rm -f $TEMP_BRANCHES" EXIT
 # Get list of local branches
 git for-each-ref --format='%(refname:short)' refs/heads > "$TEMP_BRANCHES"
 
-# Get PR merged info and filter to only show branches that exist locally
-FILTERED_OUTPUT=$(git-pr-merged-info | awk -v branches_file="$TEMP_BRANCHES" '
+# Get closed PR info and filter to only show branches that exist locally
+FILTERED_OUTPUT=$(git-pr-closed-info | awk -v branches_file="$TEMP_BRANCHES" '
   BEGIN {
     # Read local branches into an array
     while ((getline branch < branches_file) > 0) {
@@ -45,7 +45,7 @@ FILTERED_OUTPUT=$(git-pr-merged-info | awk -v branches_file="$TEMP_BRANCHES" '
     next
   }
   {
-    # Extract branch name (1st column in new format: BRANCH, MERGED AT, ID, TITLE)
+    # Extract branch name (1st column in new format: BRANCH, CLOSED AT, ID, TITLE)
     line = $0
 
     # Strip ANSI color codes
@@ -65,7 +65,7 @@ FILTERED_OUTPUT=$(git-pr-merged-info | awk -v branches_file="$TEMP_BRANCHES" '
 # Only proceed if there are branches to clean up
 if [[ -n "$FILTERED_OUTPUT" ]] && echo "$FILTERED_OUTPUT" | tail -n +3 | grep -q .; then
   # Use fzf to select branches, extract branch name (3rd column), and delete
-  SELECTED=$(echo "$FILTERED_OUTPUT" | fzf -m --reverse --ansi --header-lines=2 --header="Select merged PR branches to delete")
+  SELECTED=$(echo "$FILTERED_OUTPUT" | fzf -m --reverse --ansi --header-lines=2 --header="Select closed PR branches to delete")
 
   if [[ -n "$SELECTED" ]]; then
     # Extract branch names from selected lines (1st column in new format)
@@ -109,6 +109,6 @@ if [[ -n "$FILTERED_OUTPUT" ]] && echo "$FILTERED_OUTPUT" | tail -n +3 | grep -q
     done
   fi
 else
-  echo "No local branches found with merged PRs"
+  echo "No local branches found with closed PRs"
 fi
 

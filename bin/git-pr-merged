@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-#
-# git-pr-merged
-# List all branches from prs that have been merged in the last 30 days
-#-------------------------------------------------------------------------------
-
-set -e
-
-echo "$(gh pr list --author "@me" --state merged --state closed --json headRefName,mergedAt --search "created:>$(date -d '30 days ago' '+%Y-%m-%d')" --jq 'sort_by(.mergedAt) | reverse | .[].headRefName')"

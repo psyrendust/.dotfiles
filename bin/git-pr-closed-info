@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 #
-# git-pr-merged-info
-# List all branches from prs that have been merged in the last 30 days with
+# git-pr-closed-info
+# List all branches from prs that have been closed in the last 30 days with
 # more info.
 #-------------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: git-pr-merged-info [-n|--no-color]"
+      echo "Usage: git-pr-closed-info [-n|--no-color]"
       exit 1
       ;;
   esac
@@ -42,11 +42,10 @@ fi
 
 gh pr list \
   --author "@me" \
-  --state merged \
   --state closed \
   --search "created:>$(date -d '30 days ago' '+%Y-%m-%d')" \
-  --json headRefName,mergedAt,number,title,url \
-  --jq 'sort_by(.mergedAt) | reverse' | \
+  --json headRefName,closedAt,number,title,url \
+  --jq 'sort_by(.closedAt) | reverse' | \
   jq -r '
     # Convert ISO8601 timestamp to relative time string
     def relativeTime:
@@ -78,12 +77,12 @@ gh pr list \
     .[] |
     {
       branch: .headRefName,
-      mergedAt: (.mergedAt | relativeTime),
+      closedAt: (.closedAt | relativeTime),
       id: (.number | tostring),
       title: (if (.title | length) > 50 then (.title[0:50]) else .title end),
       url: .url
     } |
-    [.branch, .mergedAt, .id, .title, .url] |
+    [.branch, .closedAt, .id, .title, .url] |
     @tsv
   ' | \
   column -t -s $'\t' | \
@@ -109,7 +108,7 @@ gh pr list \
         spaces1 = RLENGTH
         col2_start = col1_end + spaces1
 
-        # Column 2: MERGED AT
+        # Column 2: CLOSED AT
         rest = substr(line, col2_start)
         match(rest, /^[^ ]+( [^ ]+)*/)
         col2_len = RLENGTH
@@ -156,7 +155,7 @@ gh pr list \
         # Print colored header
         printf "%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s%*s%s%-*s%s\n",
           grey, col1_len, "BRANCH", reset, spaces1, "",
-          grey, col2_len, "MERGED AT", reset, spaces2, "",
+          grey, col2_len, "CLOSED AT", reset, spaces2, "",
           grey, col3_len, "ID", reset, spaces3, "",
           grey, col4_len, "TITLE", reset, spaces4, "",
           grey, col5_len, "URL", reset

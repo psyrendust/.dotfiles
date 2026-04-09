@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#
+# git-pr-closed
+# List all branches from prs that have been closed in the last 30 days
+#-------------------------------------------------------------------------------
+
+set -e
+
+echo "$(gh pr list --author "@me" --state closed --json headRefName,closedAt --search "created:>$(date -d '30 days ago' '+%Y-%m-%d')" --jq 'sort_by(.closedAt) | reverse | .[].headRefName')"
