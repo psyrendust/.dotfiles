@@ -1,27 +1,82 @@
 #!/usr/bin/env zsh
 #
 # cleanup
-# List all closed PRs whose branches still exist locally.
-# Fuzzy select branches for deletion.
+# List all closed PRs whose branches still exist locally,
+# plus any orphaned worktree directories from previous failed removals.
+# Fuzzy select items for deletion.
 #-------------------------------------------------------------------------------
 
 set -e
 
 # Parse command line arguments
 DRY_RUN=false
+NO_COLOR=false
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -n|--dry-run)
+    -d|--dry-run)
       DRY_RUN=true
+      shift
+      ;;
+    -n|--no-color)
+      NO_COLOR=true
       shift
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: cleanup [-n|--dry-run]"
+      echo "Usage: cleanup [-d|--dry-run] [-n/|--no-color]"
       exit 1
       ;;
   esac
 done
+
+# ANSI color codes (will be empty if NO_COLOR is true)
+if [[ "$NO_COLOR" == true ]]; then
+  GREY=''
+  MAGENTA=''
+  WHITE=''
+  CYAN=''
+  BLUE=''
+  GREEN=''
+  RED=''
+  YELLOW=''
+  RESET=''
+else
+  GREY='\033[90m'
+  MAGENTA='\033[35m'
+  WHITE='\033[97m'
+  CYAN='\033[36m'
+  BLUE='\033[34m'
+  GREEN='\033[32m'
+  RED='\033[31m'
+  YELLOW='\033[33m'
+  RESET='\033[0m'
+fi
+
+logStep() {
+  printf "${CYAN}[cleanup] ${WHITE}${1}: ${GREY}${2}${RESET}\n"
+}
+
+logEmpty() {
+  printf "${BLUE}[cleanup] ${WHITE}${1}${RESET}\n"
+}
+
+logDryRun() {
+  if [[ "$DRY_RUN" == true ]]; then
+    printf "${MAGENTA}[dry-run] ${WHITE}${1}: ${GREY}${2}${RESET}\n"
+  fi
+}
+
+trashWorkspaceFile() {
+  local file="$1"
+  if [[ -n "$file" ]] && [[ -a "$file" ]]; then
+    if [[ "$DRY_RUN" == true ]]; then
+      logDryRun "Deleted VSCode workspace file" "$file"
+    else
+      rm "$file"
+      logStep "Deleted VSCode workspace file" "$file"
+    fi
+  fi
+}
 
 # Create a temporary file for local branches
 TEMP_BRANCHES=$(mktemp)
@@ -30,8 +85,25 @@ trap "rm -f $TEMP_BRANCHES" EXIT
 # Get list of local branches
 git for-each-ref --format='%(refname:short)' refs/heads > "$TEMP_BRANCHES"
 
+WORKTREE_ROOT=$(dirname $(git-root))
+GIT_ROOT=$(git-root)
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+WORKTREE_LIST=$(git worktree list --porcelain)
+
+# Get the header (always needed for display)
+PR_OUTPUT=$(git-prclosed)
+HEADER=$(echo "$PR_OUTPUT" | head -n 2)
+
+# Extract column widths from the separator line (line 2: dashes separated by spaces)
+# This gives us: BRANCH_W, CLOSED_AT_W, ID_W, TITLE_W, URL_W
+COL_WIDTHS=($(echo "$HEADER" | tail -n 1 | sed 's/\x1b\[[0-9;]*m//g' | awk '{
+  for (i = 1; i <= NF; i++) print length($i)
+}'))
+BRANCH_W=${COL_WIDTHS[1]}
+CLOSED_AT_W=${COL_WIDTHS[2]}
+
 # Get closed PR info and filter to only show branches that exist locally
-FILTERED_OUTPUT=$(git-pr-closed-info | awk -v branches_file="$TEMP_BRANCHES" '
+FILTERED_OUTPUT=$(echo "$PR_OUTPUT" | awk -v branches_file="$TEMP_BRANCHES" '
   BEGIN {
     # Read local branches into an array
     while ((getline branch < branches_file) > 0) {
@@ -62,53 +134,103 @@ FILTERED_OUTPUT=$(git-pr-closed-info | awk -v branches_file="$TEMP_BRANCHES" '
   }
 ')
 
-# Only proceed if there are branches to clean up
-if [[ -n "$FILTERED_OUTPUT" ]] && echo "$FILTERED_OUTPUT" | tail -n +3 | grep -q .; then
-  # Use fzf to select branches, extract branch name (3rd column), and delete
-  SELECTED=$(echo "$FILTERED_OUTPUT" | fzf -m --reverse --ansi --header-lines=2 --header="Select closed PR branches to delete")
-
-  if [[ -n "$SELECTED" ]]; then
-    # Extract branch names from selected lines (1st column in new format)
-    BRANCHES=( $(echo "$SELECTED" | awk '{
-      # Strip ANSI color codes
-      line = $0
-      gsub(/\033\[[0-9;]*m/, "", line)
-      # Branch is now the first column
-      match(line, /^[^ ]+/)
-      print substr(line, RSTART, RLENGTH)
-    }') )
-
-    for branch in $BRANCHES[@]; do
-      # Check if the branch is connected with a worktree
-      WORKTREE_PATH=$(git worktree list --porcelain | awk -v branch="$branch" '
-        /^worktree / { path = substr($0, 10) }
-        /^branch / {
-          if (substr($0, 8) == "refs/heads/" branch) {
-            print path
-            exit
-          }
-        }
-      ')
-
-      # If worktree exists, remove it first
-      if [[ -n "$WORKTREE_PATH" ]]; then
-        echo "Removing worktree: $WORKTREE_PATH"
-        if [[ "$DRY_RUN" == true ]]; then
-          echo "[dry-run] git worktree remove \"$WORKTREE_PATH\""
-        else
-          git worktree remove "$WORKTREE_PATH"
-        fi
-      fi
-
-      # Delete the branch
-      if [[ "$DRY_RUN" == true ]]; then
-        echo "[dry-run] git branch -D ${branch}"
-      else
-        git branch -D ${branch}
-      fi
-    done
-  fi
-else
-  echo "No local branches found with closed PRs"
+# Find orphaned worktree directories (closed PR dirs with no git worktree reference or local branch)
+CLOSED_BRANCHES=$(echo "$PR_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | awk 'NR > 2 { print $1 }')
+ORPHANED_LINES=""
+if [[ -n "$CLOSED_BRANCHES" ]]; then
+  while IFS= read -r branch; do
+    cleanBranchName="${branch//[\\\/]/-}"
+    DIR="$WORKTREE_ROOT/$cleanBranchName"
+    # Only flag if directory exists, is NOT the main git root, is NOT a registered worktree, and branch doesn't exist locally
+    if [[ -d "$DIR" ]] && [[ "$DIR" != "$GIT_ROOT" ]] && [[ "$branch" != "$DEFAULT_BRANCH" ]] && ! echo "$WORKTREE_LIST" | grep -q "^worktree ${DIR}$" && ! grep -q "^${branch}$" "$TEMP_BRANCHES"; then
+      ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "$branch" "orphaned dir" "$DIR")\n"
+    fi
+  done <<< "$CLOSED_BRANCHES"
 fi
 
+# Build combined fzf input — always include header for column alignment
+HAS_ITEMS=false
+FZF_INPUT="$HEADER"
+
+# Append branch lines (skip first 2 header lines from FILTERED_OUTPUT)
+BRANCH_LINES=$(echo "$FILTERED_OUTPUT" | tail -n +3)
+if [[ -n "$BRANCH_LINES" ]] && echo "$BRANCH_LINES" | grep -q .; then
+  HAS_ITEMS=true
+  FZF_INPUT="${FZF_INPUT}\n${BRANCH_LINES}"
+fi
+
+if [[ -n "$ORPHANED_LINES" ]]; then
+  HAS_ITEMS=true
+  FZF_INPUT="${FZF_INPUT}\n${ORPHANED_LINES}"
+fi
+
+if [[ "$HAS_ITEMS" == false ]]; then
+  logEmpty "No local branches or orphaned directories found with closed PRs"
+  exit 0
+fi
+
+SELECTED=$(echo -n "$FZF_INPUT" | fzf -m --reverse --ansi --header-lines=2 --header="Select items to clean up")
+
+if [[ -z "$SELECTED" ]]; then
+  exit 0
+fi
+
+# Process each selected line
+while IFS= read -r line; do
+  # Strip ANSI codes for parsing
+  clean_line=$(echo "$line" | sed 's/\x1b\[[0-9;]*m//g')
+
+  if echo "$clean_line" | grep -q "orphaned dir"; then
+    # Orphaned directory line — path is the last whitespace-separated token
+    DIR=$(echo "$clean_line" | awk '{ print $NF }')
+    if [[ "$DRY_RUN" == true ]]; then
+      logDryRun "Trashed orphaned directory" "$DIR"
+    else
+      trash "$DIR"
+      logStep "Trashed orphaned directory" "$DIR"
+    fi
+    trashWorkspaceFile "${DIR}.code-workspace"
+  else
+    # Branch line - extract branch name (1st column)
+    branch=$(echo "$clean_line" | awk '{ match($0, /^[^ ]+/); print substr($0, RSTART, RLENGTH) }')
+    cleanBranchName="${branch//[\\\/]/-}"
+
+    logDryRun "Checking branch" "$branch"
+
+    # Check if the branch is connected with a worktree
+    WORKTREE_PATH=$(echo "$WORKTREE_LIST" | awk -v branch="$branch" '
+      /^worktree / { path = substr($0, 10) }
+      /^branch / {
+        if (substr($0, 8) == "refs/heads/" branch) {
+          print path
+          exit
+        }
+      }
+    ')
+
+    # If worktree exists, remove it first
+    if [[ -n "$WORKTREE_PATH" ]] && [[ -d "$WORKTREE_PATH" ]]; then
+      if [[ "$DRY_RUN" == true ]]; then
+        logDryRun "Trashed worktree" "$WORKTREE_PATH"
+      else
+        if ! removeError=$(git worktree remove "$WORKTREE_PATH" 2>&1); then
+          printf "${RED}[cleanup] git worktree remove failed: ${GREY}${removeError}${RESET}\n" >&2
+          trash "$WORKTREE_PATH"
+          git worktree prune -v
+          logStep "Trashed worktree" "$WORKTREE_PATH"
+        fi
+      fi
+      trashWorkspaceFile "${WORKTREE_PATH}.code-workspace"
+    else
+      trashWorkspaceFile "$WORKTREE_ROOT/${cleanBranchName}.code-workspace"
+    fi
+
+    # Delete the branch
+    if [[ "$DRY_RUN" == true ]]; then
+      logDryRun "Trashed branch" "$branch"
+    else
+      git branch -D ${branch}
+      logStep "Trashed branch" "$branch"
+    fi
+  fi
+done <<< "$SELECTED"
