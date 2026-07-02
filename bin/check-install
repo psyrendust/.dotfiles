@@ -68,13 +68,20 @@ npm_global_packages=(
   "alfred-fkill"
   "alfred-npms"
   "chalk-cli"
+  "chrome-devtools-mcp"
+  "corepack"
   "degit"
   "fkill-cli"
-  "jest"
   "live-server"
   "lorem-ipsum"
   "npkill"
+  "npm-check-updates"
+  "npmrc"
+  "npms-cli"
+  "openskills"
   "trash-cli"
+  "typescript-language-server"
+  "typescript"
   "yarn"
 )
 
@@ -159,14 +166,19 @@ brew_formulas=(
   ["$ZDOT_BREW_ROOT/bin/tree"]="tree"
   ["$ZDOT_BREW_ROOT/bin/unbuffer"]="expect"
   ["$ZDOT_BREW_ROOT/bin/zoxide"]="zoxide"
+  ["$ZDOT_BREW_ROOT/bin/zmx"]="neurosnap/tap/zmx"
   ["$ZDOT_BREW_ROOT/bin/zsh"]="zsh"
   ["$ZDOT_BREW_ROOT/opt/coreutils"]="coreutils"
 )
 # Apps
 brew_formula_apps=(
+  ["$ZDOT_BREW_ROOT/Caskroom/1password-cli"]="1password-cli"
   ["$ZDOT_BREW_ROOT/Caskroom/bleunlock"]="bleunlock"
-  ["$ZDOT_BREW_ROOT/bin/ghostty"]="--cask ghostty"
+  ["$ZDOT_BREW_ROOT/Caskroom/jordanbaird-ice@beta"]="--cask jordanbaird-ice@beta"
   ["$ZDOT_BREW_ROOT/Caskroom/rectangle"]="rectangle"
+  ["$ZDOT_BREW_ROOT/Caskroom/supacode"]="supacode"
+  ["$ZDOT_BREW_ROOT/Caskroom/swiftbar"]="swiftbar"
+  ["$ZDOT_BREW_ROOT/Caskroom/swiftdefaultappsprefpane"]="swiftdefaultappsprefpane"
 )
 brew_formulas+=(${(kv)brew_formula_apps})
 # Quicklook plugins
@@ -174,14 +186,13 @@ brew_formulas+=(${(kv)brew_formula_apps})
 brew_formula_quicklook=(
   ["$ZDOT_BREW_ROOT/Caskroom/qlmarkdown"]="qlmarkdown"
   ["$ZDOT_BREW_ROOT/Caskroom/syntax-highlight"]="syntax-highlight"
-  ["$ZDOT_BREW_ROOT/Caskroom/qlstephen"]="qlstephen"
   ["$ZDOT_BREW_ROOT/Caskroom/suspicious-package"]="suspicious-package"
 )
 brew_formulas+=(${(kv)brew_formula_quicklook})
 # Dev Fonts
 brew_formula_fonts=(
-  ["$ZDOT_BREW_ROOT/Caskroom/font-hack-nerd-font"]="font-hack-nerd-font"
   ["$ZDOT_BREW_ROOT/Caskroom/font-dejavu-sans-mono-for-powerline"]="font-dejavu-sans-mono-for-powerline"
+  ["$ZDOT_BREW_ROOT/Caskroom/font-hack-nerd-font"]="font-hack-nerd-font"
   ["$ZDOT_BREW_ROOT/Caskroom/font-meslo-lg-nerd-font"]="font-meslo-lg-nerd-font"
   ["$ZDOT_BREW_ROOT/Caskroom/font-roboto"]="font-roboto"
   ["$ZDOT_BREW_ROOT/Caskroom/font-roboto-mono"]="font-roboto-mono"

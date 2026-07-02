@@ -2,7 +2,7 @@
 
 My dotfiles
 
-# Setup
+## Setup
 
 Clone the repo:
 

@@ -2,26 +2,31 @@
   "folders": [
     {
       "name": "Dotfiles",
-      "path": "."
+      "path": ".",
+    },
+    {
+      "name": "Dotfiles Work",
+      "path": "../.dotfileswork",
     },
     {
       "name": "home",
-      "path": ".."
+      "path": "..",
     },
     {
       "name": "work/bin",
-      "path": "../work/.bin"
+      "path": "../work/.bin",
     },
     {
       "name": "CloudDocs/shell",
-      "path": "../Library/Mobile Documents/com~apple~CloudDocs/shell"
-    }
+      "path": "../Library/Mobile Documents/com~apple~CloudDocs/shell",
+    },
   ],
-	"settings": {
-		"files.watcherExclude": {
-			"**/target": true
-		},
-		"files.exclude": {
+  "settings": {
+    "peacock.color": "#6964E6",
+    "files.watcherExclude": {
+      "**/target": true,
+    },
+    "files.exclude": {
       // -----------------------------------------------------------------------
       // ------------------------- DEV FILES -----------------------------------
       // -----------------------------------------------------------------------
@@ -136,6 +141,25 @@
       ".rnd": true,
       ".viminfo": true,
       ".wakatime*": true,
-		}
-	}
+    },
+    "workbench.colorCustomizations": {
+      "activityBar.activeBackground": "#9390ed",
+      "activityBar.background": "#9390ed",
+      "activityBar.foreground": "#15202b",
+      "activityBar.inactiveForeground": "#15202b99",
+      "activityBarBadge.background": "#c0241f",
+      "activityBarBadge.foreground": "#e7e7e7",
+      "commandCenter.border": "#e7e7e799",
+      "sash.hoverBorder": "#9390ed",
+      "statusBar.background": "#6964e6",
+      "statusBar.foreground": "#e7e7e7",
+      "statusBarItem.hoverBackground": "#9390ed",
+      "statusBarItem.remoteBackground": "#6964e6",
+      "statusBarItem.remoteForeground": "#e7e7e7",
+      "titleBar.activeBackground": "#6964e6",
+      "titleBar.activeForeground": "#e7e7e7",
+      "titleBar.inactiveBackground": "#6964e699",
+      "titleBar.inactiveForeground": "#e7e7e799",
+    },
+  },
 }
