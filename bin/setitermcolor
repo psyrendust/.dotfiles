@@ -1,0 +1,42 @@
+#!/usr/bin/env zsh
+#
+# sanitize
+# Makes a string safe for use as a folder or file name
+#
+# Usage:
+# sanitize <string>
+#-------------------------------------------------------------------------------
+
+set -e
+
+verbose=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|--verbose) verbose=true; shift ;;
+    *) break ;;
+  esac
+done
+
+# 1. get path from arg
+path_name=$1
+
+# 2. if path arg is missing set it to git-root or pwd
+if [[ -z "$path_name" ]]; then
+  # 3. Run `git-root`, if fatal use `pwd`
+  path_name="$(git-root 2>/dev/null || pwd)"
+fi
+
+[[ "$verbose" == true ]] && echo "path_name: [$path_name]"
+
+# 4. Get tab color from peacock
+hex=$(peacock "$path_name")
+[[ "$verbose" == true ]] && echo "hex: [$hex]"
+hex="${hex#\#}"
+r=$((16#${hex[1,2]}))
+g=$((16#${hex[3,4]}))
+b=$((16#${hex[5,6]}))
+
+# 5. Set iTerm2 tab color
+printf "\033]6;1;bg;red;brightness;%d\a" "$r"
+printf "\033]6;1;bg;green;brightness;%d\a" "$g"
+printf "\033]6;1;bg;blue;brightness;%d\a" "$b"
