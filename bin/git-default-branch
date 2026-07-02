@@ -1,0 +1,26 @@
+#!/usr/bin/env zsh
+#
+# git-default-branch
+# Determine the default branch for a repo (i.e. main or master)
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Determine the default branch from git
+defaultBranch="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d "/" -f 4-10)"
+
+# If not found try and assume (i.e. main or master)
+if [[ -z "$defaultBranch" ]]; then
+  # See if we have a main branch
+  if [[ "$(git branch --list main)" ]]; then
+    defaultBranch="main"
+  elif [[ "$(git branch --list master)" ]]; then
+    defaultBranch="master"
+  elif [[ "$(git branch --list dev)" ]]; then
+    defaultBranch="dev"
+  else
+    exit 1
+  fi
+fi
+
+echo "$defaultBranch"

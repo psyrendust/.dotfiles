@@ -6,14 +6,14 @@
 
 set -e
 
-mainBranch=$(git-main-branch)
+defaultBranch=$(git-default-branch)
 
-if [[ "$(git-current-branch)" == "$mainBranch" ]]; then
+if [[ "$(git-current-branch)" == "$defaultBranch" ]]; then
   # We are on main branch, just pull
-  git pull origin "$mainBranch";
+  git pull origin "$defaultBranch";
 else
   # Pull the latest on master without checkout
-  git fetch origin $mainBranch:$mainBranch
+  git fetch origin $defaultBranch:$defaultBranch
   # Apply latest changes on current branch
-  git rebase $mainBranch
+  git rebase $defaultBranch
 fi
