@@ -32,30 +32,6 @@ function pkg() {
   _pkg::$command "$@"
 }
 
-function _pkg {
-  local -a cmds subcmds
-  cmds=(
-    'help:Usage information'
-    'deps:Print out package.json dependencies'
-    'dev:Print out package.json devDependencies'
-    'has:Check if command is in package.json scripts'
-    'run:Run a command in package.json scripts'
-    'scripts:Print out package.json scripts'
-  )
-
-  if (( CURRENT == 2 )); then
-    _describe 'command' cmds
-  fi
-
-  return 0
-}
-
-if (( ! $+functions[compinit] )); then
-  autoload -Uz compinit
-  compinit
-fi
-compdef _pkg pkg
-
 function _pkg::noop() {}
 
 function _pkg::help() {

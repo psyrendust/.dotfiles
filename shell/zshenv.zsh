@@ -19,6 +19,12 @@
 
 
 # ------------------------------------------------------------------------------
+### Keep PATH unique
+# ------------------------------------------------------------------------------
+typeset -U path fpath manpath
+
+
+# ------------------------------------------------------------------------------
 ### What architecture are we using
 # ------------------------------------------------------------------------------
 export ZDOT_ARCH=$(uname -m)
@@ -56,9 +62,13 @@ export ZDOT_ICLOUD_DRIVE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 # ------------------------------------------------------------------------------
 ### Zdot work paths
 # ------------------------------------------------------------------------------
-export ZDOT_WORK="$HOME/work"
-export ZDOT_WORK_BIN="$ZDOT_WORK/.bin"
-export ZDOT_WORK_CODE="$ZDOT_WORK/code"
+export ZDOT_WORK="$HOME/.dotfileswork"
+export ZDOT_WORK_BIN="$ZDOT_WORK/bin"
+export ZDOT_WORK_CODE="$HOME/work/code"
+
+# Antidote work bundle (loaded before the main one in zshrc-antidote.zsh)
+export ZDOT_WORK_PLUGIN_CONFIG="$ZDOT_WORK/shell/zshrc-antidote-plugins.conf"
+export ZDOT_WORK_PLUGIN_CACHE="$ZDOT_WORK/shell/zshrc-antidote-plugins.zsh"
 
 
 # ------------------------------------------------------------------------------
@@ -69,10 +79,28 @@ export EDITOR="$VISUAL"
 
 
 # ------------------------------------------------------------------------------
-### Add Go paths if they exist
+### Add Go vars if they exist
 # ------------------------------------------------------------------------------
 [[ -d "$HOME/go" ]] && export GOPATH="$HOME/go"
 [[ -d "$ZDOT_BREW_ROOT/opt/go/libexec" ]] && export GOROOT="$ZDOT_BREW_ROOT/opt/go/libexec"
+
+
+# ------------------------------------------------------------------------------
+### Add Claude vars if they exist
+# ------------------------------------------------------------------------------
+[[ -d "$HOME/.claude/bin" ]] && export CLAUDE_BIN="$HOME/.claude/bin"
+
+
+# ------------------------------------------------------------------------------
+### Add Bun vars if they exist
+# ------------------------------------------------------------------------------
+[[ -d "$HOME/.bun" ]] && export BUN_INSTALL="$HOME/.bun"
+
+
+# ------------------------------------------------------------------------------
+### Add Docker cli completions
+# ------------------------------------------------------------------------------
+[[ -d "$HOME/.docker/completions" ]] && fpath=($HOME/.docker/completions $fpath)
 
 
 # ------------------------------------------------------------------------------
@@ -110,17 +138,27 @@ setopt EXTENDED_GLOB
 
 
 # ------------------------------------------------------------------------------
-### Add Zdot function paths & load them
+### Add Zdot function & completion search paths
+#
+# These dirs go on $fpath so zsh can autoload our functions (zdot, pkg) and so
+# compinit can later discover their completions (_zdot, _pkg). compinit is
+# deliberately NOT run here — .zshenv is sourced for every shell (including
+# non-interactive scripts); it runs once, for interactive shells only, from
+# $ZDOT_SHELL/zshrc.zsh.
 # ------------------------------------------------------------------------------
 fpath=(
   "$ZDOT_FUNCTIONS"(N-/)
   "$ZDOT_FUNCTIONS"/*(N-/)
+  "$HOME/.bun"(N-/)
   "$fpath[@]"
 )
-autoload -Uz compinit
 autoload -Uz zdot
 autoload -Uz pkg
 
-compinit
+# Warm the autoloads so the first interactive `zdot`/`pkg` call works: these
+# files use the self-redefining autoload style, whose very first invocation only
+# defines the function (subsequent calls run it). `zdot` is warmed naturally by
+# `zdot load` in zprofile/zshrc, but nothing calls `pkg` at startup. This no
+# longer pulls in compinit (that moved to zshrc.zsh, interactive-only).
 zdot noop
 pkg noop

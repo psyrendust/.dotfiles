@@ -1,0 +1,41 @@
+#compdef zdot
+#
+# Completion for the `zdot` command.
+#
+# Autoloaded from $ZDOT_FUNCTIONS (on $fpath) and bound to `zdot` by compinit
+# via the `#compdef` tag above — so compinit must own initialization, not this
+# file. See $ZDOT_SHELL/zshrc.zsh for where compinit runs.
+#
+# @see https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-simple-completion-functions-using-_describe
+# ------------------------------------------------------------------------------
+
+local -a cmds subcmds
+cmds=(
+  'alias:Get the value of an alias'
+  'check:Check install'
+  'clear:Run clear subcommand'
+  'edit:Open dotfiles vscode workspace'
+  'load:Source a file if it exists'
+  'notes:Open notes folder in vscode'
+  'paths:Output PATH, MANPATH and INFOPATH into distinct lines'
+  'reload:Reload the current zsh session'
+  'update:Update dotfiles using antidote'
+  'help:Usage information'
+)
+
+if (( CURRENT == 2 )); then
+  _describe 'command' cmds
+elif (( CURRENT == 3 )); then
+  case "$words[2]" in
+    clear)
+      subcmds=(
+        'antidote:Clear antidote cache and config'
+        'cache:Clear the zdot cache directory'
+        'config:Clear cached ${ZDOT_ANTIDOTE_PLUGINS_NAME}.zsh config file'
+        'help:Usage information'
+      )
+      _describe 'command' subcmds;;
+  esac
+fi
+
+return 0

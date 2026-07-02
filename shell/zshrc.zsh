@@ -16,11 +16,6 @@
 #   The MIT License (MIT) <http://psyrendust.mit-license.org/2021/license.html>
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-# Configure nvm via lukechilds/zsh-nvm
-# ------------------------------------------------------------------------------
-zdot load "$ZDOT_SHELL/init-nvm.zsh"
-
 
 # ------------------------------------------------------------------------------
 # Load framework
@@ -38,3 +33,13 @@ for _rc in ${ZDOT_SHELL}/zshrc.d/*.zsh; do
   fi
 done
 unset _rc
+
+
+autoload -Uz compinit
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  # dump older than 24h → rebuild
+  compinit
+else
+  # otherwise trust the cache (fast path)
+  compinit -C
+fi

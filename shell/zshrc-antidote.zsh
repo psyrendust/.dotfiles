@@ -33,9 +33,23 @@ fi
 ### My prompt
 # ------------------------------------------------------------------------------
 # Prevents Pure from checking whether the current Git remote has been updated.
-export PURE_GIT_PULL=0
+export PURE_GIT_PULL=1
 # Do not include untracked files in dirtiness check. Mostly useful on large repos (like WebKit).
 export PURE_GIT_UNTRACKED_DIRTY=0
+# ------------------------------------------------------------------------------
+### Custom pure prompt settings
+# https://github.com/sindresorhus/pure#zstyle-options
+# ------------------------------------------------------------------------------
+zstyle :prompt:pure:git:dirty detailed yes
+zstyle :prompt:pure:git:stash show yes
+zstyle :prompt:pure:environment:node_version show yes
+if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+  # Add space after symbol to fix rendering bug with ghostty
+  zstyle :prompt:pure:environment:node_version symbol '⬢ '
+fi
+# Disabled settings
+zstyle :prompt:pure:environment:nix-shell show no
+zstyle :prompt:pure:environment:virtualenv show no
 
 
 # ------------------------------------------------------------------------------
@@ -60,5 +74,11 @@ zstyle ':antidote:static' file "$ZDOT_ANTIDOTE_PLUGIN_CACHE"
 
 # ------------------------------------------------------------------------------
 ### Load plugins
+#
+# Workplace plugins load first from the private work dotfiles repo (if present),
+# with their own static cache so they don't clobber the main one.
 # ------------------------------------------------------------------------------
+[[ -f "$ZDOT_WORK_PLUGIN_CONFIG" ]] && \
+  antidote load "$ZDOT_WORK_PLUGIN_CONFIG" "$ZDOT_WORK_PLUGIN_CACHE"
+
 antidote load "$ZDOT_ANTIDOTE_PLUGIN_CONFIG"
