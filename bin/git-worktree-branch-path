@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# git-worktree-branch-path
+# Find the worktree branch path
+#-------------------------------------------------------------------------------
+
+[ -z "$1" ] && exit 0
+
+branch="$1"
+git worktree list --porcelain | awk -v branch="$branch" '/^worktree /{path=$2} /^branch refs\/heads\// && $2 == "refs/heads/" branch {print path}'

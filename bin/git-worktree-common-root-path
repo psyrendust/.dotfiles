@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# git-worktree-common-root-path
+# Find the git root path to the common git directory shared by all linked worktrees
+#-------------------------------------------------------------------------------
+
+echo "$(cd $(dirname $(git rev-parse --git-common-dir)) && pwd)"

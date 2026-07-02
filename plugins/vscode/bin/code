@@ -8,7 +8,7 @@
 const fs = require('fs');
 const minimist = require('minimist');
 const prompts = require('prompts');
-const { resolve } = require('path');
+const { basename, dirname, resolve } = require('path');
 const { spawn } = require('child_process');
 
 const cmds = ['/usr/local/bin/code'];
@@ -38,10 +38,18 @@ function getBoolean(val, defaultValue) {
   return false;
 }
 
+function hasFlag(flags, optionsOrValue) {
+  if (optionsOrValue instanceof Map) {
+    return flags.find(flag => optionsOrValue.has(flag.replace(/-/g, '')));
+  }
+  return flags.find(flag => optionsOrValue === flag.replace(/-/g, ''));
+}
+
 let isVerbose = getBoolean(process.env.DEBUG, false);
 
 /** Filter for workspace files */
 const findWorkspaceFiles = (filename) => workspaceReg.test(filename);
+const findWorktreeWorkspaceFiles = (name) => (filename) => name === filename;
 
 /** Create prompt choices */
 const fileChoice = (file) => ({ title: file, value: file });
@@ -152,11 +160,15 @@ Subcommands
   serve-web    Run a server that displays the editor UI in browsers.
   tunnel       Make the current machine accessible from vscode.dev or other machines through a secure tunnel.
 */
+const customFlags = [
+  '-d', '--dir',
+];
 const bailFlags = [
   '-h', '--help',
   '-v', '--version',
 ];
 const knownFlags = new Set([
+  ...customFlags,
   ...bailFlags,
   '--disable-extensions',
   '--disable-gpu',
@@ -184,12 +196,17 @@ if (paths.length === 0) paths.push('.');
 
 // Filter flag options
 const opts = new Map();
+const customOpts = new Map();
 
 for (let key in options) {
   const value = getValue(options[key]);
   const isBool = isBoolean(options[key]);
   const isShort = key.length === 1;
-  opts.set(key, { isBool, isShort, value });
+  if (hasFlag(customFlags, key)) {
+    customOpts.set(key, { isBool, isShort, value });
+  } else {
+    opts.set(key, { isBool, isShort, value });
+  }
 }
 
 logger('argv:', process.argv.slice(2));
@@ -199,6 +216,7 @@ logger('paths:', paths);
 logger('passthrough:', passthrough);
 logger('options:', options);
 logger('opts:', opts);
+logger('customOpts:', customOpts);
 logger('cwd:', process.cwd());
 
 // Create options string from minimist args
@@ -217,6 +235,7 @@ async function run() {
   if (paths.length === 1) {
     logger('-- single path passed');
     const fileOrDirPath = resolve(process.cwd(), paths[0]);
+    const parentDir = dirname(fileOrDirPath);
     logger('-- fileOrDirPath:', fileOrDirPath);
     let stats;
     try {
@@ -229,31 +248,27 @@ async function run() {
       };
     }
     const workspaceFiles = [];
+    const parentWorkspaceFiles = [];
     if (stats.isDirectory()) {
       logger('-- isDirectory: true');
       const dirSync = fs.readdirSync(fileOrDirPath)
       workspaceFiles.push(...dirSync.filter(findWorkspaceFiles));
       logger('-- dir:', dirSync);
       logger('-- files:', workspaceFiles);
+      if (workspaceFiles.length === 0) {
+        // Look for a file that matches `<basename>.code-workspace` in the parent dir
+        const worktreeWorkspace = `${basename(fileOrDirPath)}.code-workspace`
+        const parentSync = fs.readdirSync(resolve(parentDir));
+        parentWorkspaceFiles.push(...parentSync.filter(findWorktreeWorkspaceFiles(worktreeWorkspace)));
+      }
     }
 
-    const totalFound = workspaceFiles.length;
+    let totalFound = workspaceFiles.length;
     if (totalFound > 0) {
       logger('-- workspace file[s], found:', totalFound);
-      let workspaceFile;
-      const onCancel = () => workspaceFile = 'cancel';
-      const onSubmit = (prompt, answer) => workspaceFile = answer;
-      await prompts({
-        type: 'select',
-        name: 'file',
-        message: 'Choose a workspace file',
-        choices: createChoices(workspaceFiles),
-      }, { onCancel, onSubmit });
-
-      logger('-- workspaceFile chosen:', workspaceFile);
-      if (workspaceFile === 'cancel') return;
-      if (workspaceFile !== 'skip') {
-        logger('-- workspaceFile chosen:', workspaceFile);
+      if (totalFound === 1) {
+        const workspaceFile = workspaceFiles.at(0);
+        logger('-- workspaceFile:', workspaceFile);
         const workspaceFilePath = resolve(fileOrDirPath, workspaceFile);
         logger('-- workspaceFile path:', workspaceFilePath);
         cmds.push(workspaceFilePath);
@@ -261,13 +276,28 @@ async function run() {
         return;
       }
     }
+
+    totalFound = parentWorkspaceFiles.length;
+    if (totalFound > 0) {
+      logger('-- parent workspace file[s], found:', totalFound);
+      if (totalFound === 1) {
+        const parentWorkspaceFile = parentWorkspaceFiles.at(0);
+        logger('-- parent workspaceFile:', parentWorkspaceFile);
+        const workspaceFilePath = resolve(parentDir, parentWorkspaceFile);
+        logger('-- parent workspaceFile path:', workspaceFilePath);
+        cmds.push(workspaceFilePath);
+        openVscode();
+        return;
+      }
+    }
   }
+
 
   openDefault();
 }
 
 if (process.stdin.isTTY) {
-  if (bailFlags.find(flag => opts.has(flag.replace(/-/g, '')))) {
+  if (hasFlag(bailFlags, opts)) {
     // Bail out and call help or version
     openDefault();
   } else {

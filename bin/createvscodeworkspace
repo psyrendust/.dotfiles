@@ -1,0 +1,99 @@
+#!/usr/bin/env zsh
+#
+# createvscodeworkspace
+# Creates a new VSCode workspace file from a template
+# Example:
+#   createvscodeworkspace [-n|--dry-run] <folder> [color]
+#
+#
+#   -n, --dry-run  Print the workspace file contents without writing to disk
+#   folder         The path to a folder. The workspace file is saved alongside
+#                  it as <folder>.code-workspace with a relative path to the folder.
+#   color          Optional hex color to use for the Peacock theme. If omitted a
+#                  deterministic pastel color will be chosen based on the path
+#-------------------------------------------------------------------------------
+
+set -e
+
+dry_run=false
+args=()
+for arg in "$@"; do
+  case $arg in
+    -n|--dry-run) dry_run=true ;;
+    *) args+=("$arg") ;;
+  esac
+done
+
+if [[ ${#args[@]} -lt 1 ]]; then
+  echo "Usage: createvscodeworkspace [-n|--dry-run] <folder> [hex-color]"
+  exit 1
+fi
+
+logDryRun() {
+  if [[ "$dry_run" == true ]]; then
+    echo $@
+  fi
+}
+
+folder="$(cd "${args[1]:-.}" && pwd)"
+logDryRun "folder: $folder"
+
+# Derive the workspace file path and relative folder path
+workspace_file="${folder}.code-workspace"
+if [[ -f "$workspace_file" ]] && [[ "$dry_run" != true ]]; then
+  exit 0
+fi
+workspace_path="$folder"
+claude_path="${folder:h}"
+logDryRun "workspace_file: $workspace_file"
+logDryRun "workspace_path: $workspace_path"
+logDryRun "claude_path: $claude_path"
+
+workspace_color="${args[2]:-$(peacock "$workspace_path")}"
+
+# Strip leading # if present, then re-add it for consistency
+workspace_color="${workspace_color#\#}"
+workspace_color="#${workspace_color}"
+logDryRun "workspace_color: $workspace_color"
+
+base="$workspace_color"
+
+workspace_content=$(cat <<EOF
+{
+  "folders": [
+    {
+      "path": "${workspace_path}"
+    }
+  ],
+  "settings": {
+    "workbench.colorCustomizations": {
+      "activityBar.activeBackground": "${base}",
+      "activityBar.background": "${base}",
+      "activityBar.foreground": "#e7e7e7",
+      "activityBar.inactiveForeground": "#e7e7e799",
+      "activityBarBadge.background": "#081808",
+      "activityBarBadge.foreground": "#e7e7e7",
+      "commandCenter.border": "#e7e7e799",
+      "sash.hoverBorder": "${base}",
+      "statusBar.background": "${base}",
+      "statusBar.foreground": "#e7e7e7",
+      "statusBarItem.hoverBackground": "${base}",
+      "statusBarItem.remoteBackground": "${base}",
+      "statusBarItem.remoteForeground": "#e7e7e7",
+      "titleBar.activeBackground": "${base}",
+      "titleBar.activeForeground": "#e7e7e7",
+      "titleBar.inactiveBackground": "${base}99",
+      "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "${base}"
+  }
+}
+EOF
+)
+
+if [[ "$dry_run" == true ]]; then
+  echo "$workspace_content"
+else
+  printf '%s\n' "$workspace_content" > "$workspace_file"
+  echo "Created workspace: $workspace_file (color: $base)"
+fi

@@ -439,9 +439,6 @@ compdef _git gunadd=git-reset
 alias gun='git reset && git checkout . && git clean -fdx'
 compdef _git gun=git-reset
 
-alias gwt='git worktree'
-compdef _git gwt=git-worktree
-
 # Remove previously defined aliases. Look for replacements in <root>/bin
 unalias gwip
 unalias gcwip

@@ -12,7 +12,7 @@ BRANCH_FLAG=("-b" "--branch")
 UPDATE_FLAG=("-u" "--update" "-r" "--refresh")
 ALL_FLAGS=($BRANCH_FLAG $UPDATE_FLAG)
 
-targetBranch=""
+sourceBranch=""
 destinationBranch="$(git-current-branch)";
 isWorktree=""
 
@@ -22,31 +22,36 @@ fi
 
 # Check if an arg has been passed and it matches one of our flags
 if (( $ALL_FLAGS[(Ie)$1] )); then
-  # Get the target branch from our local branches using fzf
-  targetBranch=$(getgitbranch --header="Select a target branch to rebase onto ${destinationBranch}")
-  if [[ -z "$targetBranch" ]]; then
+  # Get the source branch from our local branches using fzf
+  sourceBranch=$(getgitbranch --header="Select a source branch to rebase onto ${destinationBranch}")
+  if [[ -z "$sourceBranch" ]]; then
     exit;
   fi
 
-  if [[ -z "$isWorktree" ]]; then
+  if [[ -n "$isWorktree" ]]; then
     # Update a different branch without switching to it
-    chalk -t "[ {blue GGPULL} ] updating branch {cyan $targetBranch}"
-    git fetch origin ${targetBranch}:${targetBranch}
+    # Worktrees don't allow updating a different worktree branch, so we need
+    # use a subprocess to cd to that folder and do a git fetch
+    chalk -t "[{blue GGPULL}] updating worktree branch {cyan $sourceBranch}"
+    sourceBranchPath=$(git-worktree-branch-path "$sourceBranch")
+    (cd "$sourceBranchPath" && git pull --rebase origin "$sourceBranch")
   else
+    echo "using regular fetch origin"
     # Fetch the latest changes from the remote
-    chalk -t "[ {blue GGPULL} ] fetching changes from remote {cyan $targetBranch}"
-    git fetch origin ${targetBranch}
+    chalk -t "[{blue GGPULL}] fetching changes from remote {cyan $sourceBranch}"
+    git pull --rebase origin ${sourceBranch}
   fi
 
   if (( $UPDATE_FLAG[(Ie)$1] )); then
-    chalk -t "[ {blue GGPULL} ] rebasing {green.bold $targetBranch} onto {blue.bold $destinationBranch}"
-    # Rebase changes from targetBranch onto the current branch
-    git rebase $targetBranch
+    chalk -t "[{blue GGPULL}] rebasing {green.bold $sourceBranch} onto {blue.bold $destinationBranch}"
+    # Rebase changes from sourceBranch onto the current branch
+    git rebase $sourceBranch
+    chalk -t "[{green TEST}] rebase complete {green.bold $sourceBranch}"
   fi
 else
-  # Use the current branch as the target branch
+  # Use the current branch as the source branch
   if [[ -z "$destinationBranch" ]]; then
-    chalk -t "[ {red GGPULL} ] {red branch not found} {cyan $destinationBranch}"
+    chalk -t "[{red GGPULL}] {red branch not found} {cyan $destinationBranch}"
     exit;
   fi
 

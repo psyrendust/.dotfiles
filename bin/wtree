@@ -1,0 +1,167 @@
+#!/usr/bin/env zsh
+#
+# wtree
+# Create (or switch to) a git worktree as a sibling folder of the default branch.
+#
+# Inside Supacode it creates the worktree via `supacode repo worktree-new`, so
+# Supacode registers and opens it immediately (a plain `git worktree add` only
+# appears after Supacode's next poll). Outside Supacode it falls back to
+# `git worktree add`. Shared files (.claude, _dev-notes) are linked either way.
+#
+# Usage:
+#   wtree [<branch-name>]    # no arg → pick an existing worktree with fzf
+#-------------------------------------------------------------------------------
+
+set -e
+
+# -- helpers -------------------------------------------------------------------
+
+# True when running inside a Supacode terminal (it exports SUPACODE_* vars).
+in_supacode() { [[ -n "$SUPACODE_SOCKET_PATH" ]] }
+
+# Percent-encode an absolute path into a Supacode worktree ID
+# (e.g. /a/b/ -> %2Fa%2Fb%2F). Supacode identifies worktrees by their
+# percent-encoded path with a trailing slash.
+supacode_encode_path() {
+  local s=$1 out= i c
+  for (( i = 1; i <= ${#s}; i++ )); do
+    c=${s[i]}
+    case $c in
+      [A-Za-z0-9._~-]) out+=$c ;;
+      *) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  print -r -- "$out"
+}
+
+# Wait (up to ~15s) for an async-created worktree to materialize on disk.
+# `supacode repo worktree-new` returns before the worktree is fully created, so
+# callers must wait before cd-ing into it.
+wait_for_worktree() {
+  local p=$1 i
+  for (( i = 0; i < 150; i++ )); do
+    [[ -e "$p/.git" ]] && return 0
+    sleep 0.1
+  done
+  echo "Timed out waiting for worktree at $p" >&2
+  return 1
+}
+
+# Create the worktree if it doesn't already exist.
+#   $1 branch  $2 sanitized folder  $3 worktree path  $4 absolute parent dir
+# Reads $worktree_default_branch / $worktree_root from the enclosing script scope.
+create_worktree() {
+  local branch=$1 sanitized=$2 worktree_path=$3 parent=$4
+
+  if [[ -d "$worktree_path" ]]; then
+    echo "Worktree already exists at $worktree_path"
+  elif in_supacode; then
+    # Let Supacode create it (so it registers/opens the worktree itself). This
+    # is async — worktree-new returns before the folder exists — so wait for it
+    # before the caller cd's in and runs the setup steps.
+    echo "- creating worktree via Supacode: $parent/$sanitized (branch: $branch)"
+    supacode repo worktree-new \
+      --branch "$branch" \
+      --base "$worktree_default_branch" \
+      --name "$sanitized" \
+      --location "$parent" \
+      --fetch
+    wait_for_worktree "$worktree_path"
+  elif git show-ref --verify --quiet "refs/heads/$branch"; then
+    git worktree add "$worktree_path" "$branch"
+  else
+    (
+      cd "$worktree_root" &&
+      git pull --rebase origin "$(git-current-branch)"
+    ) &&
+    git worktree add -b "$branch" "$worktree_path" "$worktree_default_branch"
+  fi
+}
+
+# Symlink shared, non-VCS files from the worktree parent into the worktree:
+# the .claude config dir (minus VCS/meta files) and the _dev-notes folder.
+#   $1 absolute worktree path   $2 worktree parent dir
+link_shared() {
+  local abs=$1 parent=$2 target
+
+  if [[ -d "$parent/.claude" ]]; then
+    mkdir -p "$abs/.claude"
+    echo "- worktree target claude: $parent/.claude"
+    echo "- worktree link claude: $abs/.claude"
+    for target in "$parent/.claude"/*; do
+      [[ -e "$target" ]] || continue
+      case "${target:t}" in
+        .git|.github|.gitignore|.gitattributes|README*|LICENSE*|CHANGELOG*) continue ;;
+      esac
+      ln -sf "$target" "$abs/.claude/"
+    done
+  else
+    echo "- worktree target claude not found, skipping: $parent/.claude"
+  fi
+
+  mkdir -p "$abs/.vscode"
+  local dev_notes_target="$parent/_dev-notes" dev_notes_link="$abs/.vscode/_dev-notes"
+  echo "- worktree target dev-notes: $dev_notes_target"
+  echo "- worktree link dev-notes: $dev_notes_link"
+  [[ -d "$dev_notes_target" ]] && ln -sf "$dev_notes_target" "$dev_notes_link"
+}
+
+# Focus the worktree in Supacode, if Supacode is running and knows about it.
+# No-op outside Supacode.
+#   $1 absolute worktree path
+open_worktree() {
+  local abs=$1
+  in_supacode || return 0
+  local id="$(supacode_encode_path "${abs}/")"
+  if supacode worktree list 2>/dev/null | grep -qF -- "$id"; then
+    echo "- focusing Supacode worktree: $abs"
+    supacode worktree focus -w "$id"
+  else
+    echo "- Supacode does not list this worktree yet: $abs"
+  fi
+}
+
+# -- main ----------------------------------------------------------------------
+
+worktree_root="$(git-worktree-common-root-path)"
+worktree_default_branch="$(git-default-branch)"
+
+if [[ -z "$worktree_root" ]]; then
+  echo "Error finding common git root directory"
+  exit 0
+fi
+
+if [[ "$(basename "$worktree_root")" != "$worktree_default_branch" ]]; then
+  echo "Warning: worktree common root and default branch name mismatch"
+  echo "worktree_root: [$worktree_root]"
+  echo "worktree_default_branch: [$worktree_default_branch]"
+  exit 0
+fi
+
+# The branch name is the sole optional positional argument. With no argument,
+# an existing worktree is chosen with fzf below.
+branch="${1:-}"
+
+if [[ -z "$branch" ]]; then
+  # No argument — pick an existing worktree with fzf.
+  worktree_path=$(git worktree list --porcelain | awk '/^worktree / {print $2}' | fzf --prompt="Select worktree: ")
+  [[ -z "$worktree_path" ]] && exit 0
+else
+  # Create (or reuse) a worktree for the branch, as a sibling of the current one.
+  sanitized=$(echo "$branch" | sanitize)
+  worktree_path="../$sanitized"
+  parent="$(cd "${worktree_path:h}" && pwd)"
+  create_worktree "$branch" "$sanitized" "$worktree_path" "$parent"
+fi
+
+abs_path="$(cd "$worktree_path" && pwd)"
+worktree_parent="$(dirname "$abs_path")"
+
+# Create the VSCode workspace file (does not launch VSCode).
+createvscodeworkspace "$worktree_path"
+
+# Link shared files (.claude, _dev-notes) into the worktree.
+link_shared "$abs_path" "$worktree_parent"
+
+# Focus the worktree in Supacode (no-op outside Supacode).
+open_worktree "$abs_path"

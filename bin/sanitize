@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+#
+# sanitize
+# Makes a string safe for use as a folder or file name
+#
+# Usage:
+# sanitize <string>
+#-------------------------------------------------------------------------------
+
+set -e
+
+local result
+if [[ -n "$1" ]]; then
+  result="$1"
+elif [[ ! -t 0 ]]; then
+  result="$(cat)"
+else
+  echo "Usage: sanitize <string>" >&2
+  return 1
+fi
+
+# Replace path separators and spaces with hyphens
+result="${result//[\\\/: ]/-}"
+
+# Remove characters that are unsafe in filenames
+result="${result//[*?\"<>|!@#\$%^&\'\;]}"
+
+# Collapse multiple consecutive hyphens into one
+while [[ "$result" == *--* ]]; do
+  result="${result//--/-}"
+done
+
+# Strip leading/trailing hyphens and dots
+result="${result#[-.]}"
+result="${result%[-.]}"
+
+# Lowercase
+result="${result:l}"
+
+echo -n "$result"
