@@ -1,0 +1,145 @@
+#!/usr/bin/env zsh
+#
+# git-propeninfo
+# List all of my prs that are still open.
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Parse command line arguments
+NO_COLOR=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -n|--no-color)
+      NO_COLOR=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: git-pr-open-info [-n|--no-color]"
+      exit 1
+      ;;
+  esac
+done
+
+# ANSI color codes (will be empty if NO_COLOR is true)
+if [[ "$NO_COLOR" == true ]]; then
+  GREY=''
+  MAGENTA=''
+  WHITE=''
+  CYAN=''
+  GREEN=''
+  RED=''
+  YELLOW=''
+  RESET=''
+else
+  GREY='\033[90m'
+  MAGENTA='\033[35m'
+  WHITE='\033[97m'
+  CYAN='\033[36m'
+  GREEN='\033[32m'
+  RED='\033[31m'
+  YELLOW='\033[33m'
+  RESET='\033[0m'
+fi
+
+gh pr list \
+  --author "@me" \
+  --state open \
+  --json headRefName,updatedAt,reviewDecision,statusCheckRollup,title,url \
+  --jq 'sort_by(.updatedAt) | reverse' | \
+  jq -r '
+    # Convert ISO8601 timestamp to relative time string
+    def relativeTime:
+      . as $timestamp |
+      (now - ($timestamp | fromdateiso8601)) as $diff |
+      if $diff < 60 then
+        "\(($diff | floor)) seconds ago"
+      elif $diff < 3600 then
+        "\(($diff / 60 | floor)) minutes ago"
+      elif $diff < 7200 then
+        "1 hour ago"
+      elif $diff < 86400 then
+        "\(($diff / 3600 | floor)) hours ago"
+      elif $diff < 172800 then
+        "1 day ago"
+      elif $diff < 604800 then
+        "\(($diff / 86400 | floor)) days ago"
+      elif $diff < 1209600 then
+        "1 week ago"
+      elif $diff < 2592000 then
+        "\(($diff / 604800 | floor)) weeks ago"
+      elif $diff < 5184000 then
+        "1 month ago"
+      else
+        "\(($diff / 2592000 | floor)) months ago"
+      end;
+
+    # Process each PR and format output
+    .[] |
+    {
+      branch: .headRefName,
+      updatedAt: (.updatedAt | relativeTime),
+      review: (if .reviewDecision == "APPROVED" then "APPROVED"
+               elif .reviewDecision == "CHANGES_REQUESTED" then "CHANGES_REQUESTED"
+               elif .reviewDecision == "REVIEW_REQUIRED" then "REVIEW_REQUIRED"
+               else .reviewDecision // "NONE" end),
+      prbs: (if (.statusCheckRollup | length) == 0 then "NONE"
+               elif [.statusCheckRollup[] | if .__typename == "CheckRun" then .conclusion else .state end] | all(. == "SUCCESS") then "PASS"
+               else "FAIL" end),
+      url: .url,
+      title: (if (.title | length) > 50 then (.title[0:50]) else .title end)
+    } |
+    [.branch, .updatedAt, .prbs, .review, .url, .title] |
+    @tsv
+  ' | \
+  awk -F'\t' -v grey="$GREY" -v magenta="$MAGENTA" -v white="$WHITE" -v cyan="$CYAN" -v green="$GREEN" -v red="$RED" -v yellow="$YELLOW" -v reset="$RESET" '
+    {
+      for (i = 1; i <= NF; i++) {
+        val[NR","i] = $i
+        if (length($i) > w[i]) w[i] = length($i)
+      }
+      nrows = NR
+    }
+    END {
+      sp = 2
+      split("BRANCH,UPDATED AT,PRBS,REVIEW,URL,TITLE", hdr, ",")
+      ncols = 6
+      for (i = 1; i <= ncols; i++)
+        if (length(hdr[i]) > w[i]) w[i] = length(hdr[i])
+
+      # Header
+      for (i = 1; i <= ncols; i++) {
+        if (i > 1) printf "%*s", sp, ""
+        printf "%s%-*s%s", grey, w[i], hdr[i], reset
+      }
+      printf "\n"
+
+      # Underlines
+      printf "%s", grey
+      for (i = 1; i <= ncols; i++) {
+        if (i > 1) printf "%*s", sp, ""
+        for (j = 0; j < w[i]; j++) printf "-"
+      }
+      printf "%s\n", reset
+
+      # Data
+      for (r = 1; r <= nrows; r++) {
+        prbs_color = (val[r","4] == "PASS") ? green : red
+
+        review_val = val[r","5]
+        if (review_val == "APPROVED") review_color = green
+        else if (review_val == "CHANGES_REQUESTED") review_color = red
+        else if (review_val == "REVIEW_REQUIRED") review_color = yellow
+        else review_color = grey
+
+        printf "%s%-*s%s", cyan, w[1], val[r","1], reset
+        printf "%*s%s%-*s%s", sp, "", green, w[2], val[r","2], reset
+        printf "%*s%s%-*s%s", sp, "", prbs_color, w[3], val[r","3], reset
+        printf "%*s%s%-*s%s", sp, "", review_color, w[4], val[r","4], reset
+        printf "%*s%s%-*s%s", sp, "", grey, w[5], val[r","5], reset
+        printf "%*s%s%-*s%s", sp, "", white, w[6], val[r","6], reset
+        printf "\n"
+      }
+    }
+  '
