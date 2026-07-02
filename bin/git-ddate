@@ -1,0 +1,24 @@
+#!/usr/bin/env zsh
+#
+# git-ddate
+# List working-tree changes (git status) with each file's last-modified time,
+# rendered as an aligned table. Deleted files show "—" (no working-tree mtime).
+#
+#-------------------------------------------------------------------------------
+
+set -e
+
+# Use zsh's built-in stat module for mtime formatting. This avoids depending on
+# GNU coreutils `stat -c` / `date -d` winning the PATH race against BSD's stat
+# (which silently produced "—" for every file when /usr/bin/stat came first).
+zmodload -F zsh/stat b:zstat
+
+{
+  print -r -- $'Status\tDate Modified\tName'
+  git -c core.fsmonitor=false status --porcelain | while IFS= read -r line; do
+    st=${line[1,2]}
+    f=${line[4,-1]}
+    when=$(zstat -s -F '%d %b %H:%M' +mtime -- "$f" 2>/dev/null) || when='—'
+    print -r -- "${st}"$'\t'"${when}"$'\t'"${f}"
+  done
+} | column -t -s $'\t'
