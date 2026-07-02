@@ -1,0 +1,62 @@
+#!/usr/bin/env zsh
+#
+# peacock
+# Generates a deterministic saturated pastel hex color from a string
+# Uses MD5 hash so the same input always produces the same color,
+# and similar inputs produce distinct colors.
+# Example:
+#   peacock <string>
+#-------------------------------------------------------------------------------
+
+set -e
+
+debug=false
+input=""
+for arg in "$@"; do
+  case $arg in
+    -d|--debug) debug=true ;;
+    -*) echo "Unknown option: $arg"; exit 1 ;;
+    *) input="$arg" ;;
+  esac
+done
+
+if [[ -z $input ]]; then
+  echo "Usage: peacock [-d|--debug] <string>"
+  exit 1
+fi
+
+dbg() { $debug && echo "$@" >&2 || true; }
+
+hash=$(printf '%s' "$input" | md5 -q)
+dbg "hash: [$hash]"
+h=$(( 16#${hash: 0: 4} % 297      ))    # 0-296 (297 valid hues)
+dbg "pre h: [$h]"
+(( h >= 37 && h <= 99 )) && (( h += 63 ))  # skip 37-99 (yellow-green)
+s=$(( 16#${hash:10:10} %  31 + 70 ))    # 70-100% saturation
+l=$(( 16#${hash:20:12} %  11 + 60 ))    # 60-70% lightness
+
+dbg "h: [$h]"
+dbg "s: [$s]"
+dbg "l: [$l]"
+
+# HSL to RGB conversion
+c=$(( (100 - (2 * l - 100 < 0 ? 100 - 2 * l : 2 * l - 100)) * s / 100 ))
+h2=$(( h * 100 / 60 ))
+x=$(( c * (100 - ((h2 % 200) - 100 < 0 ? 100 - (h2 % 200) : (h2 % 200) - 100)) / 100 ))
+m=$(( (l * 255 / 100) - (c * 255 / 200) ))
+
+if   (( h < 60 ));  then r=$((c * 255 / 100 + m)) g=$((x * 255 / 100 + m)) b=$m
+elif (( h < 120 )); then r=$((x * 255 / 100 + m)) g=$((c * 255 / 100 + m)) b=$m
+elif (( h < 180 )); then r=$m g=$((c * 255 / 100 + m)) b=$((x * 255 / 100 + m))
+elif (( h < 240 )); then r=$m g=$((x * 255 / 100 + m)) b=$((c * 255 / 100 + m))
+elif (( h < 300 )); then r=$((x * 255 / 100 + m)) g=$m b=$((c * 255 / 100 + m))
+else                     r=$((c * 255 / 100 + m)) g=$m b=$((x * 255 / 100 + m))
+fi
+
+# Clamp to 0-255
+(( r = r > 255 ? 255 : (r < 0 ? 0 : r) ))
+(( g = g > 255 ? 255 : (g < 0 ? 0 : g) ))
+(( b = b > 255 ? 255 : (b < 0 ? 0 : b) ))
+
+printf '#%02x%02x%02x\n' "$r" "$g" "$b"
+# printf '#%02x%02x%02x\n' "$r" "$g" "$b" | pastel mix red | pastel mix blue | pastel format
