@@ -72,7 +72,7 @@ function main() {
     return 1
   fi
 
-  inputFilePath="$(realpath $argInputFilePath[-1])"
+  inputFilePath="$(realpath2 $argInputFilePath[-1])"
   # Get the file name without the extension
   # @see https://til.hashrocket.com/posts/nthvpgx7hh-zsh-file-name-without-the-extension
   inputFileName="${inputFilePath:t:r}"
@@ -81,10 +81,10 @@ function main() {
   # Get the output file path
   if [[ -n "$argOutputFilePath[-1]" ]]; then
     # Use the output file path provided
-    outputFilePath="$(realpath $argOutputFilePath[-1])"
+    outputFilePath="$(realpath2 $argOutputFilePath[-1])"
   elif [[ -n "$argOutputDirectory" ]]; then
     # Use the output directory provided
-    outputFilePath="$(realpath $argOutputDirectory[-1])/${inputFileName}.mp4"
+    outputFilePath="$(realpath2 $argOutputDirectory[-1])/${inputFileName}.mp4"
   else
     # Fallback option to use the input file path and append '-handbrake.mp4'
     outputFilePath="${inputDirectory}/${inputFileName}-handbrake.mp4"
@@ -113,7 +113,7 @@ function main() {
   logger "$(date '+%Y-%m-%d %H:%M:%S')"
   logger ""
   logger "  which chalk: $(which chalk)"
-  logger "  which realpath: $(which realpath)"
+  logger "  which realpath2: $(which realpath2)"
   logger "  which HandBrakeCLI: $(which HandBrakeCLI)"
   logger ""
   logger "  inputFileName:   [$inputFileName]"

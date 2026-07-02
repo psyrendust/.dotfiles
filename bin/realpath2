@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 #
-# realpath
-# Get the real path
+# realpath2
+# Get the real path (python os.path.realpath — resolves even missing paths)
 #-------------------------------------------------------------------------------
 
 set -e
