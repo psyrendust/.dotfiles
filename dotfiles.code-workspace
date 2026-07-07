@@ -159,7 +159,7 @@
       "titleBar.activeBackground": "#6964e6",
       "titleBar.activeForeground": "#e7e7e7",
       "titleBar.inactiveBackground": "#6964e699",
-      "titleBar.inactiveForeground": "#e7e7e799",
+      "titleBar.inactiveForeground": "#e7e7e799"
     },
   },
 }
