@@ -78,34 +78,6 @@ create_worktree() {
   fi
 }
 
-# Symlink shared, non-VCS files from the worktree parent into the worktree:
-# the .claude config dir (minus VCS/meta files) and the _dev-notes folder.
-#   $1 absolute worktree path   $2 worktree parent dir
-link_shared() {
-  local abs=$1 parent=$2 target
-
-  if [[ -d "$parent/.claude" ]]; then
-    mkdir -p "$abs/.claude"
-    echo "- worktree target claude: $parent/.claude"
-    echo "- worktree link claude: $abs/.claude"
-    for target in "$parent/.claude"/*; do
-      [[ -e "$target" ]] || continue
-      case "${target:t}" in
-        .git|.github|.gitignore|.gitattributes|README*|LICENSE*|CHANGELOG*) continue ;;
-      esac
-      ln -sf "$target" "$abs/.claude/"
-    done
-  else
-    echo "- worktree target claude not found, skipping: $parent/.claude"
-  fi
-
-  mkdir -p "$abs/.vscode"
-  local dev_notes_target="$parent/_dev-notes" dev_notes_link="$abs/.vscode/_dev-notes"
-  echo "- worktree target dev-notes: $dev_notes_target"
-  echo "- worktree link dev-notes: $dev_notes_link"
-  [[ -d "$dev_notes_target" ]] && ln -sf "$dev_notes_target" "$dev_notes_link"
-}
-
 # Focus the worktree in Supacode, if Supacode is running and knows about it.
 # No-op outside Supacode.
 #   $1 absolute worktree path
@@ -154,14 +126,14 @@ else
   create_worktree "$branch" "$sanitized" "$worktree_path" "$parent"
 fi
 
-abs_path="$(cd "$worktree_path" && pwd)"
-worktree_parent="$(dirname "$abs_path")"
+worktree_dir="$(cd "$worktree_path" && pwd)"
+worktree_parent="$(dirname "$worktree_dir")"
 
 # Create the VSCode workspace file (does not launch VSCode).
 createvscodeworkspace "$worktree_path"
 
-# Link shared files (.claude, _dev-notes) into the worktree.
-link_shared "$abs_path" "$worktree_parent"
+# Link shared files (.claude, _dev-notes) from the parent into the worktree.
+linkshared "$worktree_parent" "$worktree_dir"
 
 # Focus the worktree in Supacode (no-op outside Supacode).
-open_worktree "$abs_path"
+open_worktree "$worktree_dir"

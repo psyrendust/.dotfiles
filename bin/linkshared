@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh
+#
+# linkshared
+# Symlink shared, non-VCS files from a source dir into a target dir:
+# the .claude config dir (minus VCS/meta/OS-junk files) and the _dev-notes folder.
+#
+# Usage:
+#   linkshared <source> <target>
+#
+#   source  Dir holding the shared files (e.g. the worktree parent).
+#   target  Dir to create the symlinks in (e.g. the worktree).
+#-------------------------------------------------------------------------------
+
+set -e
+
+if [[ -z "$1" || -z "$2" ]]; then
+  echo "Usage: linkshared <source> <target>" >&2
+  exit 1
+fi
+
+source_dir="$(cd "$1" && pwd)"
+target_dir="$(cd "$2" && pwd)"
+entry=
+
+if [[ -d "$source_dir/.claude" ]]; then
+  mkdir -p "$target_dir/.claude"
+  echo "- linkshared claude source: $source_dir/.claude"
+  echo "- linkshared claude target: $target_dir/.claude"
+  for entry in "$source_dir/.claude"/*; do
+    [[ -e "$entry" ]] || continue
+    case "${entry:t}" in
+      .git|.github|.gitignore|.gitattributes|.DS_Store|README*|LICENSE*|CHANGELOG*) continue ;;
+    esac
+    ln -sf "$entry" "$target_dir/.claude/"
+  done
+else
+  echo "- linkshared claude source not found, skipping: $source_dir/.claude"
+fi
+
+mkdir -p "$target_dir/.vscode"
+dev_notes_source="$source_dir/_dev-notes"
+dev_notes_link="$target_dir/.vscode/_dev-notes"
+echo "- linkshared dev-notes source: $dev_notes_source"
+echo "- linkshared dev-notes link: $dev_notes_link"
+[[ -d "$dev_notes_source" ]] && ln -sf "$dev_notes_source" "$dev_notes_link"
