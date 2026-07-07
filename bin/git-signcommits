@@ -1,0 +1,136 @@
+#!/usr/bin/env zsh
+#
+# git-signcommits
+# Sign a range of commits by rebasing them through
+#   git commit --amend --no-edit -S
+#
+# The range defaults to the commits ahead of the branch's upstream; with no
+# upstream it falls back to the whole history (--root). Only commits authored by
+# YOU (matching git user.email) are ever signed — commits by other authors (e.g.
+# a CI/bot commit landed on the default branch) are left untouched, and by
+# default their presence in the range aborts the run. Prints signature status
+# before and after. Rewrites commit hashes, so run it only on commits you have
+# NOT pushed (or be ready to force-push).
+#
+# Usage:
+#   git signcommits [-y|--yes] [-n|--dry-run] [--allow-foreign] [--root] [<base>]
+#     <base>           sign <base>..HEAD  (default: @{upstream}, else --root)
+#     --root           sign the entire history from the root commit
+#     -y, --yes        skip the confirmation prompt
+#     -n, --dry-run    show what would be signed, then stop
+#     --allow-foreign  don't abort when the range contains other authors'
+#                      commits; sign only yours and leave theirs unsigned
+#-------------------------------------------------------------------------------
+
+set -e
+
+usage() {
+  print -r -- "Usage: git signcommits [-y|--yes] [-n|--dry-run] [--allow-foreign] [--root] [<base>]
+  Sign <base>..HEAD (default: the branch upstream, else --root) via
+  'git rebase --exec \"git commit --amend --no-edit -S\"'.
+  Only commits authored by you (git user.email) are signed."
+}
+
+# List commits with a format-agnostic "signed?" marker (does the object carry a
+# gpgsig header) plus git's %G? verify code. Custom signers like ac-sign emit a
+# CMS signature that %G? can't verify (shows N/E) even though it IS signed — so
+# the marker, not %G?, is the reliable indicator.
+list_sig() {
+  git log --format='%H%x09%h%x09%G?%x09%s' "$@" | while IFS=$'\t' read -r H h g s; do
+    if git cat-file commit "$H" 2>/dev/null | grep -q '^gpgsig'; then mark="signed"; else mark="  --  "; fi
+    printf '  %s  %s  %s  %s\n' "$mark" "$g" "$h" "$s"
+  done
+}
+
+assume_yes="" dry_run="" allow_foreign="" force_root="" base_arg=""
+for arg in "$@"; do
+  case "$arg" in
+    -y|--yes)        assume_yes=1 ;;
+    -n|--dry-run)    dry_run=1 ;;
+    --allow-foreign) allow_foreign=1 ;;
+    --root)          force_root=1 ;;
+    -h|--help)       usage; exit 0 ;;
+    -*)              echo "Unknown option: $arg" >&2; usage >&2; exit 1 ;;
+    *)               [[ -z "$base_arg" ]] && base_arg="$arg" ;;
+  esac
+done
+
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+  echo "Not inside a git repository." >&2; exit 1
+}
+
+me_email=$(git config user.email)
+if [[ -z "$me_email" ]]; then
+  echo "git user.email is not set — can't tell which commits are yours." >&2
+  exit 1
+fi
+
+# Resolve the rebase target: --root, else explicit <base>, else upstream, else root.
+if [[ -n "$force_root" ]]; then
+  range="HEAD"; target=(--root)
+elif [[ -n "$base_arg" ]]; then
+  git rev-parse --verify --quiet "${base_arg}^{commit}" >/dev/null || {
+    echo "Unknown base: $base_arg" >&2; exit 1
+  }
+  range="${base_arg}..HEAD"; target=("$base_arg")
+elif upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null); then
+  range="${upstream}..HEAD"; target=("$upstream")
+else
+  range="HEAD"; target=(--root)
+fi
+
+count=$(git rev-list --count "$range")
+if (( count == 0 )); then
+  echo "Nothing to sign — $range is empty."
+  exit 0
+fi
+
+# Guardrail: find commits in the range NOT authored by you (matched on email).
+# Signing someone else's commit with your key misattributes it — e.g. a bot's
+# unsigned commit on the default branch.
+foreign=$(git log "$range" --format='%ae%x09%h  %s' \
+          | awk -F'\t' -v me="$me_email" '$1 != me { print "  " $2 }')
+
+echo "Commits in range ($count) — ${range}:"
+echo "  cols: signed? · verify(G/U=ok  N/E=none-or-unverifiable, e.g. ac-sign) · hash · subject"
+list_sig "$range"
+if [[ -n "$foreign" ]]; then
+  echo
+  echo "NOT authored by you ($me_email) — these will be left unsigned:"
+  print -r -- "$foreign"
+fi
+echo
+
+if [[ -n "$dry_run" ]]; then
+  echo "Dry run — nothing changed."
+  exit 0
+fi
+
+if [[ -n "$foreign" && -z "$allow_foreign" ]]; then
+  echo "Refusing: the range includes commits you didn't author (listed above)." >&2
+  echo "Sign only your own by narrowing the range:  git signcommits <base>" >&2
+  echo "…or pass --allow-foreign to proceed (yours get signed, theirs left as-is)." >&2
+  exit 1
+fi
+
+if [[ -z "$assume_yes" ]]; then
+  # Rewrites the commits (new hashes); only safe on un-pushed commits.
+  if ! read -q "yn?Re-sign your commit(s) in ${range}? [y/N] "; then
+    echo; echo "Aborted."; exit 1
+  fi
+  echo
+fi
+
+# Only sign commits authored by you; replay any others untouched (never signed).
+export SIGNCOMMITS_ME="$me_email"
+if ! git rebase --autostash \
+     --exec 'if [ "$(git log -1 --format=%ae)" = "$SIGNCOMMITS_ME" ]; then git commit --amend --no-edit -S; else git log -1 --format="  left unsigned (author %ae): %h"; fi' \
+     "${target[@]}"; then
+  echo "Rebase failed — run 'git rebase --abort' to restore, then retry." >&2
+  echo "(Check signing is configured: git config user.signingkey / gpg.format)" >&2
+  exit 1
+fi
+
+echo
+echo "Done. Status now:"
+list_sig "-${count}"
