@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # gitcommiteditor
-# Open VS Code, wait for exit, then focus back on iterm
+# Open VS Code, wait for exit, then focus back on Supacode
 #
 # Usage
 # 1. Add gitcommiteditor to your path
@@ -15,5 +15,14 @@
 
 set -e
 
-/usr/local/bin/code -w $@ &&
-osascript -e "tell application \"iTerm\" to activate"
+/usr/local/bin/code -w "$@"
+
+# Refocus the Supacode surface that launched the editor once its tab closes.
+# The editor runs as a child of that surface, so $SUPACODE_* are inherited and
+# `surface focus` targets it by default. Guarded so plain `git commit` from
+# another terminal is a no-op and the script still exits 0 (a non-zero editor
+# exit would abort the commit/rebase).
+if command -v supacode >/dev/null 2>&1 && [[ -n $SUPACODE_SURFACE_ID ]]; then
+  supacode open || true
+  supacode surface focus || true
+fi
