@@ -1,13 +1,41 @@
 #!/usr/bin/env zsh
 #
 # ghash
-# Fuzzy get short git sha.
+# Fuzzy-pick a commit and print its git sha.
+#
+# Usage: ghash [-g|--gpg] [-l|--long] [-h|--help]
+#   -g, --gpg    Show each commit's GPG signature status (%G?) as a column.
+#   -l, --long   Print the full 40-char sha (picker still shows the short one).
+#   -h, --help   Show this help and exit.
 #-------------------------------------------------------------------------------
 
 set -e
 
-# For short sha
-commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,reset)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>" --color=always --reverse --max-count 50) &&
+# Parse flags
+gpg_col=""
+long=""
+for arg in "$@"; do
+  case "$arg" in
+    -g|--gpg) gpg_col="%C(auto,magenta)gpg: %G?  " ;;
+    -l|--long) long=1 ;;
+    -h|--help)
+      cat <<'EOF'
+ghash — fuzzy-pick a commit and print its git sha.
+
+Usage: ghash [-g|--gpg] [-l|--long] [-h|--help]
+  -g, --gpg    Show each commit's GPG signature status (%G?) as a column.
+  -l, --long   Print the full 40-char sha (picker still shows the short one).
+  -h, --help   Show this help and exit.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+# For short sha (fixed-width fields lead; variable subject + decorations trail)
+commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  ${gpg_col}%C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d" --color=always --reverse --max-count 50) &&
 commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse --header="Select a commit to retrieve its sha") &&
-# echo -n $(echo "$commit" | sed "s/ .*//")
-echo ${commit} | awk '{ print $1 }'
+sha=$(echo "${commit}" | awk '{ print $1 }')
+# Expand the displayed short sha to the full sha when --long is set.
+[[ -n "$long" ]] && sha=$(git rev-parse "$sha")
+echo "$sha"
