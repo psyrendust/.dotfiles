@@ -1,0 +1,64 @@
+#!/usr/bin/env zsh
+#
+# gsigncommits
+# Sign a range of commits by rebasing them through
+#   git commit --amend --no-edit -S
+#
+# Uses `ghash` to fuzzy-pick the OLDEST commit you want signed, then rebases
+# from its parent so that commit and everything after it (picked..HEAD) get
+# re-signed with your default GPG key. If you pick the repo's root commit, the
+# whole history is signed via --root. Rewrites commit hashes, so run it only on
+# commits you have NOT pushed (or be ready to force-push).
+#
+# Pre-flight guards abort before any rewrite if:
+#   - no commit was selected,
+#   - no user.signingkey is configured, or
+#   - the range contains commits authored by someone other than you.
+#
+# Usage:
+#   gsigncommits
+#     Pick the oldest commit to sign in the fzf picker.
+
+set -e
+
+# Abort a half-finished rebase on any error so we never leave a mess behind.
+trap 'if git rebase --show-current-patch >/dev/null 2>&1; then
+        git rebase --abort
+        echo "gsigncommits: aborted; rebase rolled back." >&2
+      fi' ERR
+
+# Fail fast only when a signing key is genuinely required: SSH signing needs
+# user.signingkey, whereas GPG can fall back to the key matching user.email.
+# The trap + real signing during the rebase is the authoritative guard.
+# Checked before ghash so we never make the user pick a commit just to abort.
+if [[ "$(git config --get gpg.format || echo openpgp)" == "ssh" \
+      && -z "$(git config --get user.signingkey)" ]]; then
+  echo "gsigncommits: SSH signing needs user.signingkey; none configured; aborting." >&2
+  exit 1
+fi
+
+HASH=$(ghash -g -l) || exit 1
+if [[ -z "$HASH" ]]; then
+  echo "gsigncommits: no commit selected; nothing to sign." >&2
+  exit 1
+fi
+
+# Resolve the rebase base: parent of the picked commit, or --root if it has none.
+if git rev-parse --verify --quiet "${HASH}^" >/dev/null; then
+  RANGE="${HASH}^..HEAD"
+  set -- "${HASH}^"
+else
+  RANGE="HEAD"        # entire history from the root
+  set -- --root
+fi
+
+# Refuse to sign other people's commits with your key.
+MY_EMAIL=$(git config --get user.email)
+FOREIGN=$(git log --format='%ae' "$RANGE" | grep -vixF "$MY_EMAIL" | sort -u || true)
+if [[ -n "$FOREIGN" ]]; then
+  echo "gsigncommits: range contains commits by other authors; aborting:" >&2
+  echo "$FOREIGN" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+git rebase --exec 'git commit --amend --no-edit -S' "$@"

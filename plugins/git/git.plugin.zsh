@@ -442,5 +442,6 @@ compdef _git gun=git-reset
 # Remove previously defined aliases. Look for replacements in <root>/bin
 unalias gwip
 unalias gcwip
+unalias gsi
 unalias gunwip
 unset -f gunwipall
