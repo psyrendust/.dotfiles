@@ -131,10 +131,11 @@ zdot load "$FZF_PATH/shell/key-bindings.zsh"
 # --scrollbar="│"
 
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
-  --color=fg:#b2c0db,fg+:#ebede4,bg:-1,bg+:-1
+  --color=fg:#b2c0db,fg+:#ebede4,bg:-1,bg+:#3a3a5a
   --color=hl:#5fff87,hl+:#5fd7ff,info:#73d0ff,marker:#5fff87
   --color=prompt:#d7005f,spinner:#73d0ff,pointer:#af5fff,header:#af87ff
   --color=border:#262626,label:#aeaeae,query:#d9d9d9
+  --highlight-line
   --border="rounded" --border-label="" --preview-window="border-bold" --prompt="❯ "
   --marker="❯ " --pointer="▌" --separator="─" --scrollbar="│"
 '
