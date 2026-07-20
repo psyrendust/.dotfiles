@@ -33,7 +33,7 @@
   excludesfile = $HOME/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
-  pager = delta
+  pager = hunk pager
   trustctime = false
   whitespace = fix
 [gc]
