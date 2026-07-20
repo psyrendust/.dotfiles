@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
 #
 # cleanup
-# List all closed PRs whose branches still exist locally,
-# plus any orphaned worktree directories from previous failed removals.
+# List all closed PRs whose branches still exist locally, plus any orphaned
+# worktree directories/VSCode workspace files left behind by worktree removal
+# (via git, `supacode worktree delete`, or a local `--ff-only` merge with no PR).
 # Fuzzy select items for deletion.
 #-------------------------------------------------------------------------------
 
@@ -72,7 +73,7 @@ trashWorkspaceFile() {
     if [[ "$DRY_RUN" == true ]]; then
       logDryRun "Deleted VSCode workspace file" "$file"
     else
-      rm "$file"
+      trash "$file"
       logStep "Deleted VSCode workspace file" "$file"
     fi
   fi
@@ -80,14 +81,13 @@ trashWorkspaceFile() {
 
 # Create a temporary file for local branches
 TEMP_BRANCHES=$(mktemp)
-trap "rm -f $TEMP_BRANCHES" EXIT
+trap "trash $TEMP_BRANCHES" EXIT
 
 # Get list of local branches
 git for-each-ref --format='%(refname:short)' refs/heads > "$TEMP_BRANCHES"
 
 WORKTREE_ROOT=$(dirname $(git-root))
 GIT_ROOT=$(git-root)
-DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
 WORKTREE_LIST=$(git worktree list --porcelain)
 
 # Get the header (always needed for display)
@@ -134,19 +134,25 @@ FILTERED_OUTPUT=$(echo "$PR_OUTPUT" | awk -v branches_file="$TEMP_BRANCHES" '
   }
 ')
 
-# Find orphaned worktree directories (closed PR dirs with no git worktree reference or local branch)
-CLOSED_BRANCHES=$(echo "$PR_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | awk 'NR > 2 { print $1 }')
+# Find orphaned worktrees by scanning for <dir>.code-workspace files (created by
+# wtree) whose <dir> is no longer a registered git worktree. This is independent
+# of PR status, so it also catches worktrees removed via `supacode worktree
+# delete` (which drops the worktree + branch but leaves the workspace file) and
+# worktrees merged locally with `git merge --ff-only` (no PR involved at all).
 ORPHANED_LINES=""
-if [[ -n "$CLOSED_BRANCHES" ]]; then
-  while IFS= read -r branch; do
-    cleanBranchName="${branch//[\\\/]/-}"
-    DIR="$WORKTREE_ROOT/$cleanBranchName"
-    # Only flag if directory exists, is NOT the main git root, is NOT a registered worktree, and branch doesn't exist locally
-    if [[ -d "$DIR" ]] && [[ "$DIR" != "$GIT_ROOT" ]] && [[ "$branch" != "$DEFAULT_BRANCH" ]] && ! echo "$WORKTREE_LIST" | grep -q "^worktree ${DIR}$" && ! grep -q "^${branch}$" "$TEMP_BRANCHES"; then
-      ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "$branch" "orphaned dir" "$DIR")\n"
-    fi
-  done <<< "$CLOSED_BRANCHES"
-fi
+for workspace_file in "$WORKTREE_ROOT"/*.code-workspace(N); do
+  dir="${workspace_file%.code-workspace}"
+  [[ "$dir" == "$GIT_ROOT" ]] && continue
+  echo "$WORKTREE_LIST" | grep -q "^worktree ${dir}$" && continue
+  if [[ -d "$dir" ]]; then
+    label="orphaned dir"
+    path="$dir"
+  else
+    label="orphaned workspace"
+    path="$workspace_file"
+  fi
+  ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "${dir:t}" "$label" "$path")\n"
+done
 
 # Build combined fzf input — always include header for column alignment
 HAS_ITEMS=false
@@ -165,7 +171,7 @@ if [[ -n "$ORPHANED_LINES" ]]; then
 fi
 
 if [[ "$HAS_ITEMS" == false ]]; then
-  logEmpty "No local branches or orphaned directories found with closed PRs"
+  logEmpty "No local branches with closed PRs or orphaned worktrees/workspace files found"
   exit 0
 fi
 
@@ -180,7 +186,11 @@ while IFS= read -r line; do
   # Strip ANSI codes for parsing
   clean_line=$(echo "$line" | sed 's/\x1b\[[0-9;]*m//g')
 
-  if echo "$clean_line" | grep -q "orphaned dir"; then
+  if echo "$clean_line" | grep -q "orphaned workspace"; then
+    # Orphaned workspace file with no matching directory — path is the last token
+    FILE=$(echo "$clean_line" | awk '{ print $NF }')
+    trashWorkspaceFile "$FILE"
+  elif echo "$clean_line" | grep -q "orphaned dir"; then
     # Orphaned directory line — path is the last whitespace-separated token
     DIR=$(echo "$clean_line" | awk '{ print $NF }')
     if [[ "$DRY_RUN" == true ]]; then
