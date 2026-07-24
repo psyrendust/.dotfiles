@@ -33,9 +33,9 @@ __path_pre+=("$ZDOT_PLUGINS/npmlist/bin")
 __path_pre+=("$ZDOT_PLUGINS/textcleaner/bin")
 __path_pre+=("$ZDOT_PLUGINS/iterm2/bin")
 __path_pre+=("$ZDOT_PLUGINS/vscode/bin")
-__path_pre+=("$ZDOT_DROPBOX_BIN")
-__path_pre+=("$ZDOT_BIN")
-__path_pre+=("$HOME/.tmpbin")
+[[ -d "$ZDOT_DROPBOX_BIN" ]] && __path_pre+=("$ZDOT_DROPBOX_BIN")
+[[ -d "$ZDOT_BIN" ]] && __path_pre+=("$ZDOT_BIN")
+[[ -d "$HOME/.tmpbin" ]] && __path_pre+=("$HOME/.tmpbin")
 
 
 # Custom path locations for my work plugins
