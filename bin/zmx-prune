@@ -1,0 +1,277 @@
+#!/usr/bin/env zsh
+#
+# zmx-prune
+# Prune orphaned Supacode zmx sessions.
+#
+# Supacode backs every terminal surface with a zmx session named
+# `supa-<surface-uuid>`. When the app crashes, is force-quit, or a repo/worktree
+# is removed, the zmx server survives but nothing owns it any more: the session
+# lingers forever with clients:0, holding a shell (and whatever agent it was
+# running) alive.
+#
+# This cross-references the live Supacode surface tree (`supacode worktree list`
+# -> `tab list` -> `surface list`, across every running app socket) with
+# `zmx list`, then offers the leftovers up in fzf for killing.
+#
+# Classification -- only `orphan` is ever killed without confirmation:
+#   live    surface id is known to a running Supacode instance
+#   busy    unknown to Supacode but has clients attached (manual `zmx attach`)
+#   orphan  `supa-*`, unknown to Supacode, zero clients
+#   other   not a `supa-*` session, so not Supacode's to own
+#
+# Supacode restores surfaces lazily, so a cold `tab list` can under-report.
+# Two mitigations: the surface tree is walked twice (the first walk warms the
+# lazy load), and clients>0 always vetoes an orphan verdict.
+#
+# See https://github.com/neurosnap/zmx
+#-------------------------------------------------------------------------------
+
+emulate -L zsh
+setopt no_unset
+
+typeset -g PROG=${0:t}
+typeset -g SUPA_BUNDLE=app.supabit.supacode
+
+die() { print -ru2 -- "$PROG: $*"; exit 1 }
+
+usage() {
+  cat <<EOF
+usage: $PROG [-n|--dry-run] [-y|--yes] [-a|--all] [-f|--force]
+
+Kill zmx sessions that no longer belong to any running Supacode surface.
+
+  -n, --dry-run   print the classification table and exit
+  -y, --yes       kill every orphan without opening the picker
+  -a, --all       open the picker on every session, not just orphans
+  -f, --force     pass --force to \`zmx kill\`
+  -h, --help      this
+
+Picker keys: enter kill selected | tab mark | ctrl-a toggle all
+             ctrl-l show all sessions | ctrl-o orphans only
+EOF
+}
+
+# --- args ---------------------------------------------------------------------
+
+typeset -i opt_dry=0 opt_yes=0 opt_all=0 opt_force=0
+while (( $# )); do
+  case $1 in
+    -n|--dry-run) opt_dry=1 ;;
+    -y|--yes)     opt_yes=1 ;;
+    -a|--all)     opt_all=1 ;;
+    -f|--force)   opt_force=1 ;;
+    -h|--help)    usage; exit 0 ;;
+    *)            usage >&2; die "unknown option: $1" ;;
+  esac
+  shift
+done
+
+for cmd in zmx supacode; do
+  (( $+commands[$cmd] )) || die "$cmd not found in PATH"
+done
+(( opt_dry || opt_yes )) || (( $+commands[fzf] )) || die "fzf not found in PATH"
+
+# --- live supacode surfaces ---------------------------------------------------
+#
+# Surface ids live under tabs, tabs under worktrees, and both listings fall back
+# to the *caller's* $SUPACODE_* env when their flag is omitted -- so every level
+# has to be passed explicitly. Archived worktrees are hidden from
+# `worktree list` yet can still own surfaces, so they come from the prefs plist.
+
+worktree_ids() {  # $1 = socket
+  SUPACODE_SOCKET_PATH=$1 supacode worktree list 2>/dev/null
+  defaults read "$SUPA_BUNDLE" archivedWorktreeIDs 2>/dev/null \
+    | grep -o '"[^"]*"' | tr -d '"'
+  return 0
+}
+
+walk_surfaces() {  # -> surface ids, one per line
+  local socket wt tab
+  for socket in $sockets; do
+    for wt in ${(f)worktrees[$socket]}; do
+      for tab in ${(f)"$(SUPACODE_SOCKET_PATH=$socket supacode tab list -w "$wt" 2>/dev/null)"}; do
+        SUPACODE_SOCKET_PATH=$socket supacode surface list -w "$wt" -t "$tab" 2>/dev/null
+      done
+    done
+  done
+  return 0
+}
+
+typeset -a sockets
+sockets=(${(f)"$(supacode socket 2>/dev/null)"})
+(( $#sockets )) || die "no running Supacode instance (\`supacode socket\` is empty).
+Without one there is no way to tell an orphan from a session Supacode is about to
+restore. Start Supacode, then re-run."
+
+typeset -A worktrees live_surface live_worktree
+typeset id socket wt
+for socket in $sockets; do
+  worktrees[$socket]=${(F)${(u)${(f)"$(worktree_ids $socket)"}}}
+  for wt in ${(f)worktrees[$socket]}; do
+    # worktree ids are percent-encoded absolute paths with a trailing slash
+    live_worktree[${$(printf '%b' "${wt//\%/\\x}")%/}]=1
+  done
+done
+
+typeset -a walked
+walked=(${(f)"$(walk_surfaces)"})     # pass 1 also warms lazily-loaded worktrees
+sleep 0.4
+walked+=(${(f)"$(walk_surfaces)"})    # pass 2 catches what pass 1 was too early for
+for id in $walked; do
+  live_surface[${(L)id}]=1
+done
+
+(( ${#live_surface} )) || die "Supacode reported zero surfaces -- refusing to treat
+every session as an orphan. Is the app still starting up?"
+
+# --- classify zmx sessions ----------------------------------------------------
+
+human_age() {
+  local -i s=$1
+  local -i d=$(( s / 86400 )) h=$(( s % 86400 / 3600 )) m=$(( s % 3600 / 60 ))
+  if   (( d )); then print -r -- "${d}d${h}h"
+  elif (( h )); then print -r -- "${h}h${m}m"
+  elif (( m )); then print -r -- "${m}m"
+  else              print -r -- "${s}s"
+  fi
+}
+
+typeset tmp_all tmp_orphans
+tmp_all=$(mktemp "${TMPDIR:-/tmp}/zmx-prune-all.XXXXXX") || die "mktemp failed"
+tmp_orphans=$(mktemp "${TMPDIR:-/tmp}/zmx-prune-orphans.XXXXXX") || die "mktemp failed"
+trap 'rm -f -- "$tmp_all" "$tmp_orphans"' EXIT INT TERM
+
+typeset -i now=$(date +%s)
+typeset -i n_live=0 n_busy=0 n_orphan=0 n_other=0
+typeset line row state reason name pid clients created dir rec
+typeset -a fields recs
+typeset -i w_dir=8
+
+for line in ${(f)"$(zmx list 2>/dev/null)"}; do
+  fields=("${(@s:	:)line}")
+  name=${fields[1]#*name=}
+  pid=${fields[2]#*pid=}
+  clients=${fields[3]#*clients=}
+  created=${fields[4]#*created=}
+  dir=${fields[5]#*start_dir=}
+  [[ -n $name ]] || continue
+  [[ $name == "${ZMX_SESSION:-}" ]] && continue   # never offer up our own shell
+
+  if [[ $name != supa-* ]]; then
+    state=other;  reason=non-supacode;  (( ++n_other ))
+  elif (( ${+live_surface[${(L)${name#supa-}}]} )); then
+    state=live;   reason=-;             (( ++n_live ))
+  elif [[ $clients != 0 ]]; then
+    state=busy;   reason=has-clients;   (( ++n_busy ))
+  elif (( ! ${+live_worktree[$dir]} )); then
+    state=orphan; reason=worktree-gone; (( ++n_orphan ))
+  else
+    state=orphan; reason=surface-gone;  (( ++n_orphan ))
+  fi
+
+  dir=${dir/#$HOME/\~}
+  (( ${#dir} > w_dir )) && w_dir=${#dir}
+  # Sort key comes first: worktree path, then creation time (zero-padded so the
+  # lexical sort stays chronological) -- i.e. grouped by worktree, oldest
+  # session first, since the stalest ones are the prime pruning suspects.
+  fields=("$dir" "${(l:12::0:)created}" "$state" "$reason"
+          "$(human_age $(( now - created )))" "$clients" "$pid" "$name")
+  recs+=("${(pj:\t:)fields}")
+done
+
+typeset -i n_total=$#recs
+
+# The session name is the LAST column on purpose: worktree paths can contain
+# spaces, so `awk $NF` / fzf `{-1}` stay correct no matter how the path splits.
+typeset row_fmt="%-6s  %-13s  %-${w_dir}s  %-7s  %-3s  %-7s  %s"
+typeset header=$(printf "$row_fmt" STATE WHY WORKTREE AGE CLI PID SESSION)
+
+for rec in ${(o)recs}; do
+  fields=("${(@s:	:)rec}")
+  row=$(printf "$row_fmt" "$fields[3]" "$fields[4]" "$fields[1]" "$fields[5]" \
+    "$fields[6]" "$fields[7]" "$fields[8]")
+  print -r -- "$row" >> "$tmp_all"
+  [[ $fields[3] == orphan ]] && print -r -- "$row" >> "$tmp_orphans"
+done
+
+summary() {
+  print -r -- "$PROG: ${#live_surface} live surface(s) across $#sockets Supacode instance(s); $n_total zmx session(s): $n_orphan orphan, $n_live live, $n_busy busy, $n_other other"
+}
+
+if (( ! n_total )); then
+  print -r -- "$PROG: no prunable zmx sessions."
+  exit 0
+fi
+
+if (( opt_dry )); then
+  summary
+  print -r -- "$header"
+  cat -- "$tmp_all"
+  exit 0
+fi
+
+if (( ! n_orphan && ! opt_all )); then
+  summary
+  print -r -- "$PROG: nothing orphaned. Use --all to pick from every session."
+  exit 0
+fi
+
+# --- select -------------------------------------------------------------------
+
+typeset -a targets
+if (( opt_yes )); then
+  targets=(${(f)"$(awk '{ print $NF }' "$tmp_orphans")"})
+else
+  typeset src=$tmp_orphans
+  (( opt_all )) && src=$tmp_all
+  # `start` fires before the list is loaded, so select-all has to hang off
+  # `load` -- which also fires after every ctrl-l/ctrl-o reload. Row count is
+  # what tells the two views apart: pre-select the orphan view, never the
+  # full one. (Identical when every session is an orphan, which is harmless.)
+  typeset autoselect="load:transform:[ \"\$FZF_TOTAL_COUNT\" -eq $n_orphan ] && echo select-all || echo deselect-all"
+  typeset out
+  out=$(cat -- "$src" | fzf \
+    --multi \
+    --height=80% \
+    --reverse \
+    --prompt="prune> " \
+    --header="enter: kill selected | tab: mark | ctrl-a: toggle all | ctrl-l: all sessions | ctrl-o: orphans only
+$header" \
+    --bind="$autoselect" \
+    --bind='ctrl-a:toggle-all' \
+    --bind="ctrl-l:reload(cat -- $tmp_all)" \
+    --bind="ctrl-o:reload(cat -- $tmp_orphans)" \
+    --preview='zmx history {-1} 2>/dev/null | tail -200' \
+    --preview-window=right:55%:follow \
+  ) || { print -r -- "$PROG: aborted."; exit 130 }
+  targets=(${(f)"$(print -r -- "$out" | awk 'NF { print $NF }')"})
+fi
+
+(( $#targets )) || { print -r -- "$PROG: nothing selected."; exit 0 }
+
+# anything Supacode still owns needs an explicit yes
+typeset -a risky
+risky=(${(f)"$(awk -v names="${(j: :)targets}" '
+  BEGIN { split(names, a, " "); for (i in a) want[a[i]] = 1 }
+  $1 != "orphan" && want[$NF] { print $NF }' "$tmp_all")"})
+if (( $#risky )); then
+  print -ru2 -- "$PROG: $#risky of $#targets selected session(s) are NOT orphans:"
+  awk -v names="${(j: :)risky}" '
+    BEGIN { split(names, a, " "); for (i in a) want[a[i]] = 1 }
+    want[$NF]' "$tmp_all" >&2
+  if [[ -t 0 ]]; then
+    read -q "?Kill them anyway? [y/N] " || { print; die "aborted." }
+    print
+  else
+    die "refusing to kill non-orphans without a tty to confirm on"
+  fi
+fi
+
+# --- kill ---------------------------------------------------------------------
+
+typeset -a kill_args=($targets)
+(( opt_force )) && kill_args+=(--force)
+
+zmx kill "${kill_args[@]}" || die "zmx kill failed"
+print -r -- "$PROG: killed $#targets session(s):"
+print -rl -- ${targets/#/  }
