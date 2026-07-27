@@ -8,15 +8,54 @@
 
 set -e
 
+# Same age formatting as bin/zmx-prune, kept local so each script stays a
+# standalone drop-in on PATH.
+human_age() {
+  local -i s=$1
+  local -i d=$(( s / 86400 )) h=$(( s % 86400 / 3600 )) m=$(( s % 3600 / 60 ))
+  if   (( d )); then print -r -- "${d}d${h}h"
+  elif (( h )); then print -r -- "${h}h${m}m"
+  elif (( m )); then print -r -- "${m}m"
+  else              print -r -- "${s}s"
+  fi
+}
+
 run() {
+  local line rec name pid clients created dir
+  local -a fields recs
+  local -i now=$(date +%s) w_dir=8
+
+  for line in ${(f)"$(zmx list 2>/dev/null)"}; do
+    fields=("${(@s:	:)line}")
+    name=${fields[1]#*name=}
+    pid=${fields[2]#*pid=}
+    clients=${fields[3]#*clients=}
+    created=${fields[4]#*created=}
+    dir=${fields[5]#*start_dir=}
+    [[ -n $name ]] || continue
+
+    dir=${dir/#$HOME/\~}
+    if (( ${#dir} > w_dir )); then w_dir=${#dir}; fi
+    # Sort key comes first: worktree path, then creation time (zero-padded so
+    # the lexical sort stays chronological) -- grouped by worktree, oldest
+    # session first. Both key fields are dropped when the row is printed.
+    fields=("$dir" "${(l:12::0:)created}"
+            "$(human_age $(( now - created )))" "$clients" "$pid" "$name")
+    recs+=("${(pj:\t:)fields}")
+  done
+
+  # SESSION is the last column on purpose: worktree paths can contain spaces,
+  # so `awk $NF` / fzf `{-1}` stay correct no matter how the path splits.
+  local row_fmt="%-${w_dir}s  %-7s  %-3s  %-7s  %s"
+  local header=$(printf "$row_fmt" WORKTREE AGE CLI PID SESSION)
+
   local display
-  display=$(zmx list 2>/dev/null | while IFS=$'\t' read -r name pid clients created dir; do
-    name=${name#*name=}
-    pid=${pid#*pid=}
-    clients=${clients#*clients=}
-    dir=${dir#*start_dir=}
-    printf "%-20s  pid:%-8s  clients:%-2s  %s\n" "$name" "$pid" "$clients" "$dir"
-  done)
+  for rec in ${(o)recs}; do
+    fields=("${(@s:	:)rec}")
+    display+=$(printf "$row_fmt" "$fields[1]" "$fields[3]" "$fields[4]" \
+      "$fields[5]" "$fields[6]")$'\n'
+  done
+  display=${display%$'\n'}
 
   local output query key selected session_name
   output=$({ [[ -n "$display" ]] && echo "$display"; } | fzf \
@@ -25,8 +64,9 @@ run() {
     --height=80% \
     --reverse \
     --prompt="zmx> " \
-    --header="Enter: select | Ctrl-N: create new" \
-    --preview='zmx history {1}' \
+    --header="Enter: select | Ctrl-N: create new
+$header" \
+    --preview='zmx history {-1}' \
     --preview-window=right:60%:follow \
   )
   local rc=$?
@@ -38,7 +78,7 @@ run() {
   if [[ "$key" == "ctrl-n" && -n "$query" ]]; then
     session_name="$query"
   elif [[ $rc -eq 0 && -n "$selected" ]]; then
-    session_name=$(echo "$selected" | awk '{print $1}')
+    session_name=$(echo "$selected" | awk '{print $NF}')
   elif [[ -n "$query" ]]; then
     session_name="$query"
   else
