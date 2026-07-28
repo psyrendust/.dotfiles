@@ -146,12 +146,12 @@ for workspace_file in "$WORKTREE_ROOT"/*.code-workspace(N); do
   echo "$WORKTREE_LIST" | grep -q "^worktree ${dir}$" && continue
   if [[ -d "$dir" ]]; then
     label="orphaned dir"
-    path="$dir"
+    orphan_path="$dir"
   else
     label="orphaned workspace"
-    path="$workspace_file"
+    orphan_path="$workspace_file"
   fi
-  ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "${dir:t}" "$label" "$path")\n"
+  ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "${dir:t}" "$label" "$orphan_path")\n"
 done
 
 # Build combined fzf input — always include header for column alignment
