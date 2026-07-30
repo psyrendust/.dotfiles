@@ -46,6 +46,7 @@ Available commands:
   has         Check if command is in package.json scripts
   run         Run a command in package.json scripts
   scripts     Print out package.json scripts
+  version     Print out package.json version
 
 EOF
 }
@@ -79,11 +80,17 @@ function _pkg::run() {
   local pkg="$(pkg path $@)"
   echo "$pkg"
   local choice=$(cat "$pkg" | jq '.scripts | keys[]' | fzf --tac --header="Select a script to run" | tr -d '"') &&
-  yarn $choice
+  y $choice
 }
 
 function _pkg::scripts() {
   local pkg="$(pkg path $@)"
   echo "$pkg"
   cat "$pkg" | jq '.scripts'
+}
+
+function _pkg::version() {
+  local pkg="$(pkg path $@)"
+  echo "$pkg"
+  cat "$pkg" | jq '.version'
 }

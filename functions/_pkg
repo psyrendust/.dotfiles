@@ -16,6 +16,7 @@ cmds=(
   'has:Check if command is in package.json scripts'
   'run:Run a command in package.json scripts'
   'scripts:Print out package.json scripts'
+  'version:Print out package.json version'
 )
 
 if (( CURRENT == 2 )); then
