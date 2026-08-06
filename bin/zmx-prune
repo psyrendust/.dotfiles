@@ -34,6 +34,50 @@ typeset -g SUPA_BUNDLE=app.supabit.supacode
 
 die() { print -ru2 -- "$PROG: $*"; exit 1 }
 
+# --- picker -------------------------------------------------------------------
+#
+# fzf draws its UI on /dev/tty directly, so it does NOT die just because this
+# script's stdio went away. That leaves two ways for it to outlive us, both seen
+# in the wild as a stopped (`T`) fzf reparented to pid 1, holding /dev/tty open
+# indefinitely:
+#
+#   * we stop being the terminal's foreground process group (surface closed, or
+#     `zmx kill` landed on our own session): fzf's next /dev/tty write raises
+#     SIGTTOU and the kernel stops it.
+#   * a stopped process never ACTS on a pending SIGHUP/SIGTERM -- those stay
+#     queued until SIGCONT -- so an ordinary hangup never reaps it either.
+#
+# So: run fzf inside OUR process group (no_monitor keeps it out of a background
+# pgroup, preserving foreground tty access), remember its pid, and reap with
+# SIGCONT-then-SIGKILL so a stopped fzf actually dies.
+typeset -g fzf_pid= fzf_out=
+
+reap_fzf() {
+  [[ -n $fzf_pid ]] || return 0
+  kill -CONT $fzf_pid 2>/dev/null || true
+  kill -KILL $fzf_pid 2>/dev/null || true
+  fzf_pid=
+}
+
+# fzf_pick <input-file> [fzf-arg...]; selection lands in $fzf_out, fzf's status
+# is returned. Clearing $fzf_pid after the wait matters: a later reap must never
+# signal a recycled pid.
+fzf_pick() {
+  typeset src=$1; shift
+  { : < /dev/tty } 2>/dev/null || die "the picker needs a terminal"
+  typeset out
+  out=$(mktemp "${TMPDIR:-/tmp}/${PROG}-fzf.XXXXXX") || die "mktemp failed"
+  unsetopt monitor
+  fzf "$@" < "$src" > "$out" &
+  fzf_pid=$!
+  typeset -i rc=0
+  wait $fzf_pid || rc=$?
+  fzf_pid=
+  fzf_out=$(<"$out")
+  rm -f -- "$out"
+  return $rc
+}
+
 usage() {
   cat <<EOF
 usage: $PROG [-n|--dry-run] [-y|--yes] [-a|--all] [-f|--force]
@@ -139,7 +183,10 @@ human_age() {
 typeset tmp_all tmp_orphans
 tmp_all=$(mktemp "${TMPDIR:-/tmp}/zmx-prune-all.XXXXXX") || die "mktemp failed"
 tmp_orphans=$(mktemp "${TMPDIR:-/tmp}/zmx-prune-orphans.XXXXXX") || die "mktemp failed"
-trap 'rm -f -- "$tmp_all" "$tmp_orphans"' EXIT INT TERM
+# HUP matters as much as INT/TERM here: closing the surface is exactly how the
+# picker got orphaned, and reap_fzf must run before the tempfiles disappear
+# (fzf's --bind reloads read them).
+trap 'reap_fzf; rm -f -- "$tmp_all" "$tmp_orphans"' EXIT INT HUP TERM
 
 typeset -i now=$(date +%s)
 typeset -i n_live=0 n_busy=0 n_orphan=0 n_other=0
@@ -229,8 +276,8 @@ else
   # what tells the two views apart: pre-select the orphan view, never the
   # full one. (Identical when every session is an orphan, which is harmless.)
   typeset autoselect="load:transform:[ \"\$FZF_TOTAL_COUNT\" -eq $n_orphan ] && echo select-all || echo deselect-all"
-  typeset out
-  out=$(cat -- "$src" | fzf \
+  typeset -i rc=0
+  fzf_pick "$src" \
     --multi \
     --height=80% \
     --reverse \
@@ -243,8 +290,9 @@ $header" \
     --bind="ctrl-o:reload(cat -- $tmp_orphans)" \
     --preview='zmx history {-1} 2>/dev/null | tail -200' \
     --preview-window=right:55%:follow \
-  ) || { print -r -- "$PROG: aborted."; exit 130 }
-  targets=(${(f)"$(print -r -- "$out" | awk 'NF { print $NF }')"})
+    || rc=$?
+  (( rc == 0 )) || { print -r -- "$PROG: aborted."; exit 130 }
+  targets=(${(f)"$(print -r -- "$fzf_out" | awk 'NF { print $NF }')"})
 fi
 
 (( $#targets )) || { print -r -- "$PROG: nothing selected."; exit 0 }

@@ -8,6 +8,47 @@
 
 set -e
 
+typeset -g PROG=${0:t}
+
+# --- picker -------------------------------------------------------------------
+#
+# Same fzf-outliving-us hazard as bin/zmx-prune, and kept local for the same
+# reason (each script stays a standalone drop-in on PATH). fzf draws on /dev/tty
+# directly, so losing our stdio does not kill it; losing the terminal's
+# FOREGROUND process group stops it with SIGTTOU, and a stopped process never
+# acts on a pending SIGHUP/SIGTERM, so it lingers on pid 1 holding /dev/tty.
+#
+# So: run fzf inside OUR process group (no_monitor keeps it out of a background
+# pgroup, preserving foreground tty access), remember its pid, and reap with
+# SIGCONT-then-SIGKILL so a stopped fzf actually dies.
+typeset -g fzf_pid= fzf_out=
+
+reap_fzf() {
+  [[ -n $fzf_pid ]] || return 0
+  kill -CONT $fzf_pid 2>/dev/null || true
+  kill -KILL $fzf_pid 2>/dev/null || true
+  fzf_pid=
+}
+
+# fzf_pick <input-file> [fzf-arg...]; selection lands in $fzf_out, fzf's status
+# is returned. Clearing $fzf_pid after the wait matters: a later reap must never
+# signal a recycled pid.
+fzf_pick() {
+  local src=$1; shift
+  { : < /dev/tty } 2>/dev/null || { print -ru2 -- "$PROG: the picker needs a terminal"; exit 1 }
+  local out
+  out=$(mktemp "${TMPDIR:-/tmp}/${PROG}-fzf.XXXXXX") || { print -ru2 -- "$PROG: mktemp failed"; exit 1 }
+  unsetopt monitor
+  fzf "$@" < "$src" > "$out" &
+  fzf_pid=$!
+  local -i rc=0
+  wait $fzf_pid || rc=$?
+  fzf_pid=
+  fzf_out=$(<"$out")
+  rm -f -- "$out"
+  return $rc
+}
+
 # Same age formatting as bin/zmx-prune, kept local so each script stays a
 # standalone drop-in on PATH.
 human_age() {
@@ -57,8 +98,12 @@ run() {
   done
   display=${display%$'\n'}
 
-  local output query key selected session_name
-  output=$({ [[ -n "$display" ]] && echo "$display"; } | fzf \
+  local output query key selected session_name src
+  src=$(mktemp "${TMPDIR:-/tmp}/${PROG}-rows.XXXXXX") || { print -ru2 -- "$PROG: mktemp failed"; exit 1 }
+  # A plain `[[ -n … ]] && print` would return 1 on an empty list and trip `set -e`.
+  if [[ -n "$display" ]]; then print -r -- "$display" > "$src"; fi
+  local -i rc=0
+  fzf_pick "$src" \
     --print-query \
     --expect=ctrl-n \
     --height=80% \
@@ -68,8 +113,9 @@ run() {
 $header" \
     --preview='zmx history {-1}' \
     --preview-window=right:60%:follow \
-  )
-  local rc=$?
+    || rc=$?
+  rm -f -- "$src"
+  output=$fzf_out
 
   query=$(echo "$output" | sed -n '1p')
   key=$(echo "$output" | sed -n '2p')
@@ -87,5 +133,8 @@ $header" \
 
   zmx attach "$session_name"
 }
+
+trap 'reap_fzf' EXIT
+trap 'reap_fzf; exit 130' INT HUP TERM
 
 run && exit
