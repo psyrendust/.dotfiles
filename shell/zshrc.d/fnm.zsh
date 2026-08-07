@@ -6,6 +6,14 @@
 # ------------------------------------------------------------------------------
 (( $+commands[fnm] )) || return 1
 
+# Tweaks
+# ------------------------------------------------------------------------------
+#
+# --log-level=quiet
+#   Suppress messages that are printed when the shell automatically switches
+#   node versions upon directory changes.
+# ------------------------------------------------------------------------------
+
 # Experimental options used
 # @see https://github.com/Schniz/fnm/blob/master/docs/configuration.md
 # ------------------------------------------------------------------------------
@@ -26,4 +34,4 @@
 #   - fnm use will use the latest satisfying Node.js 20.x version available on
 #     your system, or prompt to install if no version matched.
 # ------------------------------------------------------------------------------
-eval "$(fnm env --use-on-cd --version-file-strategy=recursive --corepack-enabled --resolve-engines --shell zsh)"
+eval "$(fnm env --use-on-cd --log-level=quiet --version-file-strategy=recursive --corepack-enabled --resolve-engines --shell zsh)"
