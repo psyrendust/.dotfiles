@@ -1,0 +1,21 @@
+# Global git ignores
+#
+# Author:
+#   Larry Gordon
+#
+# Wired up by gitconfig/core.inc as `core.excludesfile`. That setting has pointed
+# here for years while the file did not exist, so git was silently applying no
+# global ignores at all.
+#
+# License:
+#   The MIT License (MIT) <http://psyrendust.mit-license.org/2014/license.html>
+# ------------------------------------------------------------------------------
+
+# Machine-local registry pins written by `npm-pin` and the post-checkout hook in
+# templates/git-template. These carry a private registry hostname on work
+# machines and are per-checkout, so they must never be committed anywhere.
+# Ignoring them here keeps `git status` clean in every repo without editing each
+# repo's .git/info/exclude. A repo that legitimately tracks its own .npmrc is
+# unaffected: gitignore never applies to files already in the index. To add one
+# deliberately, use `git add -f .npmrc`.
+.npmrc

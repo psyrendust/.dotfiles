@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# Copy a tree's registry down into a repo so every tool agrees with it.
+#
+# Author:
+#   Larry Gordon
+#
+# Usage:
+#   # Pin the repo containing the current directory
+#   $ npm-pin
+#
+#   # Pin a specific repo
+#   $ npm-pin ~/some/checkout
+#
+#   # Overwrite an existing untracked .npmrc
+#   $ npm-pin --force
+#
+# npm, pnpm, bun and yarn each read a project `.npmrc` from the directory they
+# are invoked in, and none of them walk up the tree. So a `.npmrc` at the root of
+# a tree of checkouts governs that root only: a repo beneath it falls back to the
+# user-level registry in `~/.npmrc`. Where those two disagree, an install from a
+# non-interactive shell — CI, an editor task, an agent — resolves through the
+# wrong registry and writes its URLs into a committed lockfile.
+#
+# The zsh hook in shell/zshrc.d/npm-registry.zsh handles interactive shells and
+# their subshells, but a new shell process never sources .zshrc. This writes the
+# inherited value into the repo so the tools resolve it natively, with no shell
+# involvement at all. Also run from the post-checkout hook in
+# templates/git-template so a fresh clone is pinned on arrival.
+#
+# The registry is read out of the ancestor `.npmrc` at runtime and never
+# hard-coded: this repo is public, and baking in a private registry hostname
+# would leak it.
+
+set -u
+
+force=0
+quiet=0
+target=''
+for arg in "$@"; do
+	case $arg in
+		-f|--force) force=1 ;;
+		-q|--quiet) quiet=1 ;;   # suppress the no-op notes; still reports a real pin
+		-h|--help) sed -n '2,32p' "$0" | sed 's/^#\{1,2\} \{0,1\}//'; exit 0 ;;
+		-*) printf 'npm-pin: unknown option %s\n' "$arg" >&2; exit 2 ;;
+		*) target=$arg ;;
+	esac
+done
+
+root=$(git -C "${target:-.}" rev-parse --show-toplevel 2>/dev/null) || {
+	printf 'npm-pin: not inside a git repository\n' >&2
+	exit 1
+}
+
+# Nothing happened, so say so only when asked directly rather than from a hook.
+note() {
+	[ "$quiet" -eq 1 ] && return 0
+	fmt=$1; shift
+	# shellcheck disable=SC2059
+	printf "$fmt" "$@" >&2
+}
+
+# Last `registry=` wins, as npm's ini parser does. Whitespace is stripped before
+# matching and the pattern is anchored, so `#registry=`, `;registry=` and
+# `@scope:registry=` are all correctly ignored.
+read_registry() {
+	[ -r "$1" ] || return 1
+	value=$(sed -n 's/[[:space:]]//g; /^registry=./{s/^registry=//;p;}' "$1" 2>/dev/null | tail -n 1)
+	[ -n "$value" ] || return 1
+	printf '%s' "$value"
+}
+
+if [ -e "$root/.npmrc" ] && [ "$force" -eq 0 ]; then
+	if git -C "$root" ls-files --error-unmatch .npmrc >/dev/null 2>&1; then
+		note 'npm-pin: %s/.npmrc is tracked; leaving it alone\n' "$root"
+		exit 0
+	fi
+	note 'npm-pin: %s/.npmrc already exists (use --force to replace)\n' "$root"
+	exit 0
+fi
+
+# Nearest declaring ancestor, stopping before $HOME: `~/.npmrc` is the user-level
+# default that every tool already applies on its own.
+inherited=''
+dir=$(dirname "$root")
+while [ -n "$dir" ] && [ "$dir" != "/" ] && [ "$dir" != "$HOME" ]; do
+	if inherited=$(read_registry "$dir/.npmrc"); then
+		break
+	fi
+	inherited=''
+	dir=$(dirname "$dir")
+done
+
+if [ -z "$inherited" ]; then
+	note 'npm-pin: no ancestor .npmrc declares a registry; nothing to pin\n'
+	exit 0
+fi
+
+default=$(read_registry "$HOME/.npmrc") || default=''
+if [ "$inherited" = "$default" ]; then
+	note 'npm-pin: tree matches the user-level default; no pin needed\n'
+	exit 0
+fi
+
+{
+	printf '# Local, untracked: inherited from %s.\n' "$dir/.npmrc"
+	printf '# The user-level default in ~/.npmrc differs, and npm/pnpm/bun do not walk up\n'
+	printf '# the tree, so it is declared here to hold in non-interactive shells.\n'
+	printf '# Delete this file to fall back to the user-level default.\n'
+	printf 'registry=%s\n' "$inherited"
+} > "$root/.npmrc" || exit 1
+
+printf 'npm-pin: pinned %s (inherited from %s)\n' "$root/.npmrc" "$dir/.npmrc" >&2

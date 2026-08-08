@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Pin a fresh clone to the registry its parent tree declares.
+#
+# Installed via `init.templateDir`, so git copies it into `.git/hooks/` of every
+# new clone. It never touches tracked content.
+#
+# Intentionally a thin caller: the logic lives in one place, `bin/npm-pin`, so
+# copies already sitting in existing clones keep following the current
+# implementation instead of drifting. Called by absolute path because a hook may
+# run without the interactive PATH (GUI clients, editors).
+#
+# Fails open in every case — a registry pin must never break a clone.
+
+# post-checkout runs on branch switches too; the null previous HEAD means clone.
+[ "${1:-}" = "0000000000000000000000000000000000000000" ] || exit 0
+
+pin="$HOME/.dotfiles/bin/npm-pin"
+[ -x "$pin" ] || exit 0
+
+# Only speaks up when it actually writes a pin; stays quiet otherwise.
+"$pin" --quiet || true
+exit 0

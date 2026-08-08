@@ -30,7 +30,9 @@
 [core]
   commitGraph = true
   editor = gitcommiteditor
-  excludesfile = $HOME/.dotfiles/templates/gitignore_global
+  # `~` is expanded for path values; `$HOME` is NOT, so this silently resolved to
+  # a literal "$HOME/..." directory and applied no global ignores at all.
+  excludesfile = ~/.dotfiles/templates/gitignore_global
   filemode = false
   hidedotfiles = false
   pager = delta
@@ -72,6 +74,10 @@
   sort = version:refname
 [init]
   defaultBranch = main
+  # Copied into .git/ of every new clone and init. Carries the post-checkout hook
+  # that pins a fresh clone to the registry its parent tree declares, so
+  # non-interactive installs cannot resolve through the wrong one.
+  templateDir = ~/.dotfiles/templates/git-template
 [diff]
   algorithm = histogram
   colorMoved = plain
