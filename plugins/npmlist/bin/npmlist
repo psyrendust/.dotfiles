@@ -74,7 +74,6 @@ ${packages.map(line => `  '${line.replace(regLineReplace, '$2$3')}'`).join(',\n'
 
   return `#!/usr/bin/env node
 var spawn = require('child_process').spawn;
-var spawnSync = require('child_process').spawnSync;
 
 /**
  * ${new Date()}
@@ -96,11 +95,14 @@ process.argv.slice(2).forEach(function (arg) {
 var args = ['install', '--location=global'];
 ${vars}
 
-const cwd = process.cwd();
-// Switch between "work" and "default" npmrc profiles based on cwd before
-// running "npm" commands
-const npmrcTarget = cwd.includes('/work') ? 'work' : 'default';
-spawnSync('npmrc', [npmrcTarget], { stdio: [0, 1, 2], cwd });
+// Registry selection is no longer done here. It used to flip the global
+// ~/.npmrc symlink between "work" and "default" profiles based on cwd, which
+// stored a per-directory fact in one machine-wide mutable location and only
+// updated when this script happened to run. The registry now comes from the
+// nearest `.npmrc` up the tree (see ~/.dotfiles/shell/zshrc.d/npm-registry.zsh
+// for the interactive hook, plus a real `.npmrc` at each install root so
+// non-interactive shells resolve correctly too). Flipping the symlink here
+// would now clobber ~/.npmrc, which is a real file again.
 
 if (isExact) {
   console.log('install exact...');
