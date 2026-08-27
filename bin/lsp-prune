@@ -1,0 +1,373 @@
+#!/usr/bin/env zsh
+#
+# lsp-prune
+# Prune orphaned language servers, and remember who spawned them.
+#
+# A language server is spawned as a child of its client (an editor, or omp's
+# `__omp_worker_lsp_mux`) and talks to it over stdio. When the client dies
+# without reaping it -- omp's mux, for one, hangs its shutdown off
+# `process.on("beforeExit")` and installs no SIGTERM handler, so a signal death
+# skips shutdown entirely -- the server is reparented to pid 1 and runs forever.
+# It can no longer serve anybody: its stdio peer is gone. Most of them then idle
+# quietly and leak unnoticed; the loud ones spin. One orphaned `oxlint --lsp`
+# burned four hours of CPU and pushed the load average to 17 before anyone
+# looked.
+#
+# Classification -- only `orphan` is ever killed without confirmation:
+#   owned   parent is alive, so somebody is still talking to it
+#   orphan  reparented to pid 1: nothing can reach it, safe to kill
+#   mux     omp's LSP multiplexer -- a manager, not a server (see below)
+#
+# ATTRIBUTION IS THE POINT. By the time a server shows up as an orphan its
+# parent is gone and `ps` can tell you nothing about where it came from, which
+# is exactly when you want to know. So every run snapshots pid -> parent for the
+# servers that still have one, and an orphan is matched back against that
+# snapshot. Run this periodically (or from a login hook) and the next orphan
+# arrives already attributed.
+#
+# See also bin/zmx-prune, which does the same job for orphaned zmx sessions.
+#-------------------------------------------------------------------------------
+
+emulate -L zsh
+setopt no_unset
+
+typeset -g PROG=${0:t}
+typeset -g STATE_DIR=${XDG_STATE_HOME:-$HOME/.local/state}/lsp-prune
+typeset -g STATE_FILE=$STATE_DIR/parents.tsv
+
+die() { print -ru2 -- "$PROG: $*"; exit 1 }
+
+# What counts as a language server. Matched against the full argv, so it catches
+# both the well-known binaries and the generic stdio/lsp flags that everything
+# else uses. `__omp_worker_lsp_mux` is included so the mux can be classified and
+# reported -- never so it can be killed by default.
+# `\b` is deliberately absent: zsh's `=~` compiles with the system ERE, where
+# BSD does not support it. A slightly loose prefix match costs nothing here.
+typeset -g LSP_RE='(--lsp|--stdio|language[-_]?server|languageserver|lsp[-_]?server|marksman |tsserver|rust-analyzer|sourcekit-lsp|gopls|pyright|basedpyright|clangd|taplo|jdtls|solargraph|lua-language-server|__omp_worker_lsp_mux)'
+
+# --- picker -------------------------------------------------------------------
+#
+# Same fzf-outliving-us hazard as bin/zmx-prune, and kept local for the same
+# reason (each script stays a standalone drop-in on PATH). fzf draws on /dev/tty
+# directly, so losing our stdio does not kill it; losing the terminal's
+# FOREGROUND process group stops it with SIGTTOU, and a stopped process never
+# acts on a pending SIGHUP/SIGTERM, so it lingers on pid 1 holding /dev/tty.
+#
+# So: run fzf inside OUR process group (no_monitor keeps it out of a background
+# pgroup, preserving foreground tty access), remember its pid, and reap with
+# SIGCONT-then-SIGKILL so a stopped fzf actually dies.
+typeset -g fzf_pid= fzf_out=
+
+reap_fzf() {
+  [[ -n $fzf_pid ]] || return 0
+  kill -CONT $fzf_pid 2>/dev/null || true
+  kill -KILL $fzf_pid 2>/dev/null || true
+  fzf_pid=
+}
+
+# fzf_pick <input-file> [fzf-arg...]; selection lands in $fzf_out, fzf's status
+# is returned. Clearing $fzf_pid after the wait matters: a later reap must never
+# signal a recycled pid.
+fzf_pick() {
+  typeset src=$1; shift
+  { : < /dev/tty } 2>/dev/null || die "the picker needs a terminal"
+  typeset out
+  out=$(mktemp "${TMPDIR:-/tmp}/${PROG}-fzf.XXXXXX") || die "mktemp failed"
+  unsetopt monitor
+  fzf "$@" < "$src" > "$out" &
+  fzf_pid=$!
+  typeset -i rc=0
+  wait $fzf_pid || rc=$?
+  fzf_pid=
+  fzf_out=$(<"$out")
+  rm -f -- "$out"
+  return $rc
+}
+
+usage() {
+  cat <<EOF
+usage: $PROG [-n|--dry-run] [-y|--yes] [-a|--all] [-f|--force] [-m|--min-cpu SEC]
+
+Kill language servers that no longer have a live parent, and record who spawned
+the ones that still do.
+
+  -n, --dry-run       print the classification table and exit
+  -y, --yes           kill every orphan without opening the picker
+  -a, --all           open the picker on every server, not just orphans
+  -f, --force         SIGKILL immediately instead of SIGTERM-then-SIGKILL
+  -m, --min-cpu SEC   only treat an orphan as prunable past SEC of CPU time
+  -h, --help          this
+
+Picker keys: enter kill selected | tab mark | ctrl-a toggle all
+EOF
+}
+
+# --- args ---------------------------------------------------------------------
+
+typeset -i opt_dry=0 opt_yes=0 opt_all=0 opt_force=0 opt_min=0
+while (( $# )); do
+  case $1 in
+    -n|--dry-run) opt_dry=1 ;;
+    -y|--yes)     opt_yes=1 ;;
+    -a|--all)     opt_all=1 ;;
+    -f|--force)   opt_force=1 ;;
+    -m|--min-cpu) shift; [[ ${1:-} == <-> ]] || die "--min-cpu wants seconds"; opt_min=$1 ;;
+    -h|--help)    usage; exit 0 ;;
+    *)            usage >&2; die "unknown option: $1" ;;
+  esac
+  shift
+done
+(( opt_dry || opt_yes )) || (( $+commands[fzf] )) || die "fzf not found in PATH"
+
+# --- helpers ------------------------------------------------------------------
+
+# Same age formatting as bin/zmx-prune, kept local so each script stays a
+# standalone drop-in on PATH.
+human_age() {
+  local -i s=$1
+  local -i d=$(( s / 86400 )) h=$(( s % 86400 / 3600 )) m=$(( s % 3600 / 60 ))
+  if   (( d )); then print -r -- "${d}d${h}h"
+  elif (( h )); then print -r -- "${h}h${m}m"
+  elif (( m )); then print -r -- "${m}m"
+  else              print -r -- "${s}s"
+  fi
+}
+
+# ps prints both cumulative CPU (`time`) and elapsed wall clock (`etime`) as
+# [DD-]HH:MM:SS or MM:SS.ss -- normalize either to seconds so they can be
+# sorted, thresholded, and subtracted.
+#
+# `etime` and not `etimes`: only some ps builds carry the seconds-valued
+# `etimes`, and BSD /bin/ps -- which a login zsh resolves -- rejects it with
+# "keyword not found". `etime` is portable and still space-free.
+hms_secs() {
+  local t=$1 days=0
+  if [[ $t == *-* ]]; then days=${t%%-*}; t=${t#*-}; fi
+  local -a p=("${(@s.:.)t}")
+  local -i s=0 i
+  for i in $p; do s=$(( s * 60 + ${i%%.*} )); done
+  print -r -- $(( s + days * 86400 ))
+}
+
+# Shorten an argv to something a table column can hold: the binary's basename,
+# or for an interpreted one the script it runs, since a bare `node` names
+# nothing useful.
+short_name() {
+  local -a w=(${(z)1})
+  local n=${${w[1]:-?}:t}
+  if [[ $n == (node|bun|deno|python|python3|ruby|perl|sh|bash|zsh|dash) && -n ${w[2]:-} ]]; then
+    n=${w[2]:t}
+  fi
+  print -r -- $n
+}
+
+# --- snapshot -----------------------------------------------------------------
+#
+# One pass over the process table, normalizing ps's clock fields to seconds.
+# now-elapsed gives a start time that doubles as a pid-reuse guard: a recycled
+# pid carries a start time minutes or hours off the one we recorded.
+
+typeset -i now=$(date +%s)
+typeset -A cur_ppid cur_cmd cur_start cur_cpu
+typeset line pid ppid etime cputime pcpu cmd
+typeset -a pids
+
+while IFS= read -r line; do
+  read -r pid ppid etime cputime pcpu cmd <<<"$line"
+  [[ -n ${cmd:-} ]] || continue
+  [[ $cmd =~ $LSP_RE ]] || continue
+  [[ $pid == $$ ]] && continue
+  cur_ppid[$pid]=$ppid
+  cur_cmd[$pid]=$cmd
+  cur_start[$pid]=$(( now - $(hms_secs $etime) ))
+  cur_cpu[$pid]=$(hms_secs $cputime)
+  pids+=($pid)
+done < <(ps -Ao pid=,ppid=,etime=,time=,pcpu=,command= 2>/dev/null)
+
+# Remembered parents from previous runs, dropped when the start time disagrees
+# (pid reuse) so a stale row can never misattribute a fresh process.
+typeset -A was_ppid was_pcmd
+if [[ -r $STATE_FILE ]]; then
+  typeset s_pid s_start s_ppid s_pcmd
+  while IFS=$'\t' read -r s_pid s_start s_ppid s_pcmd; do
+    [[ -n ${s_pid:-} && -n ${cur_start[$s_pid]:-} ]] || continue
+    (( ${cur_start[$s_pid]} - s_start >= -2 && ${cur_start[$s_pid]} - s_start <= 2 )) || continue
+    was_ppid[$s_pid]=$s_ppid
+    was_pcmd[$s_pid]=$s_pcmd
+  done < $STATE_FILE
+fi
+
+# Rewrite the snapshot. A live parent is recorded fresh; an orphan carries its
+# remembered row forward, because its parent is already gone and that row is the
+# only surviving record of where it came from -- drop it and the next run erases
+# the attribution this tool exists to preserve. Rows for pids that no longer
+# exist fall away, which is how the file stays small.
+mkdir -p -- $STATE_DIR 2>/dev/null || die "cannot create $STATE_DIR"
+typeset tmp_state
+tmp_state=$(mktemp "${TMPDIR:-/tmp}/${PROG}-state.XXXXXX") || die "mktemp failed"
+for pid in $pids; do
+  ppid=${cur_ppid[$pid]}
+  if (( ppid > 1 )); then
+    cmd=$(ps -p $ppid -o command= 2>/dev/null)
+    [[ -n ${cmd:-} ]] || cmd=${was_pcmd[$pid]:-}
+  else
+    ppid=${was_ppid[$pid]:-}
+    cmd=${was_pcmd[$pid]:-}
+  fi
+  [[ -n ${ppid:-} && -n ${cmd:-} ]] || continue
+  # Real tabs, not "\t": `print -r` does no escape processing, and the reader
+  # splits on IFS=$'\t'. Getting this wrong loses every attribution silently.
+  print -r -- "$pid"$'\t'"${cur_start[$pid]}"$'\t'"$ppid"$'\t'"$cmd" >> $tmp_state
+done
+[[ -e $tmp_state ]] && mv -f -- $tmp_state $STATE_FILE
+rm -f -- $tmp_state
+
+# --- classify -----------------------------------------------------------------
+
+typeset tmp_all tmp_orphans
+tmp_all=$(mktemp "${TMPDIR:-/tmp}/${PROG}-all.XXXXXX") || die "mktemp failed"
+tmp_orphans=$(mktemp "${TMPDIR:-/tmp}/${PROG}-orphans.XXXXXX") || die "mktemp failed"
+# HUP matters as much as INT/TERM: reap_fzf must run before the tempfiles go
+# away, since fzf's preview and reloads read them.
+trap 'reap_fzf; rm -f -- "$tmp_all" "$tmp_orphans"' EXIT INT HUP TERM
+
+typeset -i n_owned=0 n_orphan=0 n_mux=0 n_skipped=0
+typeset state origin short rec w pcmd
+typeset -a recs
+typeset -i w_origin=6
+
+for pid in $pids; do
+  ppid=${cur_ppid[$pid]}
+  cmd=${cur_cmd[$pid]}
+
+  if [[ $cmd == *__omp_worker_lsp_mux* ]]; then
+    # The mux is a manager: other omp sessions reach it over a socket rather
+    # than by being its parent, so a live one with no parent is not obviously
+    # garbage. Report it, never offer it up unless asked with --all.
+    state=mux; (( ++n_mux ))
+  elif (( ppid > 1 )); then
+    state=owned; (( ++n_owned ))
+  elif (( ${cur_cpu[$pid]} < opt_min )); then
+    state=owned; (( ++n_skipped ))   # orphan, but under the --min-cpu floor
+  else
+    state=orphan; (( ++n_orphan ))
+  fi
+
+  # Where it came from: the live parent, else the one we remembered, else the
+  # honest answer.
+  if (( ppid > 1 )); then
+    typeset pcmd=${cur_cmd[$ppid]:-$(ps -p $ppid -o command= 2>/dev/null)}
+    origin=${${pcmd:+$(short_name "$pcmd")}:-pid=$ppid}
+  elif [[ -n ${was_pcmd[$pid]:-} ]]; then
+    origin="was $(short_name "${was_pcmd[$pid]}")"
+  else
+    origin=unknown
+  fi
+  (( ${#origin} > w_origin )) && w_origin=${#origin}
+
+  # Identity of a server, short enough for a table: the binary, or for an
+  # interpreted one the script it runs, since a bare `node` names nothing. Keep
+  # the first long flag when that is what selects server mode (`oxlint --lsp`).
+  short=$(short_name "$cmd")
+  typeset -a words=(${(z)cmd})
+  for w in ${words[2,-1]}; do
+    [[ $w == (--*|__omp_worker_*) ]] && { short+=" $w"; break }
+  done
+
+  # Zero-padded CPU seconds lead the record so a plain reverse lexical sort puts
+  # the costliest server first; the key is dropped when the row is printed.
+  recs+=("${(l:12::0:)${cur_cpu[$pid]}}"$'\t'"$state"$'\t'"${cur_cpu[$pid]}"$'\t'"$origin"$'\t'"$short"$'\t'"$pid")
+done
+
+typeset -i n_total=$#recs
+
+if (( ! n_total )); then
+  print -r -- "$PROG: no language servers running."
+  exit 0
+fi
+
+# PID is the LAST column on purpose: argv fragments contain spaces, so `awk $NF`
+# and fzf's `{-1}` stay correct however the command splits.
+typeset row_fmt="%-6s  %-9s  %-${w_origin}s  %-38s  %s"
+typeset header=$(printf "$row_fmt" STATE CPU ORIGIN SERVER PID)
+
+typeset row
+typeset -a fields
+# Sort by CPU time descending: the process actually costing you something goes
+# first, which is the one you came here for.
+for rec in ${(O)recs}; do
+  fields=("${(@s:	:)rec}")
+  row=$(printf "$row_fmt" "$fields[2]" "$(human_age $fields[3])" "$fields[4]" \
+    "$fields[5]" "$fields[6]")
+  print -r -- "$row" >> $tmp_all
+  [[ $fields[2] == orphan ]] && print -r -- "$row" >> $tmp_orphans
+done
+
+summary() {
+  print -r -- "$PROG: $n_total language server(s): $n_orphan orphan, $n_owned owned, $n_mux mux$( (( n_skipped )) && print -n -- ", $n_skipped under --min-cpu")"
+}
+
+if (( opt_dry )); then
+  summary
+  print -r -- "$header"
+  cat -- $tmp_all
+  exit 0
+fi
+
+if (( ! n_orphan && ! opt_all )); then
+  summary
+  print -r -- "$PROG: nothing orphaned. Use --all to pick from every server."
+  exit 0
+fi
+
+# --- select -------------------------------------------------------------------
+
+typeset -a targets
+if (( opt_yes )); then
+  targets=(${(f)"$(awk 'NF { print $NF }' $tmp_orphans)"})
+else
+  typeset src=$tmp_orphans
+  (( opt_all )) && src=$tmp_all
+  typeset -i rc=0
+  fzf_pick "$src" \
+    --multi \
+    --height=80% \
+    --reverse \
+    --prompt="lsp-prune> " \
+    --header="enter: kill selected | tab: mark | ctrl-a: toggle all
+$header" \
+    --bind='ctrl-a:toggle-all' \
+    --preview='ps -p {-1} -ww -o pid,ppid,lstart,time,%cpu,command' \
+    --preview-window=down:40%:wrap \
+    || rc=$?
+  (( rc == 0 )) || { print -r -- "$PROG: aborted."; exit 130 }
+  targets=(${(f)"$(print -r -- "$fzf_out" | awk 'NF { print $NF }')"})
+fi
+
+(( $#targets )) || { print -r -- "$PROG: nothing selected."; exit 0 }
+
+# --- kill ---------------------------------------------------------------------
+#
+# SIGTERM, then SIGKILL if it is still there. omp's own shutdown path stops at
+# SIGTERM and gives up after a second, which is one of the ways these leak in
+# the first place -- so escalate here rather than repeat that.
+
+typeset -i killed=0
+for pid in $targets; do
+  [[ $pid == <-> ]] || continue
+  if (( opt_force )); then
+    kill -KILL $pid 2>/dev/null || continue
+  else
+    kill -TERM $pid 2>/dev/null || continue
+    typeset -i i
+    for i in {1..20}; do
+      kill -0 $pid 2>/dev/null || break
+      sleep 0.1
+    done
+    kill -0 $pid 2>/dev/null && kill -KILL $pid 2>/dev/null
+  fi
+  (( ++killed ))
+  print -r -- "  $pid $(short_name "${cur_cmd[$pid]}")"
+done
+
+print -r -- "$PROG: killed $killed of $#targets selected server(s)."
