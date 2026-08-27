@@ -365,8 +365,14 @@ alias gld='_git-log-diff'
 compdef _git gld=git-log
 
 # with signed commits
+# <sha>  <when>  <title>  <tag,branch> <author> <gpg>
 alias  glgpg='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,#989898)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an> %C(auto,magenta)<gpg: %G?>"'
 compdef _git glgpg=git-log
+
+# with signed commits
+# <sha>  <when>  <author>  <gpg>  <title>  <tag,branch>
+alias  glgg='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  %C(auto,magenta)gpg: %G?  %C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d"'
+compdef _git glgg=git-log
 
 # without signed commits
 alias  glog='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,#989898)%s %C(auto,red)% gD% %C(auto)%d %C(auto,blue)<%an>"'
