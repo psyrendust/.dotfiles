@@ -110,9 +110,23 @@ while (( $# )); do
   shift
 done
 
-for cmd in zmx supacode; do
+for cmd in supacode; do
   (( $+commands[$cmd] )) || die "$cmd not found in PATH"
 done
+
+# --- zmx client ---------------------------------------------------------------
+#
+# Supacode bundles its own zmx and every `supa-*` server IS that build, so the
+# client must be the same build. A Homebrew zmx one minor ahead sends a `list`
+# probe the older server never answers, and `ipc.probeSession` waits for the
+# reply in poll() with no timeout -- so this script hangs forever instead of
+# failing. `history`/`kill`/`attach` stayed wire compatible across 0.6/0.7,
+# which is why only the listing hangs and it reads as a stall, not an error.
+# So resolve the binary that sits next to the supacode CLI, and fall back to
+# PATH only when Supacode is not installed.
+typeset -g ZMX=${${commands[supacode]:A:h:h}:+${commands[supacode]:A:h:h}/zmx/zmx}
+[[ -n $ZMX && -x $ZMX ]] || ZMX=${commands[zmx]}
+[[ -n $ZMX && -x $ZMX ]] || die "zmx not found (neither in Supacode.app nor on PATH)"
 (( opt_dry || opt_yes )) || (( $+commands[fzf] )) || die "fzf not found in PATH"
 
 # --- live supacode surfaces ---------------------------------------------------
@@ -194,7 +208,7 @@ typeset line row state reason name pid clients created dir rec
 typeset -a fields recs
 typeset -i w_dir=8
 
-for line in ${(f)"$(zmx list 2>/dev/null)"}; do
+for line in ${(f)"$($ZMX list 2>/dev/null)"}; do
   fields=("${(@s:	:)line}")
   name=${fields[1]#*name=}
   pid=${fields[2]#*pid=}
@@ -288,7 +302,7 @@ $header" \
     --bind='ctrl-a:toggle-all' \
     --bind="ctrl-l:reload(cat -- $tmp_all)" \
     --bind="ctrl-o:reload(cat -- $tmp_orphans)" \
-    --preview='zmx history {-1} 2>/dev/null | tail -200' \
+    --preview="$ZMX history {-1} 2>/dev/null | tail -200" \
     --preview-window=right:55%:follow \
     || rc=$?
   (( rc == 0 )) || { print -r -- "$PROG: aborted."; exit 130 }
@@ -320,6 +334,6 @@ fi
 typeset -a kill_args=($targets)
 (( opt_force )) && kill_args+=(--force)
 
-zmx kill "${kill_args[@]}" || die "zmx kill failed"
+$ZMX kill "${kill_args[@]}" || die "zmx kill failed"
 print -r -- "$PROG: killed $#targets session(s):"
 print -rl -- ${targets/#/  }

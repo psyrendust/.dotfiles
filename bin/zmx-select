@@ -10,6 +10,19 @@ set -e
 
 typeset -g PROG=${0:t}
 
+# --- zmx client ---------------------------------------------------------------
+#
+# Same hazard as bin/zmx-prune, and kept local for the same reason. Supacode
+# bundles its own zmx and every `supa-*` server IS that build, so the client
+# must match: a Homebrew zmx one minor ahead sends a `list` probe the older
+# server never answers, and `ipc.probeSession` waits for the reply in poll()
+# with no timeout -- so the picker hangs forever with an empty screen instead of
+# failing. `history`/`attach` stayed wire compatible across 0.6/0.7, so the
+# preview and the attach still work; only the listing hangs.
+typeset -g ZMX=${${commands[supacode]:A:h:h}:+${commands[supacode]:A:h:h}/zmx/zmx}
+[[ -n $ZMX && -x $ZMX ]] || ZMX=${commands[zmx]}
+[[ -n $ZMX && -x $ZMX ]] || { print -ru2 -- "$PROG: zmx not found"; exit 1 }
+
 # --- picker -------------------------------------------------------------------
 #
 # Same fzf-outliving-us hazard as bin/zmx-prune, and kept local for the same
@@ -66,7 +79,7 @@ run() {
   local -a fields recs
   local -i now=$(date +%s) w_dir=8
 
-  for line in ${(f)"$(zmx list 2>/dev/null)"}; do
+  for line in ${(f)"$($ZMX list 2>/dev/null)"}; do
     fields=("${(@s:	:)line}")
     name=${fields[1]#*name=}
     pid=${fields[2]#*pid=}
@@ -111,7 +124,7 @@ run() {
     --prompt="zmx> " \
     --header="Enter: select | Ctrl-N: create new
 $header" \
-    --preview='zmx history {-1}' \
+    --preview="$ZMX history {-1}" \
     --preview-window=right:60%:follow \
     || rc=$?
   rm -f -- "$src"
@@ -131,7 +144,7 @@ $header" \
     return 130
   fi
 
-  zmx attach "$session_name"
+  $ZMX attach "$session_name"
 }
 
 trap 'reap_fzf' EXIT
