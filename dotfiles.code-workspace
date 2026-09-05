@@ -23,17 +23,59 @@
   ],
   "settings": {
     "peacock.color": "#6964E6",
+    // Object-valued settings are not deep-merged across scopes: this workspace
+    // value replaces the user-level one wholesale, so it must be self-contained.
+    // It re-states the user's entries plus the trees that live under "home".
     "files.watcherExclude": {
-      "**/target": true,
+      "**/.cache/**": true,
+      "**/.local/**": true,
+      "**/.npm/**": true,
+      "**/.nvm/**": true,
+      "**/node_modules/**": true,
+      "**/target/**": true,
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/.ammonite/**": true,
+      "**/.bloop/**": true,
+      "**/.metals/**": true,
+      "**/.tmp/**": true,
     },
+
+    // Nothing in a dotfiles repo is a JS/TS project; skip the task/script scans.
+    "npm.autoDetect": "off",
+    "task.autoDetect": "off",
+    "typescript.tsc.autoDetect": "off",
+
+    // "home" as a folder root otherwise makes the git extension hunt for repos.
+    "git.autoRepositoryDetection": "openEditors",
+
+    // $HOME contains symlinks that leave the workspace or loop.
+    "search.followSymlinks": false,
+
+    // Tailwind IntelliSense walked $HOME for 25 min at ~1400% CPU hunting for
+    // configs and package.json. There is no Tailwind here; give it nothing.
+    "tailwindCSS.files.exclude": [
+      "**/.cache/**",
+      "**/.local/**",
+      "**/.npm/**",
+      "**/.nvm/**",
+      "**/Library/**",
+      "**/node_modules/**",
+      "**/.git/**",
+    ],
     "files.exclude": {
       // -----------------------------------------------------------------------
       // ------------------------- DEV FILES -----------------------------------
       // -----------------------------------------------------------------------
       // config folders
-      ".cache": false,
+      // .cache is 1,247,769 entries / 36G and .local is 407,985 entries. Leaving
+      // them visible made every extension file scan walk them. Excluding them
+      // here also removes them from search and from workspace.findFiles callers.
+      ".cache": true,
+      ".local": true,
+
+      // Small enough to browse: .config is ~3.3K entries, .ssh is ~10.
       ".config": false,
-      ".local": false,
       ".ssh": false,
 
       // -----------------------------------------------------------------------
