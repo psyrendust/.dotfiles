@@ -4,6 +4,8 @@
 # List all closed PRs whose branches still exist locally, plus any orphaned
 # worktree directories/VSCode workspace files left behind by worktree removal
 # (via git, `supacode worktree delete`, or a local `--ff-only` merge with no PR).
+# With -w it also lists the live worktrees, so one can be retired together with
+# its VSCode workspace file (the branch is kept).
 # Fuzzy select items for deletion.
 #-------------------------------------------------------------------------------
 
@@ -12,6 +14,7 @@ set -e
 # Parse command line arguments
 DRY_RUN=false
 NO_COLOR=false
+INCLUDE_WORKTREES=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     -d|--dry-run)
@@ -22,9 +25,13 @@ while [[ $# -gt 0 ]]; do
       NO_COLOR=true
       shift
       ;;
+    -w|--worktrees)
+      INCLUDE_WORKTREES=true
+      shift
+      ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: cleanup [-d|--dry-run] [-n/|--no-color]"
+      echo "Usage: cleanup [-d|--dry-run] [-n|--no-color] [-w|--worktrees]"
       exit 1
       ;;
   esac
@@ -67,6 +74,12 @@ logDryRun() {
   fi
 }
 
+# Drop the ANSI color codes from stdin. Row keys and the selection both go
+# through this, so a row always maps back onto the key it was stored under.
+stripAnsi() {
+  sed 's/\x1b\[[0-9;]*m//g'
+}
+
 trashWorkspaceFile() {
   local file="$1"
   if [[ -n "$file" ]] && [[ -a "$file" ]]; then
@@ -79,15 +92,53 @@ trashWorkspaceFile() {
   fi
 }
 
+# Remove a registered worktree, then trash its <dir>.code-workspace file. Falls
+# back to trashing the directory when `git worktree remove` refuses (dirty or
+# locked worktree) so the files stay recoverable from the Trash.
+removeWorktree() {
+  # NB: not named `path` — in zsh that variable is tied to $PATH.
+  local worktree="$1"
+  local removeError=""
+  [[ -n "$worktree" ]] && [[ -d "$worktree" ]] || return 0
+  if [[ "$DRY_RUN" == true ]]; then
+    logDryRun "Removed worktree" "$worktree"
+  elif removeError=$(git worktree remove "$worktree" 2>&1); then
+    logStep "Removed worktree" "$worktree"
+  else
+    printf "${RED}[cleanup] git worktree remove failed: ${GREY}${removeError}${RESET}\n" >&2
+    trash "$worktree"
+    git worktree prune -v
+    logStep "Trashed worktree" "$worktree"
+  fi
+  trashWorkspaceFile "${worktree}.code-workspace"
+}
+
+# Rows generated below are matched back to their action through this map, keyed
+# on the row's uncolored text. A path can hold spaces, so it cannot be recovered
+# by splitting a rendered row; keys are exact, values are "<type>\t<path>".
+typeset -A ROW_ACTION
+
+# Remember what selecting a formatted row should do.
+#   $1 type (orphaned-workspace|orphaned-dir|live-worktree)
+#   $2 path the action operates on
+#   $3 the formatted (colored) row
+registerRow() {
+  local rowType="$1" target="$2" row="$3"
+  local key=$(echo "$row" | stripAnsi)
+  ROW_ACTION[$key]="${rowType}"$'\t'"${target}"
+}
+
 # Create a temporary file for local branches
 TEMP_BRANCHES=$(mktemp)
-trap "trash $TEMP_BRANCHES" EXIT
+trap 'trash "$TEMP_BRANCHES"' EXIT
 
 # Get list of local branches
 git for-each-ref --format='%(refname:short)' refs/heads > "$TEMP_BRANCHES"
 
-WORKTREE_ROOT=$(dirname $(git-root))
-GIT_ROOT=$(git-root)
+# Quoted: a worktree path can contain spaces, and an unquoted expansion here
+# hands `dirname` two arguments.
+GIT_ROOT="$(git-root)"
+WORKTREE_ROOT="$(dirname "$GIT_ROOT")"
 WORKTREE_LIST=$(git worktree list --porcelain)
 
 # Get the header (always needed for display)
@@ -96,11 +147,17 @@ HEADER=$(echo "$PR_OUTPUT" | head -n 2)
 
 # Extract column widths from the separator line (line 2: dashes separated by spaces)
 # This gives us: BRANCH_W, CLOSED_AT_W, ID_W, TITLE_W, URL_W
-COL_WIDTHS=($(echo "$HEADER" | tail -n 1 | sed 's/\x1b\[[0-9;]*m//g' | awk '{
+COL_WIDTHS=($(echo "$HEADER" | tail -n 1 | stripAnsi | awk '{
   for (i = 1; i <= NF; i++) print length($i)
 }'))
 BRANCH_W=${COL_WIDTHS[1]}
 CLOSED_AT_W=${COL_WIDTHS[2]}
+
+# Width of the status column on the non-PR rows. The PR rows put a relative date
+# there, which is usually narrower than the longest label ("live worktree
+# (unpushed)"), so widen it to keep those rows' path column aligned.
+LABEL_W=$CLOSED_AT_W
+(( LABEL_W < 24 )) && LABEL_W=24
 
 # Get closed PR info and filter to only show branches that exist locally
 FILTERED_OUTPUT=$(echo "$PR_OUTPUT" | awk -v branches_file="$TEMP_BRANCHES" '
@@ -143,16 +200,60 @@ ORPHANED_LINES=""
 for workspace_file in "$WORKTREE_ROOT"/*.code-workspace(N); do
   dir="${workspace_file%.code-workspace}"
   [[ "$dir" == "$GIT_ROOT" ]] && continue
-  echo "$WORKTREE_LIST" | grep -q "^worktree ${dir}$" && continue
+  echo "$WORKTREE_LIST" | grep -qxF -- "worktree ${dir}" && continue
   if [[ -d "$dir" ]]; then
+    row_type="orphaned-dir"
     label="orphaned dir"
     orphan_path="$dir"
   else
+    row_type="orphaned-workspace"
     label="orphaned workspace"
     orphan_path="$workspace_file"
   fi
-  ORPHANED_LINES+="$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${CLOSED_AT_W}s${RESET}  ${GREY}%s${RESET}" "${dir:t}" "$label" "$orphan_path")\n"
+  row=$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${YELLOW}%-${LABEL_W}s${RESET}  ${GREY}%s${RESET}" "${dir:t}" "$label" "$orphan_path")
+  registerRow "$row_type" "$orphan_path" "$row"
+  ORPHANED_LINES+="${row}\n"
 done
+
+# With --worktrees, list the live (registered) worktrees as well, so one can be
+# retired together with its <dir>.code-workspace file. The main worktree and the
+# worktree we're standing in are skipped: neither can be removed from here. A
+# worktree whose branch is already in the closed-PR list is skipped too, since
+# selecting that row removes worktree, workspace file and branch in one pass.
+WORKTREE_LINES=""
+if [[ "$INCLUDE_WORKTREES" == true ]]; then
+  CLOSED_PR_BRANCHES=$(echo "$FILTERED_OUTPUT" | tail -n +3 | stripAnsi | awk '{ print $1 }')
+  MAIN_WORKTREE=$(echo "$WORKTREE_LIST" | awk '/^worktree / { print substr($0, 10); exit }')
+  WORKTREE_PAIRS=$(echo "$WORKTREE_LIST" | awk '
+    /^worktree / {
+      if (path != "") print path "\t" branch
+      path = substr($0, 10)
+      branch = ""
+      next
+    }
+    /^branch refs\/heads\// { branch = substr($0, 19) }
+    END { if (path != "") print path "\t" branch }
+  ')
+  while IFS=$'\t' read -r wt_path wt_branch; do
+    [[ -z "$wt_path" ]] && continue
+    [[ "$wt_path" == "$MAIN_WORKTREE" ]] && continue
+    [[ "$wt_path" == "$GIT_ROOT" ]] && continue
+    [[ -n "$wt_branch" ]] && echo "$CLOSED_PR_BRANCHES" | grep -qxF -- "$wt_branch" && continue
+    label="live worktree"
+    label_color="$YELLOW"
+    if [[ -n "$(git -C "$wt_path" status --porcelain --untracked-files=no 2>/dev/null)" ]]; then
+      # Uncommitted tracked changes: `git worktree remove` will refuse this one.
+      label="live worktree (dirty)"
+      label_color="$RED"
+    elif [[ "$(git -C "$wt_path" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0)" != 0 ]]; then
+      label="live worktree (unpushed)"
+      label_color="$RED"
+    fi
+    row=$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${label_color}%-${LABEL_W}s${RESET}  ${GREY}%s${RESET}" "${wt_branch:-${wt_path:t}}" "$label" "$wt_path")
+    registerRow "live-worktree" "$wt_path" "$row"
+    WORKTREE_LINES+="${row}\n"
+  done <<< "$WORKTREE_PAIRS"
+fi
 
 # Build combined fzf input — always include header for column alignment
 HAS_ITEMS=false
@@ -165,13 +266,24 @@ if [[ -n "$BRANCH_LINES" ]] && echo "$BRANCH_LINES" | grep -q .; then
   FZF_INPUT="${FZF_INPUT}\n${BRANCH_LINES}"
 fi
 
+# Both blocks end in a literal "\n", stripped here so the rows stay contiguous:
+# a blank row in fzf is selectable and means nothing.
 if [[ -n "$ORPHANED_LINES" ]]; then
   HAS_ITEMS=true
-  FZF_INPUT="${FZF_INPUT}\n${ORPHANED_LINES}"
+  FZF_INPUT="${FZF_INPUT}\n${ORPHANED_LINES%\\n}"
+fi
+
+if [[ -n "$WORKTREE_LINES" ]]; then
+  HAS_ITEMS=true
+  FZF_INPUT="${FZF_INPUT}\n${WORKTREE_LINES%\\n}"
 fi
 
 if [[ "$HAS_ITEMS" == false ]]; then
-  logEmpty "No local branches with closed PRs or orphaned worktrees/workspace files found"
+  if [[ "$INCLUDE_WORKTREES" == true ]]; then
+    logEmpty "No local branches with closed PRs, removable worktrees or orphaned worktrees/workspace files found"
+  else
+    logEmpty "No local branches with closed PRs or orphaned worktrees/workspace files found"
+  fi
   exit 0
 fi
 
@@ -184,22 +296,33 @@ fi
 # Process each selected line
 while IFS= read -r line; do
   # Strip ANSI codes for parsing
-  clean_line=$(echo "$line" | sed 's/\x1b\[[0-9;]*m//g')
+  clean_line=$(echo "$line" | stripAnsi)
+  [[ -z "$clean_line" ]] && continue
 
-  if echo "$clean_line" | grep -q "orphaned workspace"; then
-    # Orphaned workspace file with no matching directory — path is the last token
-    FILE=$(echo "$clean_line" | awk '{ print $NF }')
-    trashWorkspaceFile "$FILE"
-  elif echo "$clean_line" | grep -q "orphaned dir"; then
-    # Orphaned directory line — path is the last whitespace-separated token
-    DIR=$(echo "$clean_line" | awk '{ print $NF }')
-    if [[ "$DRY_RUN" == true ]]; then
-      logDryRun "Trashed orphaned directory" "$DIR"
-    else
-      trash "$DIR"
-      logStep "Trashed orphaned directory" "$DIR"
-    fi
-    trashWorkspaceFile "${DIR}.code-workspace"
+  action="${ROW_ACTION[$clean_line]:-}"
+  if [[ -n "$action" ]]; then
+    # A row this script generated: type and path come from the map, never from
+    # splitting the row, so paths containing spaces survive.
+    row_type="${action%%$'\t'*}"
+    target="${action#*$'\t'}"
+    case "$row_type" in
+      orphaned-workspace)
+        trashWorkspaceFile "$target"
+        ;;
+      orphaned-dir)
+        if [[ "$DRY_RUN" == true ]]; then
+          logDryRun "Trashed orphaned directory" "$target"
+        else
+          trash "$target"
+          logStep "Trashed orphaned directory" "$target"
+        fi
+        trashWorkspaceFile "${target}.code-workspace"
+        ;;
+      live-worktree)
+        # Only the worktree and its workspace file go away; the branch is kept.
+        removeWorktree "$target"
+        ;;
+    esac
   else
     # Branch line - extract branch name (1st column)
     branch=$(echo "$clean_line" | awk '{ match($0, /^[^ ]+/); print substr($0, RSTART, RLENGTH) }')
@@ -220,17 +343,7 @@ while IFS= read -r line; do
 
     # If worktree exists, remove it first
     if [[ -n "$WORKTREE_PATH" ]] && [[ -d "$WORKTREE_PATH" ]]; then
-      if [[ "$DRY_RUN" == true ]]; then
-        logDryRun "Trashed worktree" "$WORKTREE_PATH"
-      else
-        if ! removeError=$(git worktree remove "$WORKTREE_PATH" 2>&1); then
-          printf "${RED}[cleanup] git worktree remove failed: ${GREY}${removeError}${RESET}\n" >&2
-          trash "$WORKTREE_PATH"
-          git worktree prune -v
-          logStep "Trashed worktree" "$WORKTREE_PATH"
-        fi
-      fi
-      trashWorkspaceFile "${WORKTREE_PATH}.code-workspace"
+      removeWorktree "$WORKTREE_PATH"
     else
       trashWorkspaceFile "$WORKTREE_ROOT/${cleanBranchName}.code-workspace"
     fi
