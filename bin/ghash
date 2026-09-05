@@ -33,7 +33,7 @@ EOF
 done
 
 # For short sha (fixed-width fields lead; variable subject + decorations trail)
-commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  ${gpg_col}%C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d" --color=always --reverse --max-count 50) &&
+commits=$(git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  ${gpg_col}%C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d" --color=always --reverse --max-count 100) &&
 commit=$(echo "$commits" | fzf --tac +s +m -e --ansi --reverse --header="Select a commit to retrieve its sha") &&
 sha=$(echo "${commit}" | awk '{ print $1 }')
 # Expand the displayed short sha to the full sha when --long is set.
