@@ -1,12 +1,12 @@
 #!/usr/bin/env zsh
 #
 # cleanup
-# List all closed PRs whose branches still exist locally, plus any orphaned
-# worktree directories/VSCode workspace files left behind by worktree removal
-# (via git, `supacode worktree delete`, or a local `--ff-only` merge with no PR).
-# With -w it also lists the live worktrees, so one can be retired together with
-# its VSCode workspace file (the branch is kept).
-# Fuzzy select items for deletion.
+# List the live worktrees, all closed PRs whose branches still exist locally, and
+# any orphaned worktree directories/VSCode workspace files left behind by an
+# earlier removal.
+# Fuzzy select items for deletion. Selecting a live worktree removes the worktree
+# and its VSCode workspace file; the branch goes too when it holds no unique
+# commits, which is the `wtree` + `git merge --ff-only` flow where no PR exists.
 #-------------------------------------------------------------------------------
 
 set -e
@@ -14,7 +14,7 @@ set -e
 # Parse command line arguments
 DRY_RUN=false
 NO_COLOR=false
-INCLUDE_WORKTREES=false
+INCLUDE_WORKTREES=true
 while [[ $# -gt 0 ]]; do
   case $1 in
     -d|--dry-run)
@@ -26,12 +26,17 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -w|--worktrees)
+      # Live worktrees are listed by default; accepted so old invocations work.
       INCLUDE_WORKTREES=true
+      shift
+      ;;
+    -W|--no-worktrees)
+      INCLUDE_WORKTREES=false
       shift
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: cleanup [-d|--dry-run] [-n|--no-color] [-w|--worktrees]"
+      echo "Usage: cleanup [-d|--dry-run] [-n|--no-color] [-W|--no-worktrees]"
       exit 1
       ;;
   esac
@@ -113,19 +118,35 @@ removeWorktree() {
   trashWorkspaceFile "${worktree}.code-workspace"
 }
 
+# Delete a local branch. Used after its worktree is gone, so the branch is no
+# longer checked out anywhere. Silent when the branch is already gone, so a
+# worktree removal that took the branch with it is not an error.
+deleteBranch() {
+  local branch="$1"
+  [[ -n "$branch" ]] || return 0
+  if [[ "$DRY_RUN" == true ]]; then
+    logDryRun "Deleted branch" "$branch"
+  elif git show-ref --verify --quiet "refs/heads/${branch}"; then
+    git branch -D "$branch" >/dev/null
+    logStep "Deleted branch" "$branch"
+  fi
+}
+
 # Rows generated below are matched back to their action through this map, keyed
 # on the row's uncolored text. A path can hold spaces, so it cannot be recovered
-# by splitting a rendered row; keys are exact, values are "<type>\t<path>".
+# by splitting a rendered row; keys are exact, values are
+# "<type>\t<path>\t<branch>" with an empty branch field when nothing is reaped.
 typeset -A ROW_ACTION
 
 # Remember what selecting a formatted row should do.
 #   $1 type (orphaned-workspace|orphaned-dir|live-worktree)
 #   $2 path the action operates on
 #   $3 the formatted (colored) row
+#   $4 branch to delete along with the path, empty to keep the branch
 registerRow() {
-  local rowType="$1" target="$2" row="$3"
+  local rowType="$1" target="$2" row="$3" branch="${4:-}"
   local key=$(echo "$row" | stripAnsi)
-  ROW_ACTION[$key]="${rowType}"$'\t'"${target}"
+  ROW_ACTION[$key]="${rowType}"$'\t'"${target}"$'\t'"${branch}"
 }
 
 # Create a temporary file for local branches
@@ -193,9 +214,9 @@ FILTERED_OUTPUT=$(echo "$PR_OUTPUT" | awk -v branches_file="$TEMP_BRANCHES" '
 
 # Find orphaned worktrees by scanning for <dir>.code-workspace files (created by
 # wtree) whose <dir> is no longer a registered git worktree. This is independent
-# of PR status, so it also catches worktrees removed via `supacode worktree
-# delete` (which drops the worktree + branch but leaves the workspace file) and
-# worktrees merged locally with `git merge --ff-only` (no PR involved at all).
+# of PR status, so it also catches a worktree removed by hand with
+# `git worktree remove` (which leaves the workspace file behind) and worktrees
+# merged locally with `git merge --ff-only` (no PR involved at all).
 ORPHANED_LINES=""
 for workspace_file in "$WORKTREE_ROOT"/*.code-workspace(N); do
   dir="${workspace_file%.code-workspace}"
@@ -215,15 +236,43 @@ for workspace_file in "$WORKTREE_ROOT"/*.code-workspace(N); do
   ORPHANED_LINES+="${row}\n"
 done
 
-# With --worktrees, list the live (registered) worktrees as well, so one can be
-# retired together with its <dir>.code-workspace file. The main worktree and the
-# worktree we're standing in are skipped: neither can be removed from here. A
-# worktree whose branch is already in the closed-PR list is skipped too, since
-# selecting that row removes worktree, workspace file and branch in one pass.
+# List the live (registered) worktrees, so one can be retired together with its
+# <dir>.code-workspace file. The main worktree and the worktree we're standing in
+# are skipped: neither can be removed from here. A worktree whose branch is
+# already in the closed-PR list is skipped too, since selecting that row removes
+# worktree, workspace file and branch in one pass.
+#
+# The label says what selecting the row costs. A branch is deleted along with its
+# worktree only when it holds nothing unique: every commit is already in the
+# default branch (locally or on origin) or in the branch's own upstream. That is
+# what catches the `wtree` + `git merge --ff-only` flow, where no PR ever existed
+# and only the local default branch has the commits. Anything else keeps the
+# branch, because a worktree is cheap to recreate and an unmerged branch is not.
 WORKTREE_LINES=""
 if [[ "$INCLUDE_WORKTREES" == true ]]; then
   CLOSED_PR_BRANCHES=$(echo "$FILTERED_OUTPUT" | tail -n +3 | stripAnsi | awk '{ print $1 }')
   MAIN_WORKTREE=$(echo "$WORKTREE_LIST" | awk '/^worktree / { print substr($0, 10); exit }')
+  DEFAULT_BRANCH=$(git-default-branch 2>/dev/null || echo "")
+  # Both refs are checked: after a local `--ff-only` merge the commits are in the
+  # local default branch and origin's copy is still behind.
+  DEFAULT_BASES=()
+  if [[ -n "$DEFAULT_BRANCH" ]]; then
+    git rev-parse --verify --quiet "refs/heads/${DEFAULT_BRANCH}" >/dev/null &&
+      DEFAULT_BASES+=("$DEFAULT_BRANCH")
+    git rev-parse --verify --quiet "refs/remotes/origin/${DEFAULT_BRANCH}" >/dev/null &&
+      DEFAULT_BASES+=("origin/${DEFAULT_BRANCH}")
+  fi
+
+  # True when every commit on the worktree's HEAD is already in the default
+  # branch. Fails closed: an unreadable worktree counts as unmerged.
+  branchIsMerged() {
+    local worktree="$1" base=""
+    for base in "${DEFAULT_BASES[@]}"; do
+      [[ "$(git -C "$worktree" rev-list --count "${base}..HEAD" 2>/dev/null || echo 1)" == 0 ]] &&
+        return 0
+    done
+    return 1
+  }
   WORKTREE_PAIRS=$(echo "$WORKTREE_LIST" | awk '
     /^worktree / {
       if (path != "") print path "\t" branch
@@ -241,16 +290,28 @@ if [[ "$INCLUDE_WORKTREES" == true ]]; then
     [[ -n "$wt_branch" ]] && echo "$CLOSED_PR_BRANCHES" | grep -qxF -- "$wt_branch" && continue
     label="live worktree"
     label_color="$YELLOW"
+    # Branch to delete with the worktree. Empty keeps the branch.
+    reap_branch=""
     if [[ -n "$(git -C "$wt_path" status --porcelain --untracked-files=no 2>/dev/null)" ]]; then
       # Uncommitted tracked changes: `git worktree remove` will refuse this one.
       label="live worktree (dirty)"
       label_color="$RED"
-    elif [[ "$(git -C "$wt_path" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0)" != 0 ]]; then
+    elif branchIsMerged "$wt_path"; then
+      label="live worktree (merged)"
+      reap_branch="$wt_branch"
+    elif ! git -C "$wt_path" rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1; then
+      label="live worktree (unmerged)"
+      label_color="$RED"
+    elif [[ "$(git -C "$wt_path" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 1)" == 0 ]]; then
+      # Not merged, but every commit is on origin, so the branch is recoverable.
+      label="live worktree (pushed)"
+      reap_branch="$wt_branch"
+    else
       label="live worktree (unpushed)"
       label_color="$RED"
     fi
     row=$(printf "${CYAN}%-${BRANCH_W}s${RESET}  ${label_color}%-${LABEL_W}s${RESET}  ${GREY}%s${RESET}" "${wt_branch:-${wt_path:t}}" "$label" "$wt_path")
-    registerRow "live-worktree" "$wt_path" "$row"
+    registerRow "live-worktree" "$wt_path" "$row" "$reap_branch"
     WORKTREE_LINES+="${row}\n"
   done <<< "$WORKTREE_PAIRS"
 fi
@@ -301,10 +362,12 @@ while IFS= read -r line; do
 
   action="${ROW_ACTION[$clean_line]:-}"
   if [[ -n "$action" ]]; then
-    # A row this script generated: type and path come from the map, never from
-    # splitting the row, so paths containing spaces survive.
-    row_type="${action%%$'\t'*}"
-    target="${action#*$'\t'}"
+    # A row this script generated: type, path and branch come from the map, never
+    # from splitting the row, so paths containing spaces survive.
+    action_fields=("${(@ps:\t:)action}")
+    row_type="${action_fields[1]}"
+    target="${action_fields[2]}"
+    reap_branch="${action_fields[3]:-}"
     case "$row_type" in
       orphaned-workspace)
         trashWorkspaceFile "$target"
@@ -319,8 +382,10 @@ while IFS= read -r line; do
         trashWorkspaceFile "${target}.code-workspace"
         ;;
       live-worktree)
-        # Only the worktree and its workspace file go away; the branch is kept.
+        # The worktree and its workspace file always go. The branch goes only
+        # when the listing found nothing unique on it.
         removeWorktree "$target"
+        deleteBranch "$reap_branch"
         ;;
     esac
   else
@@ -348,12 +413,6 @@ while IFS= read -r line; do
       trashWorkspaceFile "$WORKTREE_ROOT/${cleanBranchName}.code-workspace"
     fi
 
-    # Delete the branch
-    if [[ "$DRY_RUN" == true ]]; then
-      logDryRun "Trashed branch" "$branch"
-    else
-      git branch -D ${branch}
-      logStep "Trashed branch" "$branch"
-    fi
+    deleteBranch "$branch"
   fi
 done <<< "$SELECTED"
