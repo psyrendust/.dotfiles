@@ -19,13 +19,14 @@ const meowCli = meow(
     pathCase        Transform into a lower case string with slashes between words
     sentenceCase    Transform into a lower case with spaces between words then capitalize the string
     snakeCase       Transform into a lower case string with underscores between words
-    trainCase       Transform into a string with random capitalization applied
+    trainCase       Transform into a dash separated string with each word capitalized
 
   Examples
     $ changecase snake_case_string
     snakeCaseString
 `,
   {
+    allowUnknownFlags: false,
     argv: process.argv.slice(2),
     importMeta: import.meta,
     flags: {
@@ -52,13 +53,21 @@ const options = new Set([
 
 const [arg1, arg2] = meowCli.input;
 let option = 'camelCase';
-let input = '';
+let input = arg1;
 
-if (arg2 != null && options.has(arg1)) {
+if (arg2 != null) {
+  if (!options.has(arg1)) {
+    console.error(`changecase: unknown case '${arg1}'. Run \`changecase --help\` for the supported cases.`);
+    process.exit(1);
+  }
+
   option = arg1;
   input = arg2;
-} else {
-  input = arg1;
+}
+
+// Reached when every argument was a flag, so there is nothing to transform.
+if (input == null) {
+  meowCli.showHelp();
 }
 
 if (input.length > 0) {
