@@ -1,0 +1,37 @@
+# Keeps the release toolchain from drifting far enough behind that a lockfile
+# refresh stops being enough to clear an advisory. Grouped so a week of npm
+# churn arrives as one review instead of a dozen.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 5
+    # semantic-release reads these prefixes: a runtime fix cuts a patch
+    # release, a devDependency bump deliberately does not.
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+      dev-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        applies-to: version-updates
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
