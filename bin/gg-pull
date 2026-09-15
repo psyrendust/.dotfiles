@@ -43,8 +43,8 @@ if (( $ALL_FLAGS[(Ie)$1] )); then
   fi
 
   if (( $UPDATE_FLAG[(Ie)$1] )); then
-    chalk -t "[{blue GGPULL}] rebasing {green.bold $sourceBranch} onto {blue.bold $destinationBranch}"
-    # Rebase changes from sourceBranch onto the current branch
+    chalk -t "[{blue GGPULL}] rebasing {blue.bold $destinationBranch} onto {green.bold $sourceBranch}"
+    # Rebase changes from current branch onto sourceBranch
     git rebase $sourceBranch
     chalk -t "[{green TEST}] rebase complete {green.bold $sourceBranch}"
   fi
