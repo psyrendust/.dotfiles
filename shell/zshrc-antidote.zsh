@@ -40,16 +40,55 @@ export PURE_GIT_UNTRACKED_DIRTY=0
 ### Custom pure prompt settings
 # https://github.com/sindresorhus/pure#zstyle-options
 # ------------------------------------------------------------------------------
-zstyle :prompt:pure:git:dirty detailed yes
-zstyle :prompt:pure:git:stash show yes
+
+# ------------------------------------------------------------------------------
+# Show git stash status as part of the prompt.
+zstyle :prompt:pure:git:stash show no
+
+# ------------------------------------------------------------------------------
+# You can set Pure to only git fetch the upstream branch of the current local
+# branch. In some cases, this can result in faster updates for Git arrows, but
+# for most users, it's better to leave this setting disabled.
+zstyle :prompt:pure:git:fetch only_upstream no
+
+# ------------------------------------------------------------------------------
+# Node.js version display shows the current major node version when inside a directory tree containing a package.json.
 zstyle :prompt:pure:environment:node_version show yes
+
+# You can change the symbol shown before the Node.js version (default ⬢)
+zstyle :prompt:pure:environment:node_version symbol '⬢'
 if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
   # Add space after symbol to fix rendering bug with ghostty
   zstyle :prompt:pure:environment:node_version symbol '⬢ '
 fi
-# Disabled settings
+
+# ------------------------------------------------------------------------------
+# nix-shell integration adds the shell name to the prompt when used from within a nix shell.
 zstyle :prompt:pure:environment:nix-shell show no
+
+# ------------------------------------------------------------------------------
+# Virtualenv integration shows the current Python virtualenv or Conda environment name.
 zstyle :prompt:pure:environment:virtualenv show no
+
+# ------------------------------------------------------------------------------
+# Git integration
+zstyle :prompt:pure:git show yes
+
+# ------------------------------------------------------------------------------
+# Detailed dirty indicators differentiate between unstaged (*), staged (+), and untracked (?) changes instead of showing a single *.
+zstyle :prompt:pure:git:dirty detailed no
+
+# ------------------------------------------------------------------------------
+# Path separator dimming makes / characters in the path visually dimmer to help distinguish path components.
+zstyle :prompt:pure:path:separator dim yes
+
+# ------------------------------------------------------------------------------
+# Hostname display is enabled by default when in an SSH session or container.
+zstyle :prompt:pure:host show yes
+
+# ------------------------------------------------------------------------------
+# Automatic terminal title management can be disabled if you want to set your own tab or window titles
+zstyle :prompt:pure:title show yes
 
 
 # ------------------------------------------------------------------------------
