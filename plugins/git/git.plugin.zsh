@@ -371,7 +371,7 @@ compdef _git glgpg=git-log
 
 # with signed commits
 # <sha>  <when>  <author>  <gpg>  <title>  <tag,branch>
-alias  glgg='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  %C(auto,magenta)gpg: %G?  %C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d"'
+alias  glgg='git log --pretty=format:"%C(auto,yellow)%h %C(auto,green)%>(13,trunc)%ar  %C(auto,blue)%an  %C(auto,magenta)gpg: %G?  %C(auto,red)% gD%C(auto,#989898)%s%C(auto)%d" --max-count 50'
 compdef _git glgg=git-log
 
 # without signed commits
