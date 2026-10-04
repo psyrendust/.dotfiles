@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# bd shim: resolve BEADS_DIR from the current directory on every call.
+#
+# bd's own discovery stops at the primary checkout's `.git`, so worktrees miss
+# the project's `.beads`. A shell hook can't fix that for agents: their bash
+# inherits an exported snapshot that never follows `cd`. Resolving here works
+# in any shell, because every child process inherits PATH.
+#
+# The nearest `.beads` below $HOME wins. Outside a project, an inherited
+# BEADS_DIR passes through unchanged.
+
+dir=$PWD
+while [[ $dir != "/" && $dir != "$HOME" ]]; do
+	if [[ -d $dir/.beads ]]; then
+		export BEADS_DIR=$dir/.beads
+		break
+	fi
+	dir=${dir%/*}
+	[[ -z $dir ]] && dir=/
+done
+
+self=$(cd "${BASH_SOURCE[0]%/*}" && pwd -P)/${BASH_SOURCE[0]##*/}
+IFS=: read -ra path_dirs <<<"$PATH"
+for p in "${path_dirs[@]}"; do
+	candidate=$p/bd
+	[[ -x $candidate && ! -d $candidate ]] || continue
+	resolved=$(cd "${candidate%/*}" && pwd -P)/bd
+	[[ $resolved == "$self" ]] && continue
+	exec "$candidate" "$@"
+done
+
+echo "bd shim: no real bd found on PATH" >&2
+exit 127
