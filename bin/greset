@@ -1,0 +1,53 @@
+#!/usr/bin/env zsh
+#
+# greset
+# Reset the current branch to its remote tracking branch (or origin/<branch>).
+#
+# Usage: greset [-f|--fetch] [-h|--help]
+#   -f, --fetch  Fetch the remote branch before resetting.
+#   -h, --help   Show this help and exit.
+#-------------------------------------------------------------------------------
+
+emulate -L zsh
+setopt err_exit no_unset pipe_fail
+
+typeset -g PROG=${0:t}
+
+usage() {
+  cat <<'EOF'
+greset — reset the current branch to its remote tracking branch (or origin/<branch>).
+
+Usage: greset [-f|--fetch] [-h|--help]
+  -f, --fetch  Fetch the remote branch before resetting.
+  -h, --help   Show this help and exit.
+EOF
+}
+
+typeset -a opt_fetch opt_help
+zparseopts -D -E -F -- \
+  f=opt_fetch -fetch=opt_fetch \
+  h=opt_help  -help=opt_help   \
+  || exit 1
+
+if (( ${#opt_help} )); then
+  usage
+  exit 0
+fi
+
+branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || {
+  print -ru2 -- "$PROG: not on a branch (detached HEAD or not a git repository)"
+  exit 1
+}
+
+target=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null) \
+  || target="origin/$branch"
+
+if (( ${#opt_fetch} )); then
+  remote=${target%%/*}
+  remote_branch=${target#*/}
+  git fetch "$remote" "$remote_branch"
+fi
+
+prev=$(git rev-parse --short HEAD)
+print -r -- "$PROG: $branch (was $prev) -> $target"
+git reset --hard "$target"
