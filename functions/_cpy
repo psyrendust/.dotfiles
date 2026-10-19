@@ -1,0 +1,15 @@
+#compdef cpy
+#
+# Completion for the `cpy` command.
+#
+# Autoloaded from $ZDOT_FUNCTIONS (on $fpath) and bound to `cpy` by compinit
+# via the `#compdef` tag above.
+# ------------------------------------------------------------------------------
+
+_arguments -s -S \
+  '(-s --short)'{-s,--short}'[Copy full path using ~/ shorthand (ignores git root)]' \
+  '(-a --abs)'{-a,--abs}'[Copy full path with /Users/<user> expanded]' \
+  '(-p --pick)'{-p,--pick}'[Interactively pick one or more files/directories]' \
+  '(-I --ignored)'{-I,--ignored}'[Include gitignored files when picking]' \
+  '(-h --help)'{-h,--help}'[Show help and exit]' \
+  '1:file or directory:_files'
