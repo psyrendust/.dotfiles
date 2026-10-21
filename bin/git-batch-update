@@ -1,0 +1,851 @@
+#!/usr/bin/env zsh
+#
+# git-batch-update
+# Fetch and update all git repositories inside a directory in parallel.
+#
+# Discovers immediate child repositories (<dir>/<repo>/.git) as well as
+# bare-worktree containers (<dir>/<repo>/.bare -> default worktree).
+#
+# Before updating a repository that has incoming commits, any modified or
+# untracked files are staged with `git add --all` and stashed with
+# `git stash push` so untracked files never collide with incoming paths.
+# Auto-stashes are intentionally left in `stash@{0}` (not popped) to avoid
+# mid-batch merge conflicts, and their `git -C <repo> stash pop` commands
+# are printed in the summary footer.
+#
+# Initialized submodules are updated automatically (`git submodule update
+# --recursive`); pass `-S/--init-submodules` to also initialize uninitialized
+# submodules.
+#-------------------------------------------------------------------------------
+
+emulate -L zsh
+setopt no_unset pipe_fail
+zmodload zsh/datetime
+
+typeset -g PROG=${0:t}
+
+die() { print -ru2 -- "$PROG: $*"; exit 1 }
+
+usage() {
+  cat <<EOF
+usage: $PROG [options] [dir]
+
+Fetch and update all git repositories in [dir] (default: current directory)
+in parallel.
+
+Options:
+  -j, --jobs N            Parallel worker count (default: 8)
+  -i, --interactive       Open results in fzf with commit/stash/status preview
+  -u, --updates-only      Hide up-to-date repos from the table
+  -f, --force             Force-update dirty or diverged repos (auto-stash + reset --hard @{u})
+  -r, --rebase            Rebase onto upstream (\`git rebase @{u}\`) instead of --ff-only
+  -S, --init-submodules   Also initialize uninitialized submodules (--init --recursive)
+      --no-submodules     Skip automatic \`git submodule update --recursive\`
+  -a, --all-refs          Fetch all remote branches and tags (default: tracked branch only)
+  -n, --dry-run           Fetch remotes and preview updates without changing HEAD or stashing
+      --color             Force ANSI colors even when piped
+      --no-color          Disable ANSI colors
+  -h, --help              Show this help and exit
+
+Picker keys (--interactive):
+  enter: print repo path | ctrl-u: updates/issues only | ctrl-a: all repos
+EOF
+}
+
+# --- args ---------------------------------------------------------------------
+
+typeset -i opt_jobs=8 opt_interactive=0 opt_updates_only=0
+typeset -i opt_rebase=0 opt_reset=0 opt_init_submodules=0 opt_no_submodules=0
+typeset -i opt_all_refs=0 opt_dry=0 opt_color=0 opt_no_color=0
+typeset target_dir=""
+
+while (( $# )); do
+  case $1 in
+    -j|--jobs)
+      shift
+      [[ ${1:-} == <-> && ${1:-0} -gt 0 ]] || die "--jobs wants a positive integer"
+      opt_jobs=$1
+      ;;
+    --jobs=*)
+      typeset val=${1#*=}
+      [[ $val == <-> && $val -gt 0 ]] || die "--jobs wants a positive integer"
+      opt_jobs=$val
+      ;;
+    -i|--interactive)     opt_interactive=1 ;;
+    -u|--updates-only)    opt_updates_only=1 ;;
+    -f|--force|--reset)   opt_reset=1 ;;
+    -r|--rebase)          opt_rebase=1 ;;
+    -S|--init-submodules) opt_init_submodules=1 ;;
+    --no-submodules)      opt_no_submodules=1 ;;
+    -a|--all-refs)        opt_all_refs=1 ;;
+    -n|--dry-run)         opt_dry=1 ;;
+    --color)              opt_color=1; opt_no_color=0 ;;
+    --no-color)           opt_no_color=1; opt_color=0 ;;
+    -h|--help)            usage; exit 0 ;;
+    --)                   shift; break ;;
+    -*)                   usage >&2; die "unknown option: $1" ;;
+    *)
+      [[ -z $target_dir ]] || die "unexpected extra argument: $1"
+      target_dir=$1
+      ;;
+  esac
+  shift
+done
+
+if (( $# )); then
+  [[ -z $target_dir ]] || die "unexpected extra argument: $1"
+  target_dir=$1
+fi
+
+(( opt_rebase && opt_reset )) && die "--rebase and --force/--reset are mutually exclusive"
+(( opt_interactive )) && (( ! $+commands[fzf] )) && die "fzf not found in PATH"
+
+target_dir=${target_dir:-$PWD}
+[[ -d $target_dir ]] || die "not a directory: $target_dir"
+target_dir=${target_dir:A}
+typeset display_root=${target_dir/#$HOME/\~}
+
+# --- colors -------------------------------------------------------------------
+
+[[ -n ${NO_COLOR:-} ]] && (( ! opt_color )) && opt_no_color=1
+[[ ! -t 1 && ! -t 2 && -z ${FORCE_COLOR:-} ]] && (( ! opt_color )) && opt_no_color=1
+
+typeset C_RESET='' C_BOLD='' C_DIM='' C_WHITE=''
+typeset C_GREEN='' C_YELLOW='' C_RED='' C_CYAN='' C_BLUE='' C_MAGENTA=''
+
+if (( ! opt_no_color )); then
+  C_RESET=$'\033[0m'
+  C_BOLD=$'\033[1m'
+  C_DIM=$'\033[90m'
+  C_WHITE=$'\033[97m'
+  C_GREEN=$'\033[32m'
+  C_YELLOW=$'\033[33m'
+  C_RED=$'\033[31m'
+  C_CYAN=$'\033[36m'
+  C_BLUE=$'\033[34m'
+  C_MAGENTA=$'\033[35m'
+fi
+
+# --- fzf lifecycle (same foreground-pgroup safety as bin/zmx-prune) -----------
+
+typeset -g fzf_pid= fzf_out=
+
+reap_fzf() {
+  [[ -n $fzf_pid ]] || return 0
+  kill -CONT $fzf_pid 2>/dev/null || true
+  kill -KILL $fzf_pid 2>/dev/null || true
+  fzf_pid=
+}
+
+fzf_pick() {
+  typeset src=$1; shift
+  typeset out
+  out=$(mktemp "${TMPDIR:-/tmp}/${PROG}-fzf.XXXXXX") || die "mktemp failed"
+  unsetopt monitor
+  fzf "$@" < "$src" > "$out" &
+  fzf_pid=$!
+  typeset -i rc=0
+  wait $fzf_pid || rc=$?
+  fzf_pid=
+  fzf_out=$(<"$out")
+  rm -f -- "$out"
+  return $rc
+}
+
+# --- discover repos -----------------------------------------------------------
+#
+# Supports both standard checkouts (<dir>/<repo>/.git) and bare-worktree
+# containers created by `git-clone-bare` (<dir>/<repo>/.bare + sibling worktree).
+
+typeset -a repo_names repo_paths
+
+resolve_bare_container() {
+  typeset container=$1
+  typeset cand
+  for cand in "$container/main" "$container/master" "$container/develop"; do
+    if [[ -e "$cand/.git" ]]; then
+      print -r -- "$cand"
+      return 0
+    fi
+  done
+  typeset line wt_path=""
+  for line in ${(f)"$(git -C "$container" worktree list --porcelain 2>/dev/null)"}; do
+    if [[ $line == worktree\ * ]]; then
+      wt_path=${line#worktree }
+    elif [[ $line == branch\ * && -n $wt_path && $wt_path != "$container" && -e "$wt_path/.git" ]]; then
+      print -r -- "$wt_path"
+      return 0
+    fi
+  done
+  return 1
+}
+
+typeset child resolved
+for child in "$target_dir"/*(/N); do
+  if [[ -d "$child/.bare" ]] || { [[ -f "$child/.git" ]] && [[ $(git -C "$child" rev-parse --is-bare-repository 2>/dev/null) == true ]]; }; then
+    if resolved=$(resolve_bare_container "$child"); then
+      repo_names+=("${child:t}/${resolved:t}")
+      repo_paths+=("$resolved")
+    fi
+  elif [[ -e "$child/.git" ]]; then
+    repo_names+=("${child:t}")
+    repo_paths+=("$child")
+  fi
+done
+
+typeset -i n_total=${#repo_paths}
+if (( ! n_total )); then
+  print -r -- "$PROG: no git repositories found in $display_root"
+  exit 0
+fi
+
+# --- temp workspace -----------------------------------------------------------
+
+typeset tmp_dir
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/${PROG}.XXXXXX") || die "mktemp failed"
+trap 'reap_fzf; rm -rf -- "$tmp_dir"' EXIT INT HUP TERM
+
+# --- worker -------------------------------------------------------------------
+
+format_elapsed() {
+  typeset -F 2 sec=$1
+  if (( sec < 1.0 )); then
+    typeset -i ms=$(( sec * 1000 ))
+    (( ms < 1 )) && ms=1
+    print -r -- "${ms}ms"
+  else
+    typeset -F 1 s=$sec
+    print -r -- "${s}s"
+  fi
+}
+
+clean_one_line() {
+  typeset s=${1:-}
+  s=${s//$'\r'/ }
+  s=${s//$'\n'/ }
+  s=${s//$'\t'/ }
+  print -r -- "${s[1,90]}"
+}
+
+extract_error() {
+  typeset f=$1 line=""
+  if [[ -s $f ]]; then
+    line=$(grep -E '^(fatal|error):' "$f" 2>/dev/null | head -n 1 || true)
+    [[ -n $line ]] || line=$(tail -n 1 "$f" 2>/dev/null || true)
+  fi
+  clean_one_line "$line"
+}
+
+update_one_repo() {
+  typeset -i idx=$1
+  typeset name=$2
+  typeset repo=$3
+  typeset -F 4 t0=$EPOCHREALTIME
+  typeset err_file="$tmp_dir/$idx.err"
+  typeset out_tmp="$tmp_dir/$idx.tsv.tmp"
+  typeset out_file="$tmp_dir/$idx.tsv"
+
+  typeset state="up-to-date"
+  typeset -i rank=70
+  typeset branch="-"
+  typeset change="-"
+  typeset detail=""
+  typeset stash_cmd=""
+  typeset old_sha="" new_sha=""
+
+  finish_repo() {
+    typeset -F 4 dt=$(( EPOCHREALTIME - t0 ))
+    typeset elapsed=$(format_elapsed $dt)
+    if [[ -z $detail ]]; then
+      detail=$elapsed
+    else
+      detail="$detail ($elapsed)"
+    fi
+    typeset -a rec=(
+      "${(l:2::0:)rank}"
+      "$name"
+      "$state"
+      "$branch"
+      "$change"
+      "$detail"
+      "$repo"
+      "$old_sha"
+      "$new_sha"
+      "$stash_cmd"
+    )
+    print -r -- "${(pj:\t:)rec}" > "$out_tmp"
+    mv -f -- "$out_tmp" "$out_file"
+  }
+
+  # 1. Inspect current branch
+  branch=$(git -C "$repo" symbolic-ref --quiet --short HEAD 2>/dev/null || true)
+  if [[ -z $branch ]]; then
+    old_sha=$(git -C "$repo" rev-parse --short HEAD 2>/dev/null || print "detached")
+    state="skipped"
+    rank=60
+    branch="(detached)"
+    change="$old_sha"
+    detail="detached HEAD"
+    finish_repo
+    return 0
+  fi
+
+  # 2. Resolve upstream tracking branch (or fallback to origin/<branch>)
+  typeset upstream=""
+  upstream=$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)
+  typeset remote="origin"
+  typeset remote_branch=$branch
+  if [[ -n $upstream ]]; then
+    remote=${upstream%%/*}
+    remote_branch=${upstream#*/}
+  fi
+
+  # 3. Fetch remote
+  # Global gitconfig often sets fetch.all=true and fetch.pruneTags=true, which
+  # pulls thousands of unrelated PR branches (e.g. 7,400+ in cmux), fails on
+  # force-moved rolling tags (`tip`), or hits case-insensitive ref collisions on
+  # macOS APFS. Fetching the tracked branch refspec directly avoids all three.
+  typeset -i fetch_ok=1
+  if (( opt_all_refs )); then
+    GIT_TERMINAL_PROMPT=0 git -C "$repo" \
+      -c fetch.all=false \
+      -c maintenance.auto=false \
+      -c gc.auto=0 \
+      fetch --prune --force "$remote" > /dev/null 2>"$err_file" || fetch_ok=0
+  else
+    GIT_TERMINAL_PROMPT=0 git -C "$repo" \
+      -c fetch.all=false \
+      -c fetch.prune=false \
+      -c fetch.pruneTags=false \
+      -c maintenance.auto=false \
+      -c gc.auto=0 \
+      fetch --no-tags "$remote" "+refs/heads/${remote_branch}:refs/remotes/${remote}/${remote_branch}" \
+      > /dev/null 2>"$err_file" || fetch_ok=0
+  fi
+
+  if (( ! fetch_ok )); then
+    if [[ -z $upstream ]] && grep -q "couldn't find remote ref" "$err_file" 2>/dev/null; then
+      state="skipped"
+      rank=60
+      change="no-upstream"
+      detail="no tracking branch"
+      finish_repo
+      return 0
+    fi
+    state="failed"
+    rank=10
+    change="fetch-error"
+    detail=$(extract_error "$err_file")
+    [[ -n $detail ]] || detail="git fetch $remote failed"
+    finish_repo
+    return 0
+  fi
+
+  if [[ -z $upstream ]]; then
+    if git -C "$repo" show-ref --verify --quiet "refs/remotes/${remote}/${remote_branch}" 2>/dev/null; then
+      upstream="${remote}/${remote_branch}"
+    else
+      state="skipped"
+      rank=60
+      change="no-upstream"
+      detail="no tracking branch"
+      finish_repo
+      return 0
+    fi
+  fi
+
+  # 4. Compare HEAD against upstream
+  old_sha=$(git -C "$repo" rev-parse --short HEAD 2>/dev/null || true)
+  typeset up_sha=$(git -C "$repo" rev-parse --short "$upstream" 2>/dev/null || true)
+  if [[ -z $old_sha || -z $up_sha ]]; then
+    state="failed"
+    rank=10
+    change="bad-ref"
+    detail="unable to resolve $upstream"
+    finish_repo
+    return 0
+  fi
+
+  typeset counts
+  counts=$(git -C "$repo" rev-list --left-right --count "HEAD...$upstream" 2>/dev/null || print "0	0")
+  typeset -i ahead=${counts%%$'\t'*}
+  typeset -i behind=${counts##*$'\t'}
+
+  typeset dirty_status
+  dirty_status=$(git -C "$repo" status --porcelain 2>/dev/null || true)
+  typeset -i is_dirty=0
+  [[ -n $dirty_status ]] && is_dirty=1
+
+  # 5. Handle repos with no incoming commits (unless -f/--force with ahead or dirty state)
+  if (( behind == 0 && ( ! opt_reset || ( ahead == 0 && ! is_dirty ) ) )); then
+    if (( ! opt_dry && ! opt_no_submodules )) && [[ -f "$repo/.gitmodules" ]]; then
+      typeset -a sub_args=(submodule update --recursive)
+      (( opt_init_submodules )) && sub_args=(submodule update --init --recursive)
+      GIT_TERMINAL_PROMPT=0 git -C "$repo" "${sub_args[@]}" >/dev/null 2>&1 || true
+    fi
+    if (( ahead > 0 )); then
+      state="ahead"
+      rank=50
+      change="+${ahead} ahead"
+      detail="local commits ahead of $upstream (use -f to reset)"
+      (( is_dirty )) && detail+=", dirty"
+    else
+      state="up-to-date"
+      rank=70
+      change="-"
+      (( is_dirty )) && detail="dirty working tree (use -f to stash & reset)"
+    fi
+    finish_repo
+    return 0
+  fi
+
+  # 6. Handle diverged branches when neither --rebase nor -f/--force was requested
+  if (( ahead > 0 && behind > 0 && ! opt_rebase && ! opt_reset )); then
+    state="diverged"
+    rank=40
+    change="+${ahead} / -${behind}"
+    detail="diverged from $upstream (use -f or --rebase)"
+    finish_repo
+    return 0
+  fi
+
+  typeset delta="+${behind}"
+  if (( opt_reset )); then
+    if (( ahead > 0 && behind > 0 )); then
+      delta="-${ahead}/+${behind} force"
+    elif (( ahead > 0 && behind == 0 )); then
+      delta="-${ahead} force"
+    elif (( ahead == 0 && behind == 0 && is_dirty )); then
+      delta="clean"
+    fi
+  fi
+
+  typeset preview_change="${old_sha}..${up_sha} (${delta})"
+  [[ $delta == "clean" ]] && preview_change="clean (stashed)"
+
+  # 7. Dry-run preview
+  if (( opt_dry )); then
+    new_sha=$up_sha
+    change=$preview_change
+    if (( is_dirty )); then
+      state="stashed"
+      rank=20
+      if (( opt_reset )); then
+        detail="dry-run: would git add -A + stash + force-reset"
+      else
+        detail="dry-run: would git add -A + stash + update"
+      fi
+    else
+      state="updated"
+      rank=30
+      if (( opt_reset && ahead > 0 )); then
+        detail="dry-run: would force-reset to $upstream"
+      else
+        detail="dry-run: would update"
+      fi
+    fi
+    finish_repo
+    return 0
+  fi
+
+  # 8. Auto-stash any tracked or untracked changes (`git add --all` + `git stash push`)
+  typeset -i did_stash=0
+  if (( is_dirty )); then
+    typeset stash_msg="git-batch-update auto-stash ($branch @ $old_sha)"
+    if ! ( git -C "$repo" add --all && git -C "$repo" stash push --quiet -m "$stash_msg" ) 2>"$err_file"; then
+      state="failed"
+      rank=10
+      change="stash-error"
+      detail=$(extract_error "$err_file")
+      [[ -n $detail ]] || detail="git add/stash failed"
+      finish_repo
+      return 0
+    fi
+    did_stash=1
+    stash_cmd="git -C ${(q-)repo} stash pop"
+  fi
+
+  # 9. Apply update (--reset, --rebase, or default --ff-only)
+  typeset update_ok=1
+  if (( opt_reset )); then
+    GIT_TERMINAL_PROMPT=0 git -C "$repo" reset --hard "$upstream" >/dev/null 2>"$err_file" || update_ok=0
+  elif (( opt_rebase )); then
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$repo" rebase "$upstream" >/dev/null 2>"$err_file"; then
+      git -C "$repo" rebase --abort >/dev/null 2>&1 || true
+      update_ok=0
+    fi
+  else
+    GIT_TERMINAL_PROMPT=0 git -C "$repo" merge --ff-only "$upstream" >/dev/null 2>"$err_file" || update_ok=0
+  fi
+
+  if (( ! update_ok )); then
+    state="failed"
+    rank=10
+    change="update-error"
+    detail=$(extract_error "$err_file")
+    [[ -n $detail ]] || detail="git update failed"
+    (( did_stash )) && detail+=" (changes saved in stash@{0})"
+    finish_repo
+    return 0
+  fi
+
+  new_sha=$(git -C "$repo" rev-parse --short HEAD 2>/dev/null || print "$up_sha")
+
+  # 10. Automatically update submodules (initialized by default, or all with -S)
+  typeset sub_note=""
+  if (( ! opt_no_submodules )) && [[ -f "$repo/.gitmodules" ]]; then
+    typeset -a sub_args=(submodule update --recursive)
+    (( opt_init_submodules )) && sub_args=(submodule update --init --recursive)
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$repo" "${sub_args[@]}" >/dev/null 2>"$err_file"; then
+      state="failed"
+      rank=10
+      change="${old_sha}..${new_sha} (+${behind})"
+      detail="submodule update failed: $(extract_error "$err_file")"
+      finish_repo
+      return 0
+    fi
+  fi
+
+  typeset final_change="${old_sha}..${new_sha} (${delta})"
+  [[ $delta == "clean" ]] && final_change="clean (stashed)"
+
+  if (( did_stash )); then
+    state="stashed"
+    rank=20
+    change=$final_change
+    detail="auto-stashed in stash@{0}"
+    (( opt_reset && ahead > 0 )) && detail+=" · force-reset"
+  else
+    state="updated"
+    rank=30
+    change=$final_change
+    detail=""
+    (( opt_reset && ahead > 0 )) && detail="force-reset to $upstream"
+  fi
+
+  finish_repo
+  return 0
+}
+
+# --- parallel execution engine ------------------------------------------------
+
+typeset -F 4 batch_t0=$EPOCHREALTIME
+unsetopt monitor
+
+typeset -a active_pids=()
+typeset -i next_idx=1
+typeset -a spin_frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+typeset -i spin_idx=1
+typeset -i show_spinner=0
+[[ -t 2 ]] && show_spinner=1
+
+draw_progress() {
+  (( show_spinner )) || return 0
+  typeset -a done_files=("$tmp_dir"/*.tsv(N))
+  typeset -i done_count=${#done_files}
+  typeset -i pct=$(( done_count * 100 / n_total ))
+  typeset -i bar_w=20
+  typeset -i filled=$(( done_count * bar_w / n_total ))
+  typeset -i empty=$(( bar_w - filled ))
+  typeset bar="${(l:$filled::█:)}${(l:$empty::░:)}"
+  typeset frame=${spin_frames[$spin_idx]}
+  spin_idx=$(( (spin_idx % ${#spin_frames}) + 1 ))
+  printf "\r\033[K%s%s%s [%d/%d] %s %3d%%  Updating %s (jobs: %d)..." \
+    "$C_CYAN" "$frame" "$C_RESET" "$done_count" "$n_total" "$bar" "$pct" "$display_root" "$opt_jobs" >&2
+}
+
+while (( next_idx <= n_total || ${#active_pids} > 0 )); do
+  while (( next_idx <= n_total && ${#active_pids} < opt_jobs )); do
+    update_one_repo "$next_idx" "${repo_names[$next_idx]}" "${repo_paths[$next_idx]}" &
+    active_pids+=($!)
+    (( ++next_idx ))
+  done
+
+  draw_progress
+
+  typeset -a still_running=()
+  typeset pid=""
+  for pid in $active_pids; do
+    if kill -0 "$pid" 2>/dev/null; then
+      still_running+=("$pid")
+    else
+      wait "$pid" 2>/dev/null || true
+    fi
+  done
+  active_pids=("${still_running[@]}")
+
+  if (( ${#active_pids} > 0 )); then
+    sleep 0.04
+  fi
+done
+
+(( show_spinner )) && printf "\r\033[K" >&2
+typeset -F 4 batch_elapsed=$(( EPOCHREALTIME - batch_t0 ))
+
+# --- collect & format results -------------------------------------------------
+
+typeset -a records=()
+typeset f
+for f in "$tmp_dir"/*.tsv(N); do
+  records+=("$(<"$f")")
+done
+
+typeset -i n_updated=0 n_stashed=0 n_uptodate=0 n_ahead=0 n_diverged=0 n_skipped=0 n_failed=0
+typeset -i w_state=10 w_repo=4 w_branch=6 w_change=6
+typeset -a stash_notes=()
+
+typeset rec
+typeset -a fields
+for rec in "${records[@]}"; do
+  fields=("${(@s:	:)rec}")
+  typeset r_name=${fields[2]}
+  typeset r_state=${fields[3]}
+  typeset r_branch=${fields[4]}
+  typeset r_change=${fields[5]}
+
+  case $r_state in
+    updated)    (( ++n_updated )) ;;
+    stashed)    (( ++n_stashed )) ;;
+    up-to-date) (( ++n_uptodate )) ;;
+    ahead)      (( ++n_ahead )) ;;
+    diverged)   (( ++n_diverged )) ;;
+    skipped)    (( ++n_skipped )) ;;
+    failed)     (( ++n_failed )) ;;
+  esac
+
+  if (( opt_updates_only && ! opt_interactive )) && [[ $r_state == up-to-date ]]; then
+    continue
+  fi
+
+  (( ${#r_name} > w_repo ))     && w_repo=${#r_name}
+  (( ${#r_branch} > w_branch )) && w_branch=${#r_branch}
+  (( ${#r_change} > w_change )) && w_change=${#r_change}
+
+done
+
+color_state() {
+  typeset st=$1 padded=$2 detail=$3
+  case $st in
+    updated)    print -r -- "${C_GREEN}${C_BOLD}${padded}${C_RESET}" ;;
+    stashed)    print -r -- "${C_YELLOW}${C_BOLD}${padded}${C_RESET}" ;;
+    up-to-date)
+      if [[ $detail == dirty* ]]; then
+        print -r -- "${C_YELLOW}${padded}${C_RESET}"
+      else
+        print -r -- "${C_DIM}${padded}${C_RESET}"
+      fi
+      ;;
+    ahead)      print -r -- "${C_CYAN}${C_BOLD}${padded}${C_RESET}" ;;
+    diverged)   print -r -- "${C_MAGENTA}${C_BOLD}${padded}${C_RESET}" ;;
+    skipped)    print -r -- "${C_BLUE}${padded}${C_RESET}" ;;
+    failed)     print -r -- "${C_RED}${C_BOLD}${padded}${C_RESET}" ;;
+    *)          print -r -- "$padded" ;;
+  esac
+}
+
+color_repo() {
+  typeset st=$1 padded=$2 detail=$3
+  case $st in
+    updated)    print -r -- "${C_WHITE}${C_BOLD}${padded}${C_RESET}" ;;
+    stashed)    print -r -- "${C_YELLOW}${C_BOLD}${padded}${C_RESET}" ;;
+    diverged)   print -r -- "${C_MAGENTA}${C_BOLD}${padded}${C_RESET}" ;;
+    ahead)      print -r -- "${C_CYAN}${padded}${C_RESET}" ;;
+    skipped)    print -r -- "${C_BLUE}${padded}${C_RESET}" ;;
+    failed)     print -r -- "${C_RED}${C_BOLD}${padded}${C_RESET}" ;;
+    up-to-date)
+      if [[ $detail == dirty* ]]; then
+        print -r -- "${C_YELLOW}${padded}${C_RESET}"
+      else
+        print -r -- "${C_DIM}${padded}${C_RESET}"
+      fi
+      ;;
+    *)          print -r -- "$padded" ;;
+  esac
+}
+
+color_branch() {
+  typeset st=$1 br=$2 padded=$3 detail=$4
+  if [[ $br == "(detached)" ]]; then
+    print -r -- "${C_YELLOW}${padded}${C_RESET}"
+  elif [[ $st == up-to-date && $detail != dirty* ]]; then
+    print -r -- "${C_DIM}${padded}${C_RESET}"
+  else
+    print -r -- "${C_CYAN}${padded}${C_RESET}"
+  fi
+}
+
+color_change() {
+  typeset st=$1 raw=$2 padded=$3
+  (( opt_no_color )) && { print -r -- "$padded"; return 0 }
+  typeset trail=${padded#$raw}
+  if [[ $raw == *..*\ \(*\) ]]; then
+    typeset range=${raw%% *}
+    typeset paren=${raw#* }
+    typeset lhs=${range%..*}
+    typeset rhs=${range#*..}
+    typeset p_color="${C_GREEN}${C_BOLD}"
+    [[ $st == stashed || $paren == *force* || $paren == *reset* ]] && p_color="${C_YELLOW}${C_BOLD}"
+    print -r -- "${C_YELLOW}${lhs}${C_DIM}..${C_CYAN}${rhs} ${p_color}${paren}${C_RESET}${trail}"
+  elif [[ $raw == +*\ /\ -* ]]; then
+    typeset a=${raw%% / *}
+    typeset b=${raw#* / }
+    print -r -- "${C_CYAN}${a}${C_DIM} / ${C_MAGENTA}${C_BOLD}${b}${C_RESET}${trail}"
+  elif [[ $raw == "clean (stashed)" ]]; then
+    print -r -- "${C_YELLOW}${padded}${C_RESET}"
+  elif [[ $raw == +* ]]; then
+    print -r -- "${C_CYAN}${padded}${C_RESET}"
+  else
+    print -r -- "${C_DIM}${padded}${C_RESET}"
+  fi
+}
+
+color_detail() {
+  typeset st=$1 raw=$2
+  (( opt_no_color )) && { print -r -- "$raw"; return 0 }
+  typeset body=$raw timing=""
+  if [[ $raw == *\ \([0-9]*s\) ]]; then
+    timing=" (${raw##*\(}"
+    body=${raw% \([0-9]*s\)}
+  fi
+  if [[ $st == failed ]]; then
+    print -r -- "${C_RED}${body}${C_DIM}${timing}${C_RESET}"
+  elif [[ $body == dry-run:* ]]; then
+    typeset rest=${body#dry-run:}
+    print -r -- "${C_MAGENTA}dry-run:${C_WHITE}${rest}${C_DIM}${timing}${C_RESET}"
+  elif [[ $body == auto-stashed* || $body == dirty* ]]; then
+    print -r -- "${C_YELLOW}${body}${C_DIM}${timing}${C_RESET}"
+  elif [[ $st == diverged ]]; then
+    print -r -- "${C_MAGENTA}${body}${C_DIM}${timing}${C_RESET}"
+  elif [[ $st == ahead ]]; then
+    print -r -- "${C_CYAN}${body}${C_DIM}${timing}${C_RESET}"
+  elif [[ $st == skipped ]]; then
+    print -r -- "${C_BLUE}${body}${C_DIM}${timing}${C_RESET}"
+  else
+    print -r -- "${C_DIM}${raw}${C_RESET}"
+  fi
+}
+
+typeset tmp_all="$tmp_dir/table_all.txt"
+typeset tmp_updates="$tmp_dir/table_updates.txt"
+: > "$tmp_all"
+: > "$tmp_updates"
+
+typeset header_plain
+header_plain=$(printf "%-${w_state}s  %-${w_repo}s  %-${w_branch}s  %-${w_change}s  %s" \
+  "STATE" "REPO" "BRANCH" "CHANGE" "DETAIL")
+
+typeset -i printed_rows=0
+for rec in ${(o)records}; do
+  fields=("${(@s:	:)rec}")
+  typeset r_name=${fields[2]}
+  typeset r_state=${fields[3]}
+  typeset r_branch=${fields[4]}
+  typeset r_change=${fields[5]}
+  typeset r_detail=${fields[6]}
+  typeset r_path=${fields[7]}
+  typeset r_stash=${fields[10]:-}
+  if [[ -n $r_stash ]]; then
+    typeset nm_stash_pad=$(printf "%-${w_repo}s" "$r_name")
+    stash_notes+=("  ${C_YELLOW}${C_BOLD}${nm_stash_pad}${C_RESET}  ${C_DIM}->${C_RESET}  ${C_CYAN}${r_stash}${C_RESET}")
+  fi
+
+  typeset st_pad=$(printf "%-${w_state}s" "$r_state")
+  typeset nm_pad=$(printf "%-${w_repo}s" "$r_name")
+  typeset br_pad=$(printf "%-${w_branch}s" "$r_branch")
+  typeset ch_pad=$(printf "%-${w_change}s" "$r_change")
+
+  typeset st_col=$(color_state "$r_state" "$st_pad" "$r_detail")
+  typeset nm_col=$(color_repo "$r_state" "$nm_pad" "$r_detail")
+  typeset br_col=$(color_branch "$r_state" "$r_branch" "$br_pad" "$r_detail")
+  typeset ch_col=$(color_change "$r_state" "$r_change" "$ch_pad")
+  typeset dt_col=$(color_detail "$r_state" "$r_detail")
+
+  typeset line_display="${st_col}  ${nm_col}  ${br_col}  ${ch_col}  ${dt_col}"
+  typeset dt_pad=$(printf "%-48s" "$r_detail")
+  typeset dt_fzf=$(color_detail "$r_state" "$dt_pad")
+  typeset line_fzf="${st_col}  ${nm_col}  ${br_col}  ${ch_col}  ${dt_fzf}  ${C_DIM}${r_path}${C_RESET}"
+
+  print -r -- "$line_fzf" >> "$tmp_all"
+  [[ $r_state != up-to-date ]] && print -r -- "$line_fzf" >> "$tmp_updates"
+
+  if (( opt_updates_only )) && [[ $r_state == up-to-date ]]; then
+    continue
+  fi
+
+  if (( ! printed_rows )); then
+    print -r -- "${C_BOLD}${C_WHITE}${header_plain}${C_RESET}"
+  fi
+  print -r -- "$line_display"
+  (( ++printed_rows ))
+done
+
+(( printed_rows )) && print
+
+# --- summary & auto-stash footer ----------------------------------------------
+
+typeset -a counts_parts=()
+(( n_updated ))  && counts_parts+=("${C_GREEN}${C_BOLD}${n_updated} updated${C_RESET}")
+(( n_stashed ))  && counts_parts+=("${C_YELLOW}${C_BOLD}${n_stashed} stashed${C_RESET}")
+(( n_uptodate )) && counts_parts+=("${C_DIM}${n_uptodate} up-to-date${C_RESET}")
+(( n_ahead ))    && counts_parts+=("${C_CYAN}${C_BOLD}${n_ahead} ahead${C_RESET}")
+(( n_diverged )) && counts_parts+=("${C_MAGENTA}${C_BOLD}${n_diverged} diverged${C_RESET}")
+(( n_skipped ))  && counts_parts+=("${C_BLUE}${n_skipped} skipped${C_RESET}")
+(( n_failed ))   && counts_parts+=("${C_RED}${C_BOLD}${n_failed} failed${C_RESET}")
+
+print -r -- "${C_BOLD}${C_WHITE}$PROG:${C_RESET} ${C_BOLD}$n_total${C_RESET} repo(s) in ${C_CYAN}$(format_elapsed $batch_elapsed)${C_RESET} ${C_DIM}(jobs: $opt_jobs)${C_RESET} -- ${(pj:, :)counts_parts}"
+
+if (( ${#stash_notes} )); then
+  print
+  print -r -- "${C_YELLOW}${C_BOLD}Auto-stashed working trees (left in stash@{0} to avoid pop conflicts):${C_RESET}"
+  print -rl -- "${stash_notes[@]}"
+fi
+
+# --- optional interactive fzf inspector ---------------------------------------
+
+if (( opt_interactive )); then
+  typeset src=$tmp_all
+  (( opt_updates_only )) && [[ -s $tmp_updates ]] && src=$tmp_updates
+  typeset fzf_header
+  fzf_header=$(printf "%-${w_state}s  %-${w_repo}s  %-${w_branch}s  %-${w_change}s  %-28s  %s" \
+    "STATE" "REPO" "BRANCH" "CHANGE" "DETAIL" "PATH")
+  typeset preview_cmd='
+    repo={-1}
+    state={1}
+    change={4}
+    echo "Repository: $repo ($state)"
+    echo "------------------------------------------------------------"
+    if [[ "$state" == "stashed" ]]; then
+      echo "=== Auto-stash (stash@{0}) ==="
+      git -C "$repo" stash show --stat --color=always stash@{0} 2>/dev/null
+      echo ""
+    fi
+    if [[ "$change" == *..* ]]; then
+      range="${change%% *}"
+      echo "=== Incoming Commits ($range) ==="
+      git -C "$repo" log --color=always --graph --oneline --stat "$range" 2>/dev/null
+    else
+      git -C "$repo" status -sb 2>/dev/null
+      echo ""
+      git -C "$repo" log --color=always --graph --oneline -n 15 2>/dev/null
+    fi
+  '
+  typeset -i rc=0
+  fzf_pick "$src" \
+    --ansi \
+    --height=80% \
+    --reverse \
+    --prompt="$PROG> " \
+    --header="enter: select repo | ctrl-u: updates/issues only | ctrl-a: all repos
+$fzf_header" \
+    --bind="ctrl-a:reload(cat -- $tmp_all)" \
+    --bind="ctrl-u:reload(cat -- $tmp_updates)" \
+    --preview="$preview_cmd" \
+    --preview-window=right:55%:wrap \
+    || rc=$?
+  if (( rc == 0 )) && [[ -n $fzf_out ]]; then
+    print -r -- "$fzf_out" | sed $'s/\x1b\\[[0-9;]*m//g' | awk 'NF { print $NF }'
+  fi
+fi
+
+(( n_failed > 0 )) && exit 1
+exit 0
