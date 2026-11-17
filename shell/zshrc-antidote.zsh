@@ -57,7 +57,7 @@ zstyle :prompt:pure:environment:node_version show yes
 
 # You can change the symbol shown before the Node.js version (default ⬢)
 zstyle :prompt:pure:environment:node_version symbol '⬢'
-if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+if [[ -n "$GHOSTTY_RESOURCES_DIR" || -n "$REX_BIN_DIR" ]]; then
   # Add space after symbol to fix rendering bug with ghostty
   zstyle :prompt:pure:environment:node_version symbol '⬢ '
 fi
